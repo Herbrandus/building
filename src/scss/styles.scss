@@ -1,0 +1,189 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: arial, sans-serif;
+    color: #222;
+    font-size: 14px;
+    line-height: 20px;
+    background: #fff;
+}
+
+#world {
+	position: relative;
+	margin: 90px auto 20px auto;
+}
+
+.controls {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	
+	a.showMap {
+		color: #999;
+		text-decoration: none;
+		text-transform: uppercase;
+		font-size: 12px;
+	}
+}
+
+.testmap {
+	display: none;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	opacity: 0.7;
+	z-index: 900;
+	
+	.show {
+		display: block;
+	}
+}
+
+.row:after {
+	content: '';
+	display: block;
+	clear: both;
+}
+
+.cell {
+	float: left;
+	display: inline-block;
+	position: relative;
+	width: 23px;
+	height: 23px;
+	padding: 2px 8px;
+	text-align: center;
+	font-size: 12px;
+	border-right: #ccc solid 1px;
+	border-top: #ccc solid 1px;
+	
+	&:first-child {
+		border-left: #ccc solid 1px;
+	}
+	
+	&:last-child { 
+		.cell {
+			border-bottom: #ccc solid 1px;
+		}
+	}
+}
+
+.cell > span {
+	color: #999;
+}
+
+.cell.dataPresent:hover {
+	cursor: pointer;
+	opacity: 0.8;
+}
+
+.cell.dataPresent.show {
+	opacity: 0.7;
+	font-weight: bold;
+	color: #fee;
+}
+
+.showData {
+	display: none;
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	background: #fff;
+	color: #333;
+	font-size: 12px;
+	line-height: 18px;
+	border: #bbb solid 1px;
+	border-radius: 4px;
+	min-width: 250px;
+    padding: 12px 20px 12px 16px;
+    text-align: left;
+	z-index: 1000;
+}
+
+.segment {
+    margin: 8px 0;
+    padding: 4px 0;
+    border-top: #ddd solid 1px;
+}
+
+.segment > strong {
+    display: block;
+    font-size: 13px;
+}
+
+.testmap.show + .showData {
+	display: block;
+}
+
+.testmap.show + .showData:empty {
+	display: none;
+}
+
+.showData p {
+	margin: 2px 0 2px 8px;
+}
+
+.floor, .wall, .tile, .block {
+	position: absolute;
+}
+
+.block {
+	z-index: 10;
+}
+
+.block > svg {
+	position: absolute;
+}
+
+.tile > .dot {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 3px;
+	height: 3px;
+	background:#fff;
+	transform:translate(-2px, -2px);
+}
+
+.tile > span {
+    position: relative;
+    z-index: 10;
+    color: #fff;
+    font-size: 10px;
+    top: -26px;
+    left: 17px;
+}
+
+.tester {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	color: #555;
+	font-family: courier;
+	font-size: 10px;
+	line-height: 14px;
+	padding: 10px;
+	background: rgba(255,255,255,0.6);
+	z-index: 100000;
+}
+
+@media screen and (max-width: 480px) {
+
+	#world {
+		position: absolute;
+		left: 0;
+		width: auto !important;
+		height: auto !important;
+		transform: scale(0.35) translate(30px, 20px);
+		margin: 90px auto 30px auto !important;
+	}
+
+}

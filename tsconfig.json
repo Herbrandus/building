@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"removeComments": true,
+		"target": "es2015",
+		"outDir": "js",
+		"rootDir": "ts",
+		"lib": [
+            "es2016",
+            "dom",
+            "es5"
+        ]
+	}
+}
