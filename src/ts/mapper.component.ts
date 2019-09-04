@@ -19,7 +19,7 @@ export default class MapGenerator {
 	private blockGroups: any[]
 	private startBlockEdges: number[]
 	private additionalBlockEdges: number[]
-	private mapGenerationFunctions: MapGenerationFunctions
+	private mapGenerationFunctions: MapGenerationFunctions = new MapGenerationFunctions()
 
 	public createMap(	
 			mapWidth: number, 

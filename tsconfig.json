@@ -3,8 +3,8 @@
 		"module": "commonjs",
 		"removeComments": true,
 		"target": "es2015",
-		"outDir": "js",
-		"rootDir": "ts",
+		"outDir": "dist/js",
+		"rootDir": "src/ts",
 		"lib": [
             "es2016",
             "dom",

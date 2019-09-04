@@ -1,6 +1,6 @@
 const gulp = require('gulp');
 const sass = require('gulp-sass');
-const uglify = require('gulp-uglify');
+const terser = require('gulp-terser');
 const csso = require('gulp-csso');
 const autoprefixer = require('gulp-autoprefixer');
 const concat = require('gulp-concat');
@@ -31,6 +31,7 @@ function styles() {
 		.pipe(browserSync.stream());
 }
 
+
 function typescript() {
 	
 	let files = glob.sync('./src/ts/**/*.ts');
@@ -38,11 +39,8 @@ function typescript() {
 	return browserify({
 		basedir: '.',
 		debug: true,
-		entries: files,
-		cache: {},
-		packageCache: {}
+		entries: files
 	})
-	.plugin(tsify)
 	.on('error', function(err) {
 		console.log(err.stack),
 		notifier.notify({
@@ -50,17 +48,15 @@ function typescript() {
 			'message': err.message
 		});
 	})
-	.transform('babelify', {
-		presets: ['es2015'],
-		extensions: ['.ts']
-	})
+	.plugin(tsify)
 	.bundle()
 	.pipe(source('bundle.min.js'))
 	.pipe(buffer())
 	.pipe(sourcemaps.init({loadMaps: true}))
-	.pipe(uglify())
-	.pipe(sourcemaps.write('./'))
+	.pipe(terser())
+	.pipe(sourcemaps.write(''))
 	.pipe(gulp.dest('./dist/js'))
+	.pipe(browserSync.stream());
 }
 
 function watch() {
@@ -76,7 +72,12 @@ function watch() {
 	gulp.watch('./src/*.html', htmlcomp);
 }
 
+function clean() {
+	return del(['./dist/js/']);
+}
+
 exports.styles = styles;
 exports.typescript = typescript;
 exports.htmlcomp = htmlcomp;
 exports.watch = watch;
+exports.clean = clean;
