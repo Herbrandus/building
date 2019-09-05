@@ -42,10 +42,22 @@ export class Tile {
 
 	get id(): number {
 		return this._id
-	}
+	}	
 
 	get type(): TileType {
 		return this._tileType
+	}
+
+	get blockGroup(): number {
+		return this._blockGroup
+	}
+
+	get options(): object {
+		if (this._tileType != TileType.None) {
+			return this._options
+		} else {
+			return { 'defined': false }
+		}
 	}
 
 }

@@ -11,7 +11,6 @@ const tsify = require('tsify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const sourcemaps = require('gulp-sourcemaps');
-const tsconfig = require('./tsconfig.json');
 
 function htmlcomp() {
 
@@ -79,5 +78,5 @@ function clean() {
 exports.styles = styles;
 exports.typescript = typescript;
 exports.htmlcomp = htmlcomp;
-exports.watch = watch;
+exports.watch = gulp.series(typescript, styles, watch);
 exports.clean = clean;
