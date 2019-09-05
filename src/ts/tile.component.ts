@@ -7,7 +7,6 @@ export class Tile {
 	_y: number
 	_h: number
 	_tileType: TileType
-	_blockGroup: number
 	_colorRed: TileColor
 	_colorGreen: TileColor
 	_colorBlue: TileColor
@@ -19,7 +18,6 @@ export class Tile {
 			y: number,
 			h: number,
 			tileType: TileType,
-			blockGroup: number,
 			colorRed: TileColor,
 			colorGreen: TileColor,
 			colorBlue: TileColor,
@@ -30,7 +28,6 @@ export class Tile {
 		this._y = y
 		this._h = h
 		this._tileType = tileType
-		this._blockGroup = blockGroup
 		this._colorRed = colorRed
 		this._colorGreen = colorGreen
 		this._colorBlue = colorBlue
@@ -42,14 +39,18 @@ export class Tile {
 
 	get id(): number {
 		return this._id
+	}
+
+	get x(): number {
+		return this._x
+	}
+
+	get y(): number {
+		return this._y
 	}	
 
 	get type(): TileType {
 		return this._tileType
-	}
-
-	get blockGroup(): number {
-		return this._blockGroup
 	}
 
 	get options(): object {
@@ -57,6 +58,14 @@ export class Tile {
 			return this._options
 		} else {
 			return { 'defined': false }
+		}
+	}
+
+	public getColor(): object {
+		return {
+			'r': this._colorRed,
+			'g': this._colorGreen,
+			'b': this._colorBlue
 		}
 	}
 

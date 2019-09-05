@@ -1,65 +1,65 @@
-import { MapGenerationFunctions, TileColor } from './mapGenerationFunctions.component'
+import { MapGenerationFunctions, TileColor, BuildingHeightVariations } from './mapGenerationFunctions.component'
 import { Tile, TileType } from './tile.component'
 
-export default class MapGenerator {
+export default class Map {
 
-	private mapWidth: number
-	private mapLength: number
-	private mapMaxHeight: number
-	private averageBuildingSize: number
-	private blockHeight: number
-	private maximumBlockIterations: number
-	private additionalBlockIterations: number
-	private mapEdgeWidth: number
-	private highestPoint: number
-	private startBlockXfromCenterDeviation: number
-	private world: any[][]
-	private blockHeightsArray: number[]
-	private blockGroupCollection: any[]
-	private blockGroups: any[]
-	private startBlockEdges: number[]
-	private additionalBlockEdges: number[]
-	private mapGenerationFunctions: MapGenerationFunctions = new MapGenerationFunctions()
-	private blockHeightVariationLabels = ['tallcenter', 'tallsurrounds', 'random'];
-	private blockHeightVariation = this.blockHeightVariationLabels[Math.floor(Math.random() * 3)];
+	private _mapWidth: number
+	private _mapLength: number
+	private _mapMaxHeight: number
+	private _averageBuildingSize: number
+	private _blockHeight: number
+	private _maximumBlockIterations: number
+	private _additionalBlockIterations: number
+	private _mapEdgeWidth: number
+	private _highestPoint: number
+	private _startBlockXfromCenterDeviation: number
+	private _world: any[][]
+	private _blockHeightsArray: number[]
+	private _blockGroupCollection: any[]
+	private _blockGroups: any[]
+	private _startBlockEdges: number[]
+	private _additionalBlockEdges: number[]
+	private _mapGenerationFunctions: MapGenerationFunctions = new MapGenerationFunctions()
+	private _blockHeightVariationLabels = [BuildingHeightVariations.TallCenter, BuildingHeightVariations.TallSurrounds, BuildingHeightVariations.Random];
+	private _blockHeightVariation = this._blockHeightVariationLabels[Math.floor(Math.random() * 3)];
 
-	public createMap(	
+	constructor(	
 			mapWidth: number, 
 			mapLength: number, 
 			mapMaxHeight: number, 
 			mapEdgeWidth: number,
 			averageBuildingSize: number,
 			blockHeight: number,
-			maximumBlockIterations: number) : any[]
+			maximumBlockIterations: number)
 	{
-		this.mapWidth = mapWidth
-		this.mapLength = mapLength
-		this.mapMaxHeight = mapMaxHeight
-		this.mapEdgeWidth = mapEdgeWidth
-		this.averageBuildingSize = averageBuildingSize
-		this.blockHeight = blockHeight
-		this.maximumBlockIterations = maximumBlockIterations
-		this.additionalBlockIterations = this.mapGenerationFunctions.calculateAdditionalBlockIterations(maximumBlockIterations)
-		this.blockGroups = []
+		this._mapWidth = mapWidth
+		this._mapLength = mapLength
+		this._mapMaxHeight = mapMaxHeight
+		this._mapEdgeWidth = mapEdgeWidth
+		this._averageBuildingSize = averageBuildingSize
+		this._blockHeight = blockHeight
+		this._maximumBlockIterations = maximumBlockIterations
+		this._additionalBlockIterations = this._mapGenerationFunctions.calculateAdditionalBlockIterations(maximumBlockIterations)
+		this._blockGroups = []
 
 		let mapLengthHalf = Math.floor(mapLength / 2)
 		let mapWidthHalf = Math.floor(mapWidth / 2)
 		let startBlockXfromCenterDeviation = 6
-		let startblockLength = (this.averageBuildingSize + 1) + Math.floor(Math.random() * 6)
-		let startblockWidth = this.averageBuildingSize + Math.floor(Math.random() * 5)
-		let startblockXfromCenter = 2 + Math.floor(Math.random() * startBlockXfromCenterDeviation)
+		let startblockLength = (this._averageBuildingSize + 1) + Math.floor(Math.random() * 6)
+		let startblockWidth = this._averageBuildingSize + Math.floor(Math.random() * 5)
+		let startblockXfromCenter = 6 + Math.floor(Math.random() * startBlockXfromCenterDeviation)
 		let startblockLengthHalf = Math.floor(startblockLength / 2)
 		let startblockWidthHalf = Math.floor(startblockWidth / 2)
-		let startingPositionX = Math.floor(mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
+		let startingPositionX = Math.floor(this._mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
 
-		this.world = []
+		this._world = []
 		let i = 0
 		let tileHeight = 0
 		let firstBlockHeight
 
-		if (this.blockHeightVariation == 'tallcenter') {
+		if (this._blockHeightVariation == BuildingHeightVariations.TallCenter) {
 			firstBlockHeight = blockHeight * 2;
-		} else if (this.blockHeightVariation == 'tallsurrounds') {
+		} else if (this._blockHeightVariation == BuildingHeightVariations.TallSurrounds) {
 			firstBlockHeight = 1 + Math.round(Math.random());
 			blockHeight = firstBlockHeight;
 		} else {
@@ -67,12 +67,14 @@ export default class MapGenerator {
 		}
 
 		for (let y = 0; y < this.mapLength; y++) {
-			this.world[y] = []
+
+			this._world[y] = []
+
 			for (let x = 0; x < this.mapWidth; x++) {
 
 				let thisBlockGroup = 0
 
-				let column = new Column(x, y, 0)
+				let column = new Column(false, x, y, 0)
 
 				if (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf) ) {
 
@@ -85,6 +87,7 @@ export default class MapGenerator {
 
 							let thisPillar = 0
 							let thisWindowed = 0
+							let isRoof = (h === firstBlockHeight-1) ? true : false
 
 							tileStack.push(
 								new Tile(
@@ -92,62 +95,121 @@ export default class MapGenerator {
 									x, 
 									y, 
 									h, 
-									TileType.Body, 
-									thisBlockGroup, 
+									TileType.Body,
 									TileColor.Red, 
 									TileColor.Green, 
 									TileColor.Blue,
 									{
+										'roof':			isRoof,
 										'pillar': 		thisPillar,
 										'windowed': 	thisWindowed,
-										'tower': 		false,
-										'marker': 		0
+										'tower': 		false
 									})			
 								)
 
-							if (this.blockGroups.indexOf(thisBlockGroup) == -1) {
-								this.blockGroups[thisBlockGroup] = new Array( [y,x] );
+							if (this._blockGroups.indexOf(thisBlockGroup) == -1) {
+								this._blockGroups[thisBlockGroup] = new Array( [y,x] );
 							} else {
-								this.blockGroups[thisBlockGroup].push([y,x]);
-							}							
+								this._blockGroups[thisBlockGroup].push([y,x]);
+							}
+
+							i++;						
 						}
 
-						column = new Column(x, y, firstBlockHeight)
+						column = new Column(true, x, y, firstBlockHeight)
 
 						column.blockGroup = thisBlockGroup
 						column.height = firstBlockHeight
 						column.corner = false
-						column.edge = false
-						column.tileStack = tileStack
+						column.tileStack = tileStack						
 					}
 				}
 
-				this.world[y][x] = column;
-
-				i++;
+				this._world[y][x] = column;				
 			}
 		}
 
-		return this.world
+		this.setEdges()
+	}
+
+	get mapWidth(): number {
+		return this._mapWidth
+	}
+
+	get mapLength(): number {
+		return this._mapLength
+	}
+
+	get map(): any[] {
+		return this._world
 	}
 
 	public getColumn(x, y): Column {
-		return this.world[y][x]
+		return this._world[y][x]
+	}
+
+	public getTiles(x, y): Tile[] {
+		return this._world[y][x].tileStack
+	}
+
+	public getTile(x, y, h): Tile {
+		return this._world[y][x].getTile(h)
+	}
+
+	public getTopTile(x, y): Tile {
+		let height = this._world[y][x].height
+		return this._world[y][x].getTile(height-1)
+	}
+
+	setEdges(): void {
+
+		for (let y = 0; y < this.mapLength; y++) {
+			for (let x = 0; x < this.mapWidth; x++) {
+				
+				if (y > 0 && x > 0 && y < this.mapLength-1 && x < this.mapWidth-1 && this._world[y][x].isDefined) {
+
+					if (!this._world[y-1][x].isDefined) {
+						this._world[y][x].edge.top = true
+					}
+
+					if (!this._world[y+1][x].isDefined) {
+						this._world[y][x].edge.bottom = true
+					}
+
+					if (!this._world[y][x-1].isDefined) {
+						this._world[y][x].edge.left = true
+					}
+
+					if (!this._world[y][x+1].isDefined) {
+						this._world[y][x].edge.right = true
+					}
+
+					if ( (this._world[y][x].edge['top'] && this._world[y][x].edge['right']) ||
+						 (this._world[y][x].edge['top'] && this._world[y][x].edge['left']) ||
+						 (this._world[y][x].edge['bottom'] && this._world[y][x].edge['right']) ||
+						 (this._world[y][x].edge['bottom'] && this._world[y][x].edge['left']) ) {
+						this._world[y][x].corner = true
+					}
+				}				
+			}
+		}
 	}
 
 }
 
 class Column {
 
+	_defined: boolean
 	_x: number
 	_y: number
 	_height: number
 	_blockGroup: number
 	_corner: boolean
-	_edge: boolean
+	_edge: object = { 'top': false, 'right': false, 'bottom': false, 'left': false }
 	_tileStack: Tile[] = []
 
-	constructor(private colX: number, private colY: number, private colHeight: number) {
+	constructor(private defined: boolean, private colX: number, private colY: number, private colHeight: number) {
+		this._defined = defined
 		this._x = colX
 		this._y = colY
 		this._height = colHeight
@@ -173,12 +235,16 @@ class Column {
 		this._corner = corner
 	}
 
-	set edge(edge: boolean) {
+	set edge(edge: object) {
 		this._edge = edge
 	}
 
 	set tileStack(tiles: Tile[]) {
 		this._tileStack = tiles
+	}
+
+	get isDefined(): boolean {
+		return this._defined
 	}
 
 	get x(): number {
@@ -201,12 +267,16 @@ class Column {
 		return this._corner
 	}
 
-	get edge(): boolean {
+	get edge(): object {
 		return this._edge
 	}
 
 	get tileStack(): Tile[] {
 		return this._tileStack
+	}
+
+	public getTile(height: number): Tile {
+		return this._tileStack[height]
 	}
 }
 

@@ -12,3 +12,9 @@ export enum TileColor {
 	Green = 170 + Math.floor(Math.random() * 40),
 	Blue = 180 + Math.floor(Math.random() * 30)
 }
+
+export enum BuildingHeightVariations {
+	TallCenter = 'tallcenter', 
+	TallSurrounds = 'tallsurrounds', 
+	Random = 'random'
+}

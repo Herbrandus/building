@@ -1,25 +1,27 @@
-import MapGenerator from './mapper.component'
+import Map from './mapper.component'
 import Builder from './builder.component'
 
 class RandomBuilding {
 
-	private _map: any[]
-	private _mapGenerator: MapGenerator = new MapGenerator()
+	private _map: Map
+	private _builder: Builder = new Builder
 
 	constructor() {
-		this._map = this._mapGenerator.createMap(25, 25, 10, 2, (4 + Math.floor(Math.random() * 6)), 2, 4)
-	}
-
-	get mapGenerator(): MapGenerator {
-		return this._mapGenerator
+		this._map = new Map(25, 25, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4)
 	}
 
 	get map() {
 		return this._map
 	}
+
+	public colorMap(): string {
+		return this._builder.showData(this._map) + this._builder.build2DMap(this._map)
+	}
 }
 
 const building = new RandomBuilding();
 
-console.log(building.map);
-console.log("tile on 15, 17: ", building.mapGenerator.getColumn(15, 17))
+console.log(building.map.map);
+console.log("column on 15, 17: ", building.map.getColumn(15, 17))
+
+document.querySelector('#world').innerHTML = building.colorMap()
