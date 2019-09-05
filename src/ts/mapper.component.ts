@@ -199,14 +199,14 @@ export default class Map {
 
 class Column {
 
-	_defined: boolean
-	_x: number
-	_y: number
-	_height: number
-	_blockGroup: number
-	_corner: boolean
-	_edge: object = { 'top': false, 'right': false, 'bottom': false, 'left': false }
-	_tileStack: Tile[] = []
+	private _defined: boolean
+	private _x: number
+	private _y: number
+	private _height: number
+	private _blockGroup: number
+	private _corner: boolean
+	private _edge: object = { 'top': false, 'right': false, 'bottom': false, 'left': false }
+	private _tileStack: Tile[] = []
 
 	constructor(private defined: boolean, private colX: number, private colY: number, private colHeight: number) {
 		this._defined = defined
@@ -278,10 +278,4 @@ class Column {
 	public getTile(height: number): Tile {
 		return this._tileStack[height]
 	}
-}
-
-class BlockGroup {
-
-	blockgroups: object[]
-
 }

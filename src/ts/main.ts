@@ -17,6 +17,10 @@ class RandomBuilding {
 	public colorMap(): string {
 		return this._builder.showData(this._map) + this._builder.build2DMap(this._map)
 	}
+
+	public drawTile(): string {
+		return this._builder.createTile()
+	}
 }
 
 const building = new RandomBuilding();
@@ -24,4 +28,5 @@ const building = new RandomBuilding();
 console.log(building.map.map);
 console.log("column on 15, 17: ", building.map.getColumn(15, 17))
 
-document.querySelector('#world').innerHTML = building.colorMap()
+//document.querySelector('#world').innerHTML = building.colorMap()
+document.querySelector("#world").innerHTML = building.drawTile()

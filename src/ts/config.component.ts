@@ -1,8 +1,9 @@
 export default class Config {
 
-	private _tileWidth: number = 40
-	private _tileLength: number = 40
+	private _tileWidth: number = 400
+	private _tileLength: number = 400
 	private _tileHeight: number = 20
+	private _tileAngle: number = 20
 
 	public get tileWidth(): number {
 		return this._tileWidth
@@ -14,6 +15,10 @@ export default class Config {
 
 	public get tileHeight(): number {
 		return this._tileHeight
+	}
+
+	public get tileAngle(): number {
+		return this._tileAngle
 	}
 
 	public getMapWidth(mapArrayWidth: number): number {
