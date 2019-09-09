@@ -1,4 +1,4 @@
-import { TileColor } from './mapGenerationFunctions.component'
+import { Color } from './mapGenerationFunctions.component'
 
 export class Tile {
 	
@@ -7,9 +7,7 @@ export class Tile {
 	_y: number
 	_h: number
 	_tileType: TileType
-	_colorRed: TileColor
-	_colorGreen: TileColor
-	_colorBlue: TileColor
+	_tileColor: Color
 	_options?: object = {}
 
 	constructor(			
@@ -18,9 +16,7 @@ export class Tile {
 			y: number,
 			h: number,
 			tileType: TileType,
-			colorRed: TileColor,
-			colorGreen: TileColor,
-			colorBlue: TileColor,
+			tileColor: Color,
 			options?: object)
 	{
 		this._id = id
@@ -28,9 +24,7 @@ export class Tile {
 		this._y = y
 		this._h = h
 		this._tileType = tileType
-		this._colorRed = colorRed
-		this._colorGreen = colorGreen
-		this._colorBlue = colorBlue
+		this._tileColor = tileColor
 
 		if (options) {
 			this._options = options
@@ -61,12 +55,8 @@ export class Tile {
 		}
 	}
 
-	public getColor(): object {
-		return {
-			'r': this._colorRed,
-			'g': this._colorGreen,
-			'b': this._colorBlue
-		}
+	public getColor(): Color {
+		return this._tileColor
 	}
 
 }

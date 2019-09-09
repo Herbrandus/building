@@ -1,5 +1,6 @@
-import { MapGenerationFunctions, TileColor, BuildingHeightVariations } from './mapGenerationFunctions.component'
+import { MapGenerationFunctions, BuildingHeightVariations } from './mapGenerationFunctions.component'
 import { Tile, TileType } from './tile.component'
+import { Config } from './config.component'
 
 export default class Map {
 
@@ -20,8 +21,9 @@ export default class Map {
 	private _startBlockEdges: number[]
 	private _additionalBlockEdges: number[]
 	private _mapGen: MapGenerationFunctions = new MapGenerationFunctions()
-	private _blockHeightVariationLabels = [BuildingHeightVariations.TallCenter, BuildingHeightVariations.TallSurrounds, BuildingHeightVariations.Random];
-	private _blockHeightVariation = this._blockHeightVariationLabels[Math.floor(Math.random() * 3)];
+	private config: Config = new Config()
+	private _blockHeightVariationLabels = [BuildingHeightVariations.TallCenter, BuildingHeightVariations.TallSurrounds, BuildingHeightVariations.Random]
+	private _blockHeightVariation = this._blockHeightVariationLabels[Math.floor(Math.random() * 3)]
 
 	constructor(	
 			mapWidth: number, 
@@ -58,23 +60,23 @@ export default class Map {
 		let firstBlockHeight
 
 		if (this._blockHeightVariation == BuildingHeightVariations.TallCenter) {
-			firstBlockHeight = blockHeight * 2;
+			firstBlockHeight = blockHeight * 2
 		} else if (this._blockHeightVariation == BuildingHeightVariations.TallSurrounds) {
-			firstBlockHeight = 1 + Math.round(Math.random());
-			blockHeight = firstBlockHeight;
+			firstBlockHeight = 1 + Math.round(Math.random())
+			blockHeight = firstBlockHeight
 		} else {
-			firstBlockHeight = blockHeight;
+			firstBlockHeight = blockHeight
 		}
 
-		console.log("Block height variation: " + this._blockHeightVariation);
+		console.log("Block height variation: " + this._blockHeightVariation)
 
 		for (let y = 0; y < this.mapLength; y++) {
 
-			this._world[y] = [];
+			this._world[y] = []
 
 			for (let x = 0; x < this.mapWidth; x++) {
 
-				let thisBlockGroup = 0;
+				let thisBlockGroup = 0
 
 				let column = new Column(false, x, y, 0)
 
@@ -82,14 +84,14 @@ export default class Map {
 
 					if (x > startingPositionX && x <= (startingPositionX + startblockWidth) ) {
 
-						thisBlockGroup = 1;
-						let tileStack = [];
+						thisBlockGroup = 1
+						let tileStack = []
 
 						for (let h = 0; h < firstBlockHeight; h++) {
 
-							let thisPillar = 0;
-							let thisWindowed = 0;
-							let isRoof = (h === firstBlockHeight-1) ? true : false;
+							let thisPillar = 0
+							let thisWindowed = 0
+							let isRoof = (h === firstBlockHeight-1) ? true : false
 
 							tileStack.push(
 								new Tile(
@@ -98,36 +100,34 @@ export default class Map {
 									y, 
 									h, 
 									TileType.Body,
-									TileColor.Red, 
-									TileColor.Green, 
-									TileColor.Blue,
+									this.config.buildingBaseColor,
 									{
 										'roof':			isRoof,
 										'pillar': 		thisPillar,
 										'windowed': 	thisWindowed,
 										'tower': 		false
 									})
-								);
+								)
 
 							if (this._blockGroups.indexOf(thisBlockGroup) === -1) {
-								this._blockGroups[thisBlockGroup] = new Array( [y,x] );
+								this._blockGroups[thisBlockGroup] = new Array( [y,x] )
 							} else {
-								this._blockGroups[thisBlockGroup].push([y,x]);
+								this._blockGroups[thisBlockGroup].push([y,x])
 							}
 
-							i++;						
+							i++
 						}
 
-						column = new Column(true, x, y, firstBlockHeight);
+						column = new Column(true, x, y, firstBlockHeight)
 
-						column.blockGroup = thisBlockGroup;
-						column.height = firstBlockHeight;
-						column.corner = false;
-						column.tileStack = tileStack;
+						column.blockGroup = thisBlockGroup
+						column.height = firstBlockHeight
+						column.corner = false
+						column.tileStack = tileStack
 					}
 				}
 
-				this._world[y][x] = column;				
+				this._world[y][x] = column
 			}
 		}
 

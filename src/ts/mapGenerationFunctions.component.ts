@@ -86,3 +86,88 @@ export enum BuildingHeightVariations {
 	TallSurrounds = 'tallSurrounds',
 	Random = 'random'
 }
+
+export class Color {
+	private _hexNames: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+	private _colorRgb: object
+	private _colorHex: string
+
+	constructor(...params: any[]) {
+		let error = null
+		if (params.length === 1) {
+			if (typeof params[0] === 'string') {
+				if (this.validateHex(params[0])) {
+					let hexColor = params[0]
+					if (hexColor.charAt(0) !== '#') {
+						hexColor = `#${hexColor}`
+					}
+					this.setHex(hexColor)
+					this.hexToRgb()
+				} else {
+					error = "Hexadecimal color is incorrect"
+				}
+			} else {
+				error = "Length of 1 in parameters is not equal to string"
+			}
+		} else if (params.length === 3) {
+			if (this.validateRgb(params)) {
+				this.setRgb(params[0], params[1], params[2])
+			} else {
+				error = "Values of RGB exceed limits"
+			}
+		}
+
+		if (error !== null) {
+			throw "Color type is incorrect. " + error + ": " + params.toString()
+		}
+	}
+
+	public setRgb(r: number, g: number, b: number) {
+		this._colorRgb = {r: r, g: g, b: b}
+	}
+
+	public setHex(hexadecimal: string) {
+		if (hexadecimal.length < 7) {
+			let hexVal1 = hexadecimal.charAt(1)
+			let hexVal2 = hexadecimal.charAt(2)
+			let hexVal3 = hexadecimal.charAt(3)
+			hexadecimal = "#" + hexVal1 + hexVal1 + hexVal2 + hexVal2 + hexVal3 + hexVal3
+		}
+		this._colorHex = hexadecimal
+	}
+
+	public rgb(): object {
+		return this._colorRgb
+	}
+
+	public hex(): string {
+		return this._colorHex
+	}
+
+	validateRgb(rgb: number[]): boolean {
+		if (rgb[0] > -1 && rgb[0] < 256 &&
+			rgb[1] > -1 && rgb[1] < 256 &&
+			rgb[2] > -1 && rgb[2] < 256) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	validateHex(hex: string): boolean {
+		let regex = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+		if (hex.match(regex)) {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	hexToRgb() {
+		let hexValues: string[] = this._colorHex.substr(1).split('')
+		let hexPair1 = (this._hexNames.indexOf(hexValues[0]) * 16) + this._hexNames.indexOf(hexValues[1])
+		let hexPair2 = (this._hexNames.indexOf(hexValues[2]) * 16) + this._hexNames.indexOf(hexValues[3])
+		let hexPair3 = (this._hexNames.indexOf(hexValues[4]) * 16) + this._hexNames.indexOf(hexValues[5])
+		this.setRgb(hexPair1, hexPair2, hexPair3)
+	}
+}

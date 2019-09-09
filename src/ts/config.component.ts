@@ -1,3 +1,5 @@
+import { Color } from './mapGenerationFunctions.component'
+
 export class Config {
 
 	private _tileWidth: number = 35
@@ -5,7 +7,12 @@ export class Config {
 	private _tileHeight: number = 20
 	private _tileSmallAngle: number = 85
 	private _tileLargeAngle: number = 100
-	private _groundColor: string = 'dbc'
+	private _groundColor: Color = new Color('dbc')
+	private _buildingBaseColor: Color = new Color(
+		125 + Math.floor(Math.random() * 75),
+		170 + Math.floor(Math.random() * 40),
+		180 + Math.floor(Math.random() * 30)
+	)
 
 	public get tileWidth(): number {
 		return this._tileWidth
@@ -27,8 +34,12 @@ export class Config {
 		return this._tileLargeAngle
 	}
 
-	public get groundColor(): string {
+	public get groundColor(): Color {
 		return this._groundColor
+	}
+
+	public get buildingBaseColor(): Color {
+		return this._buildingBaseColor
 	}
 
 	public getMapWidth(mapArrayWidth: number): number {
