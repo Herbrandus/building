@@ -3,7 +3,7 @@ export class Config {
 	private _tileWidth: number = 35
 	private _tileLength: number = 35
 	private _tileHeight: number = 20
-	private _tileSmallAngle: number = 80
+	private _tileSmallAngle: number = 85
 	private _tileLargeAngle: number = 100
 	private _groundColor: string = 'dbc'
 

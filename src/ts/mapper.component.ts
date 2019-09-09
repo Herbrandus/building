@@ -19,7 +19,7 @@ export default class Map {
 	private _blockGroups: any[]
 	private _startBlockEdges: number[]
 	private _additionalBlockEdges: number[]
-	private _mapGenerationFunctions: MapGenerationFunctions = new MapGenerationFunctions()
+	private _mapGen: MapGenerationFunctions = new MapGenerationFunctions()
 	private _blockHeightVariationLabels = [BuildingHeightVariations.TallCenter, BuildingHeightVariations.TallSurrounds, BuildingHeightVariations.Random];
 	private _blockHeightVariation = this._blockHeightVariationLabels[Math.floor(Math.random() * 3)];
 
@@ -39,7 +39,7 @@ export default class Map {
 		this._averageBuildingSize = averageBuildingSize
 		this._blockHeight = blockHeight
 		this._maximumBlockIterations = maximumBlockIterations
-		this._additionalBlockIterations = this._mapGenerationFunctions.calculateAdditionalBlockIterations(maximumBlockIterations)
+		this._additionalBlockIterations = this._mapGen.calculateAdditionalBlockIterations(maximumBlockIterations)
 		this._blockGroups = []
 
 		let mapLengthHalf = Math.floor(mapLength / 2)
@@ -66,13 +66,15 @@ export default class Map {
 			firstBlockHeight = blockHeight;
 		}
 
+		console.log("Block height variation: " + this._blockHeightVariation);
+
 		for (let y = 0; y < this.mapLength; y++) {
 
-			this._world[y] = []
+			this._world[y] = [];
 
 			for (let x = 0; x < this.mapWidth; x++) {
 
-				let thisBlockGroup = 0
+				let thisBlockGroup = 0;
 
 				let column = new Column(false, x, y, 0)
 
@@ -80,14 +82,14 @@ export default class Map {
 
 					if (x > startingPositionX && x <= (startingPositionX + startblockWidth) ) {
 
-						thisBlockGroup = 1
-						let tileStack = []
+						thisBlockGroup = 1;
+						let tileStack = [];
 
 						for (let h = 0; h < firstBlockHeight; h++) {
 
-							let thisPillar = 0
-							let thisWindowed = 0
-							let isRoof = (h === firstBlockHeight-1) ? true : false
+							let thisPillar = 0;
+							let thisWindowed = 0;
+							let isRoof = (h === firstBlockHeight-1) ? true : false;
 
 							tileStack.push(
 								new Tile(
@@ -104,10 +106,10 @@ export default class Map {
 										'pillar': 		thisPillar,
 										'windowed': 	thisWindowed,
 										'tower': 		false
-									})			
-								)
+									})
+								);
 
-							if (this._blockGroups.indexOf(thisBlockGroup) == -1) {
+							if (this._blockGroups.indexOf(thisBlockGroup) === -1) {
 								this._blockGroups[thisBlockGroup] = new Array( [y,x] );
 							} else {
 								this._blockGroups[thisBlockGroup].push([y,x]);
@@ -116,12 +118,12 @@ export default class Map {
 							i++;						
 						}
 
-						column = new Column(true, x, y, firstBlockHeight)
+						column = new Column(true, x, y, firstBlockHeight);
 
-						column.blockGroup = thisBlockGroup
-						column.height = firstBlockHeight
-						column.corner = false
-						column.tileStack = tileStack						
+						column.blockGroup = thisBlockGroup;
+						column.height = firstBlockHeight;
+						column.corner = false;
+						column.tileStack = tileStack;
 					}
 				}
 
