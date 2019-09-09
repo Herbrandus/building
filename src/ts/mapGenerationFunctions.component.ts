@@ -1,6 +1,12 @@
+import { Config } from './config.component'
+
 export class MapGenerationFunctions {
 
-	constructor() {}
+	private config: Config = new Config()
+	smallAngle = this.config.tileSmallAngle
+	largeAngle = this.config.tileLargeAngle
+
+	constructor() { }
 
 	public calculateAdditionalBlockIterations(maximumBlockIterations: number) {
 		return 2 + Math.floor(Math.random() * maximumBlockIterations)
@@ -10,10 +16,7 @@ export class MapGenerationFunctions {
 		let sum = Math.pow(adjacent, 2) + Math.pow(opposite, 2)
 		let result = Math.sqrt(sum)
 		return result
-	}
-
-	smallAngle = 80;						// small angle for drawing tiles and blocks
-	largeAngle = 90;						// largest angle for drawing tiles and blocks
+	}	
 
 	// calculate the dimensions to draw the isometric perspective tile with the parameters as if it were a straight square tile
 	public calculateStraightLinesFromIsometricSquare (blockWidth: number, blockHeight: number) {
@@ -52,19 +55,19 @@ export class MapGenerationFunctions {
 	// calculate the amount of pixels from the bottom left side of a straight square to the point at the bottom 
 	// .. where the tip of the tile meets the border of the square
 	public getHorizontalBottomShortestWidth (diagonalWidth: number, smallAngle: number) {
-		return Math.round((diagonalWidth * Math.sin(this.toRadians(smallAngle))) * 100) / 100;
+		return Math.ceil((diagonalWidth * Math.sin(this.toRadians(smallAngle))) * 100) / 100;
 	}
 
 	public getVerticalBottomShortestHeight (diagonalHeight: number, smallAngle: number) {
-		return Math.round((diagonalHeight * Math.cos(this.toRadians(smallAngle))) * 100) / 100;
+		return Math.ceil((diagonalHeight * Math.cos(this.toRadians(smallAngle))) * 100) / 100;
 	}
 
 	public getHorizontalTopLongestWidth (diagonalWidth: number, largeAngle: number) {
-		return Math.round((diagonalWidth * Math.sin(this.toRadians(largeAngle))) * 100) / 100;
+		return Math.floor((diagonalWidth * Math.sin(this.toRadians(largeAngle))) * 100) / 100;
 	}
 
 	public getVerticalTopLongestHeight (diagonalHeight: number, largeAngle: number) {
-		return Math.floor(diagonalHeight * Math.cos(this.toRadians(largeAngle)));
+		return Math.ceil(diagonalHeight * Math.cos(this.toRadians(largeAngle)));
 	}
 
 	toRadians (angle) {

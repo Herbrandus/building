@@ -1,9 +1,9 @@
 import { MapGenerationFunctions } from './mapGenerationFunctions.component'
 import Map from './mapper.component'
 import { Tile, TileType } from './tile.component'
-import Config from './config.component'
+import { Config, Coords, TileTemplate, Position } from './config.component'
 
-export default class Builder {	
+export class Builder {	
 
 	private config: Config = new Config()
 	private calculations: MapGenerationFunctions = new MapGenerationFunctions()
@@ -53,19 +53,78 @@ export default class Builder {
 
 	buildMap(map: Map): string {
 
-		let mapTotalWidth = this.config.getMapWidth(map.mapWidth)
-		let mapTotalLength = this.config.getMapLength(map.mapLength)
+		let mapTotalWidth = map.mapWidth
+		let mapTotalLength = map.mapLength
 
-		let htmlMap = '<svg width="" height=""></svg>';
+		let testTile = this.createTile(0, 0);
 
-		return htmlMap
+		console.log(testTile)
+
+		let xDeviation = testTile.coords.bottom.x - testTile.coords.top.x;
+		let yDeviation = testTile.coords.right.y - testTile.coords.left.y;
+		let tileHalfWidthLeft = testTile.coords.top.x - testTile.coords.left.x;
+		let tileHalfWidthRight = testTile.coords.right.x - testTile.coords.top.x;
+		let mapWidthLeft = tileHalfWidthLeft * mapTotalLength;
+		let mapWidthRight = tileHalfWidthRight * mapTotalWidth;
+		let tileHalfLengthTop = testTile.coords.right.y;
+		let tileHalfLengthBottom = testTile.coords.bottom.y - testTile.coords.right.y;
+		let mapLengthTop = tileHalfLengthTop * mapTotalWidth;
+		let mapLengthBottom = tileHalfLengthBottom * mapTotalLength;
+		let mapWidthPx = Math.round((tileHalfWidthLeft + tileHalfWidthRight) * (mapTotalWidth ))
+		let mapLengthPx = Math.round(mapLengthTop + mapLengthBottom)
+
+		console.log(mapWidthLeft)
+
+		let html = '<svg width="'+mapWidthPx+'" height="'+mapLengthPx+'">';
+
+		let lastTile = null
+		let startTileX = tileHalfWidthLeft * (mapTotalWidth - 1)
+
+		for (let y = 0; y < mapTotalLength; y++) {
+
+			//console.log('y: ' + y)
+
+			for (let x = 0; x < mapTotalWidth; x++) {
+
+				let thisPosY = 0
+				let thisPosX = 0
+
+				if (x === 0 && y === 0) {
+					thisPosX = startTileX
+				}
+
+				if (lastTile != null) {
+					thisPosY = lastTile.coords.right.y	
+				}
+
+				if (y > 0 && x === 0) {
+					thisPosX = startTileX - (tileHalfWidthLeft * y)
+					thisPosY = (tileHalfLengthTop * y) - (yDeviation * y)
+				}	
+				
+				if (x > 0) {
+					thisPosX = (lastTile.coords.right.x - (lastTile.coords.right.x - lastTile.coords.bottom.x))
+								
+				}
+
+				let newTile = this.createTile(thisPosX, thisPosY)
+
+				html += newTile.html
+
+				lastTile = newTile
+			}
+		}
+
+		html += '</svg>'
+
+		return html
 	}
 
-	createTile(): string {
+	createTile(xPos: number, yPos: number): TileTemplate {
 
 		let tileW = this.config.tileWidth
 		let tileL = this.config.tileLength
-		let angle = this.config.tileAngle
+		let angle = 1
 
 		// split into two triangles to calculate isometric dimensions of tile
 
@@ -80,19 +139,29 @@ export default class Builder {
 		let canvasWidth = adjacentL + adjacentR
 		let canvasLength = canvasWidth
 
+		let tileColor = `#${this.config.groundColor}`
+
 		let dimensions = this.calculations.calculateStraightLinesFromIsometricSquare(tileW, tileL);
 
-		console.log(dimensions)
+		let top: Position = { "x": (xPos + dimensions.horizontalWidthFromTop), "y": yPos}
+		let left: Position = { "x": xPos, "y": (yPos + dimensions.verticalHeightFromTop) }
+		let bottom: Position = { "x": (xPos + dimensions.horizontalWidthFromBottom), "y": (yPos + dimensions.totalHeight) }
+		let right: Position = { "x": (xPos + dimensions.totalWidth), "y": (yPos + dimensions.verticalHeightFromBottom) }
 
-		var html = `<svg width="${dimensions.totalWidth}" height="${dimensions.totalHeight+2}" style="border:#666 solid 1px;">
-				<path fill="red" 
-					d="M 0 ${dimensions.verticalHeightFromTop} 
-					L${dimensions.horizontalWidthFromBottom} ${dimensions.totalHeight}
-					L${dimensions.totalWidth} ${dimensions.verticalHeightFromBottom}
-					L${dimensions.horizontalWidthFromTop} 0 
-					L0 ${dimensions.verticalHeightFromTop} Z" />`
-		html += '</svg>'
+		let pointTop = `${top.x} ${top.y}`
+		let pointLeft = `${left.x} ${left.y}`
+		let pointBottom = `${bottom.x} ${bottom.y}`
+		let pointRight = `${right.x} ${right.y}`
 
-		return html
+		var html = `<path fill="${tileColor}"
+					d="M${pointLeft} 
+					L${pointBottom} 
+					L${pointRight} 
+					L${pointTop} 
+					L${pointLeft} Z" />`
+
+		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
+
+		return { html: html, coords: coords }
 	}
 }
