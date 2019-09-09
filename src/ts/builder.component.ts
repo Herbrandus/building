@@ -124,20 +124,6 @@ export class Builder {
 
 		let tileW = this.config.tileWidth
 		let tileL = this.config.tileLength
-		let angle = 1
-
-		// split into two triangles to calculate isometric dimensions of tile
-
-		// calculate opposite with: sin(angle) * hypotenuse
-		let oppositeL = Math.sin(angle) * tileW
-		let oppositeR = Math.sin(angle) * tileL
-
-		// calculate adjacent with: sqrt(hypotenuse(2) - opposite(2))
-		let adjacentL = Math.sqrt(Math.pow(tileW, 2) - Math.pow(oppositeL, 2))
-		let adjacentR = Math.sqrt(Math.pow(tileL, 2) - Math.pow(oppositeR, 2))
-
-		let canvasWidth = adjacentL + adjacentR
-		let canvasLength = canvasWidth
 
 		let tileColor = `#${this.config.groundColor}`
 
