@@ -89,7 +89,7 @@ export enum BuildingHeightVariations {
 
 export class Color {
 	private _hexNames: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-	private _colorRgb: object
+	private _colorRgb: RGB
 	private _colorHex: string
 
 	constructor(...params: any[]) {
@@ -112,6 +112,7 @@ export class Color {
 		} else if (params.length === 3) {
 			if (this.validateRgb(params)) {
 				this.setRgb(params[0], params[1], params[2])
+				this.rgbToHex()
 			} else {
 				error = "Values of RGB exceed limits"
 			}
@@ -123,7 +124,7 @@ export class Color {
 	}
 
 	public setRgb(r: number, g: number, b: number) {
-		this._colorRgb = {r: r, g: g, b: b}
+		this._colorRgb = {r: r, g: g, b: b} as RGB
 	}
 
 	public setHex(hexadecimal: string) {
@@ -136,7 +137,7 @@ export class Color {
 		this._colorHex = hexadecimal
 	}
 
-	public rgb(): object {
+	public rgb(): RGB {
 		return this._colorRgb
 	}
 
@@ -169,5 +170,24 @@ export class Color {
 		let hexPair2 = (this._hexNames.indexOf(hexValues[2]) * 16) + this._hexNames.indexOf(hexValues[3])
 		let hexPair3 = (this._hexNames.indexOf(hexValues[4]) * 16) + this._hexNames.indexOf(hexValues[5])
 		this.setRgb(hexPair1, hexPair2, hexPair3)
+		this.rgbToHex()
 	}
+
+	rgbToHex() {
+		if (typeof this._colorRgb === 'object') {
+			let r = this._colorRgb.r
+			let b = this._colorRgb.b
+			let g = this._colorRgb.g
+			let hexR = Number(r).toString(16)
+			let hexG = Number(g).toString(16)
+			let hexB = Number(b).toString(16)
+			this._colorHex = "#" + hexR + hexG + hexB
+		}
+	}
+}
+
+export interface RGB {
+	r: 0,
+	g: 0,
+	b: 0
 }
