@@ -41,7 +41,11 @@ export class Tile {
 
 	get y(): number {
 		return this._y
-	}	
+	}
+
+	get h(): number {
+		return this._h
+	}
 
 	get type(): TileType {
 		return this._tileType

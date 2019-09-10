@@ -1,13 +1,17 @@
 import Map from './mapper.component'
-import { Builder } from './builder.component'
+import { Renderer } from './builder.component'
+import { Color } from './mapGenerationFunctions.component'
+import { Config } from './config.component'
 
 class RandomBuilding {
 
 	private _map: Map
-	private _builder: Builder = new Builder
+	private _builder: Renderer = new Renderer
+	private config: Config = new Config
 
 	constructor() {
 		this._map = new Map(20, 20, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4)
+		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
 	get map() {
@@ -23,8 +27,16 @@ class RandomBuilding {
 	}
 }
 
-const building = new RandomBuilding();
+/*
+const color = new Color(150, 225, 116);
 
-//document.querySelector('#world').innerHTML = building.colorMap()
+const colorDivs = `
+	<div class="color__tile" style="background-color: rgb(${color.getShadowsRGB().r},${color.getShadowsRGB().g},${color.getShadowsRGB().b})"></div>
+	<div class="color__tile" style="background-color: rgb(${color.rgb().r},${color.rgb().g},${color.rgb().b})"></div>
+	<div class="color__tile" style="background-color: rgb(${color.getHighlightsRGB().r},${color.getHighlightsRGB().g},${color.getHighlightsRGB().b})"></div>`
+
+document.querySelector('#color').innerHTML = colorDivs */
+
+const building = new RandomBuilding();
 
 document.querySelector("#world").innerHTML = building.drawTileMap()

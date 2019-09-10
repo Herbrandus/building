@@ -7,12 +7,13 @@ export class Config {
 	private _tileHeight: number = 20
 	private _tileSmallAngle: number = 85
 	private _tileLargeAngle: number = 100
-	private _groundColor: Color = new Color('dbc')
+	private _groundColor: Color = new Color('f5f3e5')
 	private _buildingBaseColor: Color = new Color(
 		125 + Math.floor(Math.random() * 75),
 		170 + Math.floor(Math.random() * 40),
 		180 + Math.floor(Math.random() * 30)
 	)
+	private _tileEdgeBleed: number = 0.38
 
 	public get tileWidth(): number {
 		return this._tileWidth
@@ -40,6 +41,10 @@ export class Config {
 
 	public get buildingBaseColor(): Color {
 		return this._buildingBaseColor
+	}
+
+	public get tileEdgeBleed(): number {
+		return this._tileEdgeBleed
 	}
 
 	public getMapWidth(mapArrayWidth: number): number {

@@ -12,12 +12,6 @@ export class MapGenerationFunctions {
 		return 2 + Math.floor(Math.random() * maximumBlockIterations);
 	}
 
-	public calculateTriangleHypotenuse(adjacent: number, opposite: number): number {
-		let sum = Math.pow(adjacent, 2) + Math.pow(opposite, 2);
-		let result = Math.sqrt(sum);
-		return result
-	}	
-
 	// calculate the dimensions to draw the isometric perspective tile with the parameters as if it were a straight square tile
 	public calculateStraightLinesFromIsometricSquare (blockWidth: number, blockHeight: number) {
 		// lengths this function returns when it comes to positions of longest and shortest sides as array
@@ -44,30 +38,30 @@ export class MapGenerationFunctions {
 		let totalHeight = verticalHeightFromBottom + verticalHeightFromTop;
 		let totalWidth = horizontalWidthFromBottom + horizontalWidthFromTop;
 
-		return {	'totalWidth': totalWidth, 
-					'totalHeight': totalHeight, 
-					'horizontalWidthFromBottom': horizontalWidthFromBottom, 
-					'horizontalWidthFromTop': horizontalWidthFromTop, 
-					'verticalHeightFromBottom': verticalHeightFromBottom, 
-					'verticalHeightFromTop': verticalHeightFromTop }
+		return {	'totalWidth': totalWidth, // 0
+					'totalHeight': totalHeight,  // 1
+					'horizontalWidthFromBottom': horizontalWidthFromBottom,  // 2
+					'horizontalWidthFromTop': horizontalWidthFromTop,  // 3
+					'verticalHeightFromBottom': verticalHeightFromBottom,  // 4
+					'verticalHeightFromTop': verticalHeightFromTop } // 5
 	}
 
 	// calculate the amount of pixels from the bottom left side of a straight square to the point at the bottom 
 	// .. where the tip of the tile meets the border of the square
 	public getHorizontalBottomShortestWidth (diagonalWidth: number, smallAngle: number): number {
-		return Math.ceil((diagonalWidth * Math.sin(this.toRadians(smallAngle))) * 100) / 100;
+		return diagonalWidth * Math.sin(this.toRadians(smallAngle));
 	}
 
 	public getVerticalBottomShortestHeight (diagonalHeight: number, smallAngle: number): number {
-		return Math.ceil((diagonalHeight * Math.cos(this.toRadians(smallAngle))) * 100) / 100;
+		return diagonalHeight * Math.cos(this.toRadians(smallAngle));
 	}
 
 	public getHorizontalTopLongestWidth (diagonalWidth: number, largeAngle: number): number {
-		return Math.ceil((diagonalWidth * Math.sin(this.toRadians(largeAngle))) * 100) / 100;
+		return diagonalWidth * Math.sin(this.toRadians(largeAngle));
 	}
 
 	public getVerticalTopLongestHeight (diagonalHeight: number, largeAngle: number): number {
-		return Math.ceil(diagonalHeight * Math.cos(this.toRadians(largeAngle)));
+		return diagonalHeight * Math.cos(this.toRadians(largeAngle));
 	}
 
 	toRadians (angle: number): number {
@@ -88,7 +82,6 @@ export enum BuildingHeightVariations {
 }
 
 export class Color {
-	private _hexNames: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 	private _colorRgb: RGB
 	private _colorHex: string
 
@@ -166,9 +159,9 @@ export class Color {
 
 	hexToRgb() {
 		let hexValues: string[] = this._colorHex.substr(1).split('')
-		let hexPair1 = (this._hexNames.indexOf(hexValues[0]) * 16) + this._hexNames.indexOf(hexValues[1])
-		let hexPair2 = (this._hexNames.indexOf(hexValues[2]) * 16) + this._hexNames.indexOf(hexValues[3])
-		let hexPair3 = (this._hexNames.indexOf(hexValues[4]) * 16) + this._hexNames.indexOf(hexValues[5])
+		let hexPair1 = parseInt(hexValues[0]+hexValues[1], 16)
+		let hexPair2 = parseInt(hexValues[2]+hexValues[3], 16)
+		let hexPair3 = parseInt(hexValues[4]+hexValues[5], 16)
 		this.setRgb(hexPair1, hexPair2, hexPair3)
 		this.rgbToHex()
 	}
@@ -184,10 +177,36 @@ export class Color {
 			this._colorHex = "#" + hexR + hexG + hexB
 		}
 	}
+
+	public getHighlightsRGB(): RGB {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r + 45
+		let newG = g + 45
+		let newB = b + 30
+		if (newR > 255) newR = 255
+		if (newG > 255) newG = 255
+		if (newR > 255) newR = 255
+		return {r: newR, g: newG, b: newB}
+	}
+
+	public getShadowsRGB(): RGB {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r - 70
+		let newG = g - 70
+		let newB = b - 60
+		if (newR < 0) newR = 0
+		if (newG < 0) newG = 0
+		if (newR < 0) newR = 0
+		return {r: newR, g: newG, b: newB}
+	}
 }
 
 export interface RGB {
-	r: 0,
-	g: 0,
-	b: 0
+	r: number,
+	g: number,
+	b: number
 }
