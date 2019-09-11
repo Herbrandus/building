@@ -68,6 +68,7 @@ export default class Map {
 			firstBlockHeight = blockHeight
 		}
 
+		console.log('firstBlockHeight: ' + firstBlockHeight)
 		console.log("Block height variation: " + this._blockHeightVariation)
 
 		for (let y = 0; y < this.mapLength; y++) {

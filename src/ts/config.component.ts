@@ -9,11 +9,11 @@ export class Config {
 	private _tileLargeAngle: number = 100
 	private _groundColor: Color = new Color('f5f3e5')
 	private _buildingBaseColor: Color = new Color(
-		125 + Math.floor(Math.random() * 75),
-		170 + Math.floor(Math.random() * 40),
-		180 + Math.floor(Math.random() * 30)
+		115 + Math.floor(Math.random() * 75),
+		155 + Math.floor(Math.random() * 40),
+		150 + Math.floor(Math.random() * 30)
 	)
-	private _tileEdgeBleed: number = 0
+	private _tileEdgeBleed: number = 0.3
 
 	public get tileWidth(): number {
 		return this._tileWidth

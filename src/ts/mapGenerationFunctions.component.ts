@@ -178,6 +178,38 @@ export class Color {
 		}
 	}
 
+	public changeColorLighting(amount: number, encoding: string): string {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r + amount
+		let newG = g + amount
+		let newB = b + (amount - 8)
+		if (newR > 255) newR = 255
+		if (newG > 255) newG = 255
+		if (newR > 255) newR = 255
+
+		let hexR = Number(newR).toString(16)
+		let hexG = Number(newG).toString(16)
+		let hexB = Number(newB).toString(16)
+		let result = "#" + hexR + hexG + hexB
+
+		return result
+	}
+
+	public getLightestRGB(): RGB {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r + 55
+		let newG = g + 55
+		let newB = b + 40
+		if (newR > 255) newR = 255
+		if (newG > 255) newG = 255
+		if (newR > 255) newR = 255
+		return {r: newR, g: newG, b: newB}
+	}
+
 	public getHighlightsRGB(): RGB {
 		let r = this._colorRgb.r
 		let b = this._colorRgb.b
@@ -191,7 +223,46 @@ export class Color {
 		return {r: newR, g: newG, b: newB}
 	}
 
+	public getDarkerRegularRGB(): RGB {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r + 15
+		let newG = g + 15
+		let newB = b + 5
+		if (newR > 255) newR = 255
+		if (newG > 255) newG = 255
+		if (newR > 255) newR = 255
+		return {r: newR, g: newG, b: newB}
+	}
+
+	public getHalflightsRGB(): RGB {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r + 25
+		let newG = g + 25
+		let newB = b + 15
+		if (newR > 255) newR = 255
+		if (newG > 255) newG = 255
+		if (newR > 255) newR = 255
+		return {r: newR, g: newG, b: newB}
+	}
+
 	public getShadowsRGB(): RGB {
+		let r = this._colorRgb.r
+		let b = this._colorRgb.b
+		let g = this._colorRgb.g
+		let newR = r - 55
+		let newG = g - 55
+		let newB = b - 35
+		if (newR < 0) newR = 0
+		if (newG < 0) newG = 0
+		if (newR < 0) newR = 0
+		return {r: newR, g: newG, b: newB}
+	}
+
+	public getDarkestRGB(): RGB {
 		let r = this._colorRgb.r
 		let b = this._colorRgb.b
 		let g = this._colorRgb.g

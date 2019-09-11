@@ -2,11 +2,13 @@ import { MapGenerationFunctions, Color } from './mapGenerationFunctions.componen
 import Map from './mapper.component'
 import { Tile, TileType } from './tile.component'
 import { Config, Coords, TileTemplate, Position } from './config.component'
+import { RenderElements } from './renderelements.component'
 
 export class Renderer {	
 
 	private config: Config = new Config()
 	private calculations: MapGenerationFunctions = new MapGenerationFunctions()
+	private render: RenderElements = new RenderElements()
 
 	constructor() {	}
 
@@ -54,7 +56,7 @@ export class Renderer {
 		let mapTotalWidth = mapToBuild.mapWidth
 		let mapTotalLength = mapToBuild.mapLength
 
-		let testTile = this.createTile(0, 0)
+		let testTile = this.render.createTile(0, 0)
 
 		let xDeviation = testTile.coords.bottom.x - testTile.coords.top.x
 		let yDeviation = testTile.coords.right.y - testTile.coords.left.y
@@ -101,12 +103,38 @@ export class Renderer {
 					thisPosX = (lastTile.coords.right.x - (lastTile.coords.right.x - lastTile.coords.bottom.x))
 				}
 
-				let newTile = this.createTile(thisPosX, thisPosY)
+				let newTile = this.render.createTile(thisPosX, thisPosY)
 				let newData = ''
 
 				if (map[y][x].isDefined) {
 					for (let h = 0; h < map[y][x].height; h++) {
-						let tile = this.createBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h))
+
+						let tile = null
+
+						if (map[y][x].edge.top && !map[y][x].corner && h === map[y][x].height-1) {
+							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'n')
+						} else if (map[y][x].edge.bottom && !map[y][x].corner && h === map[y][x].height-1) {
+							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 's')
+						} else if (map[y][x].edge.right && !map[y][x].corner && h === map[y][x].height-1) {
+							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'e')
+						} else if (map[y][x].edge.left && !map[y][x].corner && h === map[y][x].height-1) {
+							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'w')
+						} else {
+							tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h))	
+						}
+
+						if (map[y][x].corner && h === map[y][x].height-1) {
+							if (map[y][x].edge.top && map[y][x].edge.left) {
+								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'nw')
+							} else if (map[y][x].edge.top && map[y][x].edge.right) {
+								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'ne')
+							} else if (map[y][x].edge.bottom && map[y][x].edge.left) {
+								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'sw')
+							} else if (map[y][x].edge.bottom && map[y][x].edge.right) {
+								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'se')
+							}
+						}
+						
 						newData += tile.html
 					}
 				}
@@ -120,98 +148,5 @@ export class Renderer {
 		html += '</svg>'
 
 		return html
-	}
-
-	createTile(xPos: number, yPos: number): TileTemplate {
-
-		let tileW = this.config.tileWidth
-		let tileL = this.config.tileLength
-		let bleed = this.config.tileEdgeBleed
-
-		let tileColor = this.config.groundColor.hex()
-
-		let dimensions = this.calculations.calculateStraightLinesFromIsometricSquare(tileW, tileL)
-
-		let top: Position = { "x": (xPos + dimensions.horizontalWidthFromTop), "y": yPos}
-		let left: Position = { "x": xPos, "y": (yPos + dimensions.verticalHeightFromTop) }
-		let bottom: Position = { "x": (xPos + dimensions.horizontalWidthFromBottom), "y": (yPos + dimensions.totalHeight) }
-		let right: Position = { "x": (xPos + dimensions.totalWidth), "y": (yPos + dimensions.verticalHeightFromBottom) }
-
-		let pointTop = `${top.x} ${top.y-bleed}`
-		let pointLeft = `${left.x-bleed} ${left.y}`
-		let pointBottom = `${bottom.x} ${bottom.y+bleed}`
-		let pointRight = `${right.x+bleed} ${right.y}`
-
-		var html = `<path fill="${tileColor}"
-					d="M${pointLeft} 
-					L${pointBottom} 
-					L${pointRight} 
-					L${pointTop} 
-					L${pointLeft} Z" />`
-
-		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
-
-		return { html: html, coords: coords }
-	}
-
-	createBlock(xPos: number, yPos: number, tile: Tile): TileTemplate {
-
-		let tileW = this.config.tileWidth
-		let tileL = this.config.tileLength
-		let tileH = this.config.tileHeight
-		let bleed = this.config.tileEdgeBleed
-
-		let id = tile.id
-		let height = (tile.h * tileH) - tileH
-
-		let regularColor = this.config.buildingBaseColor.hex()
-		let highlightColor = `rgb(${this.config.buildingBaseColor.getHighlightsRGB().r},${this.config.buildingBaseColor.getHighlightsRGB().g},${this.config.buildingBaseColor.getHighlightsRGB().b})`
-		let shadowColor = `rgb(${this.config.buildingBaseColor.getShadowsRGB().r},${this.config.buildingBaseColor.getShadowsRGB().g},${this.config.buildingBaseColor.getShadowsRGB().b})`
-
-		let dimensions = this.calculations.calculateStraightLinesFromIsometricSquare(tileW, tileL)
-
-		let top: Position = { "x": (xPos + dimensions.horizontalWidthFromTop), "y": yPos }
-		let left: Position = { "x": xPos, "y": (yPos + dimensions.verticalHeightFromTop) }
-		let bottom: Position = { "x": (xPos + dimensions.horizontalWidthFromBottom), "y": (yPos + dimensions.totalHeight) }
-		let right: Position = { "x": (xPos + dimensions.totalWidth), "y": (yPos + dimensions.verticalHeightFromBottom) }
-
-		let leftWallLeftTop = `${left.x-bleed} ${left.y-height-tileH}`
-		let leftWallLeftBottom = `${left.x-bleed} ${left.y-height+bleed}`
-		let leftWallRightBottom = `${bottom.x} ${bottom.y-height+bleed}`
-		let leftWallRightTop = `${bottom.x} ${bottom.y-height-tileH}`
-
-		let rightWallLeftTop = `${bottom.x} ${bottom.y-height-tileH}`
-		let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+bleed}`
-		let rightWallRightBottom = `${right.x+bleed} ${right.y-height+bleed}`
-		let rightWallRightTop = `${right.x+bleed} ${right.y-height-tileH}`
-
-		let blockTopLeft = `${left.x-bleed} ${left.y-height-tileH}`
-		let blockTopBottom = `${bottom.x} ${bottom.y-height-tileH}`
-		let blockTopRight = `${right.x+bleed} ${right.y-height-tileH}`
-		let blockTopTop = `${top.x} ${top.y-height-tileH}`
-
-
-		let html = `<g style="z-index:${id};"><path fill="${shadowColor}"
-					d="M${leftWallLeftTop} 
-					L${leftWallLeftBottom} 
-					L${leftWallRightBottom} 
-					L${leftWallRightTop} 
-					L${leftWallLeftTop} Z" />
-					<path fill="${regularColor}"
-					d="M${rightWallLeftTop} 
-					L${rightWallLeftBottom} 
-					L${rightWallRightBottom} 
-					L${rightWallRightTop} 
-					L${rightWallLeftTop} Z" />
-					<path fill="${highlightColor}"
-					d="M${blockTopLeft} 
-					L${blockTopBottom} 
-					L${blockTopRight} 
-					L${blockTopTop} 
-					L${blockTopLeft} Z" /></g>`
-
-		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
-
-		return { html: html, coords: coords }
-	}
+	}	
 }
