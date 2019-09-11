@@ -105,7 +105,6 @@ export class Renderer {
 				let newData = ''
 
 				if (map[y][x].isDefined) {
-					console.log(map[y][x])
 					for (let h = 0; h < map[y][x].height; h++) {
 						let tile = this.createBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h))
 						newData += tile.html

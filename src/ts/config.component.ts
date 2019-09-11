@@ -13,7 +13,7 @@ export class Config {
 		170 + Math.floor(Math.random() * 40),
 		180 + Math.floor(Math.random() * 30)
 	)
-	private _tileEdgeBleed: number = 0.38
+	private _tileEdgeBleed: number = 0
 
 	public get tileWidth(): number {
 		return this._tileWidth
