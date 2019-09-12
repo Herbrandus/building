@@ -14,6 +14,7 @@ export class Config {
 		150 + Math.floor(Math.random() * 30)
 	)
 	private _tileEdgeBleed: number = 0.3
+	private _maxAllowedHeight: number = 12
 
 	public get tileWidth(): number {
 		return this._tileWidth
@@ -45,6 +46,10 @@ export class Config {
 
 	public get tileEdgeBleed(): number {
 		return this._tileEdgeBleed
+	}
+
+	public get maxAllowedHeight(): number {
+		return this._maxAllowedHeight
 	}
 
 	public getMapWidth(mapArrayWidth: number): number {

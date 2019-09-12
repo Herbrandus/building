@@ -71,9 +71,9 @@ export class Renderer {
 		let mapWidthPx = Math.round((tileHalfWidthLeft + tileHalfWidthRight) * (mapTotalWidth ))
 		let mapLengthPx = Math.round(mapLengthTop + mapLengthBottom)
 
-		console.log('map:', mapToBuild.map)
 		const map = mapToBuild.map
 
+		let detailsHtml = ''
 		let html = '<svg width="'+mapWidthPx+'" height="'+mapLengthPx+'">'
 
 		let lastTile = null
@@ -105,15 +105,17 @@ export class Renderer {
 
 				let newTile = this.render.createTile(thisPosX, thisPosY)
 				let newData = ''
-
+				
 				if (map[y][x].isDefined) {
 					for (let h = 0; h < map[y][x].height; h++) {
-
-						let tile = this.addSlopedEdges(map, x, y, h, thisPosX, thisPosY)
-						
+						let tile = this.render.createBlock(thisPosX, thisPosY, map[y][x].tileStack[h])
 						newData += tile.html
+
+						if (h === map[y][x].height - 1) {
+							detailsHtml += `<div class="blockLabel" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div><span>id: ${map[y][x].tileStack[h].id}<br>h: ${h}</span></div>`
+						}
 					}
-				}
+				} 
 
 				html += newTile.html + newData
 
@@ -123,7 +125,9 @@ export class Renderer {
 
 		html += '</svg>'
 
-		return html
+		// document.querySelector('#debug').innerHTML = detailsHtml
+
+		return '<div id="debug">' + detailsHtml + '</div>' + html
 	}
 
 	addSlopedEdges(map: any[], x: number, y: number, h: number, xPos: number, yPos: number) {

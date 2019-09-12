@@ -4,7 +4,7 @@
 
 body {
     margin: 0;
-    padding: 0;
+    padding: 7px;
     font-family: arial, sans-serif;
     color: #222;
     font-size: 14px;
@@ -49,4 +49,85 @@ body {
     display: inline-block;
     width: 200px;
     height: 200px;
+}
+
+button {
+    display: inline-block;
+    padding: 3px 15px;
+    border: #ddd solid 1px;
+    font-size: 15px;
+    text-align: center;
+    border-radius: 3px;
+    cursor: pointer;
+    background: #fff;
+}
+
+button.active {
+    background: #ddd;
+    border-color: #888;
+}
+
+button:focus {
+    outline: 0;
+}
+
+#debug {
+    display: none;
+}
+
+#debug.show {
+    display: block;    
+    position: relative;
+
+    .blockLabel {
+        position: absolute;
+        font-size: 10px;
+        line-height: 16px;
+        color: #777;
+
+        .point {
+            position: absolute;
+            margin: 8px auto;
+            width: 8px;
+            height: 8px;
+            background-color: #666;
+            cursor: pointer;
+            border-radius: 4px;           
+        }
+
+        span {
+            display: none;
+            position: absolute;
+            top: -100px;
+            background-color: #fff;
+            width: 80px;
+            padding: 4px 6px 4px 9px;
+            z-index: 1000;
+        }
+
+        span:before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 0;
+            height: 115px;
+            width: 1px;
+            border-left: #666 solid 2px;
+            z-index: 100;
+        }
+    }
+
+    .blockLabel.active {
+
+        .point {
+            border: #968ce9 solid 3px;
+            box-sizing: content-box;
+            top: -3px;
+            left: -3px;
+        }
+
+        span {
+            display: block;
+        }
+    }
 }

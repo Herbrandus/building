@@ -40,15 +40,26 @@ const colorDivs = `
 document.querySelector('#color').innerHTML = colorDivs */
 
 document.querySelector('#generate').addEventListener('click', () => {
-	if (allowPyramid) {
-		allowPyramid = false	
-	} else {
-		allowPyramid = true	
-	} 
-	
 	const building2 = new RandomBuilding(allowPyramid);
 	document.querySelector("#world").innerHTML = building2.drawTileMap()
+
+	document.querySelectorAll('.blockLabel').forEach((item) => {
+		item.addEventListener('click', () => {
+			item.classList.toggle('active')
+		})
+	})
+})
+
+document.querySelector('#debugActive').addEventListener('click', () => {
+	document.querySelector('#debug').classList.toggle('show')
+	document.querySelector('#debugActive').classList.toggle('active')
 })
 
 const building = new RandomBuilding(allowPyramid);
 document.querySelector("#world").innerHTML = building.drawTileMap()
+
+document.querySelectorAll('.blockLabel').forEach((item) => {
+	item.addEventListener('click', () => {
+		item.classList.toggle('active')
+	})
+})

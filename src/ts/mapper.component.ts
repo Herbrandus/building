@@ -1,6 +1,6 @@
 import { MapGenerationFunctions, BuildingHeightVariations } from './mapGenerationFunctions.component'
 import { Tile, TileType } from './tile.component'
-import { Config } from './config.component'
+import { Config, Position } from './config.component'
 import { Primitives } from './primitives.component'
 
 export default class Map {
@@ -15,17 +15,19 @@ export default class Map {
 	private _mapEdgeWidth: number
 	private _highestPoint: number
 	private _startBlockXfromCenterDeviation: number
+	private _mapHalfLength: number
 	private _world: any[][]
 	private _blockHeightsArray: number[]
 	private _blockGroupCollection: any[]
 	private _blockGroups: any[]
-	private _startBlockEdges: number[]
-	private _additionalBlockEdges: number[]
+	private _blockEdges: Position[]
+	private _additionalBlockEdges: Position[]
 	private _mapGen: MapGenerationFunctions = new MapGenerationFunctions()
 	private config: Config = new Config()
 	private primitives: Primitives = new Primitives()
 	private _blockHeightVariationLabels = [BuildingHeightVariations.TallCenter, BuildingHeightVariations.TallSurrounds, BuildingHeightVariations.Random]
 	private _blockHeightVariation = this._blockHeightVariationLabels[Math.floor(Math.random() * 3)]
+	private _blockIdIterator: number
 
 	constructor(	
 			mapWidth: number, 
@@ -46,8 +48,12 @@ export default class Map {
 		this._maximumBlockIterations = maximumBlockIterations
 		this._additionalBlockIterations = this._mapGen.calculateAdditionalBlockIterations(maximumBlockIterations)
 		this._blockGroups = []
+		this._blockEdges = []
+		this._blockHeightsArray = []
+		this._mapHalfLength = Math.floor(mapLength / 2)
+		this._blockIdIterator = 0
 
-		let mapLengthHalf = Math.floor(mapLength / 2)
+		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
 		let startBlockXfromCenterDeviation = 6
 		let startblockLength = (this._averageBuildingSize + 1) + Math.floor(Math.random() * 6)
@@ -58,21 +64,17 @@ export default class Map {
 		let startingPositionX = Math.floor(this._mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
 
 		this._world = []
-		let i = 0
 		let tileHeight = 0
 		let firstBlockHeight
 
-		if (this._blockHeightVariation == BuildingHeightVariations.TallCenter) {
+		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
 			firstBlockHeight = blockHeight * 2
-		} else if (this._blockHeightVariation == BuildingHeightVariations.TallSurrounds) {
+		} else if (this._blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
 			firstBlockHeight = 1 + Math.round(Math.random())
 			blockHeight = firstBlockHeight
 		} else {
 			firstBlockHeight = blockHeight
 		}
-
-		console.log('firstBlockHeight: ' + firstBlockHeight)
-		console.log("Block height variation: " + this._blockHeightVariation)
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -99,7 +101,7 @@ export default class Map {
 
 							tileStack.push(
 								new Tile(
-									i, 
+									this._blockIdIterator, 
 									x, 
 									y, 
 									h, 
@@ -119,7 +121,9 @@ export default class Map {
 								this._blockGroups[thisBlockGroup].push([y,x])
 							}
 
-							i++
+							this._blockHeightsArray.push(firstBlockHeight)
+
+							this._blockIdIterator++
 						}
 
 						column = new Column(true, x, y, firstBlockHeight)
@@ -135,10 +139,107 @@ export default class Map {
 			}
 		}
 
-		if (pyramid) {
-			this.createPyramid()
-			this.setEdges(true)
-		}		
+		console.log('i: ' + this._blockIdIterator)
+
+		for (let i = 0; i < this._additionalBlockIterations; i++) {
+
+			console.log('iteration #'+i)
+			this.getEdges()
+
+			let randomPositionPicker = 2 + Math.ceil(Math.random() * (this._blockEdges.length - 2))
+			let thisHeight = 0
+
+			console.log('this._blockEdges', this._blockEdges)
+			console.log('randomPositionPicker', randomPositionPicker)
+
+			if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
+				thisHeight = this._blockHeight - i;
+				
+			} else if (this._blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
+
+				thisHeight = this._blockHeight + i;
+
+			} else if (this._blockHeightVariation === BuildingHeightVariations.Random) {
+
+				thisHeight = this._blockHeight + 1;
+			}
+
+			if (thisHeight < 2) {
+				thisHeight = 2;
+			} else if (thisHeight > this.config.maxAllowedHeight) {
+				thisHeight = this.config.maxAllowedHeight;
+			}
+
+			let yPos = this._blockEdges[randomPositionPicker].x
+			let xPos = this._blockEdges[randomPositionPicker].y
+
+			let thisBlockLength = (this._averageBuildingSize - 2) + Math.floor(Math.random() * 4)
+			let thisBlockWidth = (this._averageBuildingSize - 2) + Math.floor(Math.random() * 4)
+
+			for (let y = 0; y < this._mapLength; y++) {
+				
+				for (let x = 0; x < this._mapWidth; x++) {
+
+					if (y >= (yPos - Math.floor(thisBlockLength / 2)) && 
+						y <= (yPos + Math.floor(thisBlockLength / 2)) && 
+						x >= (xPos - Math.floor(thisBlockWidth / 2)) && 
+						x <= (xPos + Math.floor(thisBlockWidth / 2)) ) {
+
+						let thisBlockGroup = i+2
+						let tileStack = []
+
+						for (let h = 0; h < thisHeight; h++) {
+
+							let thisPillar = 0
+							let thisWindowed = 0
+							let isRoof = (h === thisHeight-1) ? true : false
+
+							tileStack.push(
+								new Tile(
+									this._blockIdIterator, 
+									x, 
+									y, 
+									h, 
+									TileType.Body,
+									this.config.buildingBaseColor,
+									{
+										'roof':			isRoof,
+										'pillar': 		thisPillar,
+										'windowed': 	thisWindowed,
+										'tower': 		false
+									})
+								)
+
+							if (this._blockGroups.indexOf(thisBlockGroup) === -1) {
+								this._blockGroups[thisBlockGroup] = new Array( [y,x] )
+							} else {
+								this._blockGroups[thisBlockGroup].push([y,x])
+							}
+
+							this._world[y][x] = null
+
+							let column = new Column(true, x, y, thisHeight)
+
+							column.blockGroup = thisBlockGroup
+							column.height = thisHeight
+							column.corner = false
+							column.tileStack = tileStack
+
+							this._blockHeightsArray.push(thisHeight)
+
+							this._blockIdIterator++
+
+							this._world[y][x] = column
+						}
+					}					
+				}
+			}
+		}
+
+		this.clearMapEdges()
+
+		console.log('i: ' + this._blockIdIterator)
+		console.log(this._world)
 	}
 
 	get mapWidth(): number {
@@ -225,17 +326,58 @@ export default class Map {
 		}
 	}
 
+	getEdges(): void {
+
+		for (let y = 0; y < this._mapLength; y++) {
+			// only check second half of map
+
+			if (y > this._mapHalfLength + 1) {
+
+				for (let x = 0; x < this._mapWidth; x++) {
+					
+					if (x > this._mapEdgeWidth && x < this._mapWidth - 1) {
+
+						if (this._world[y][x].isDefined) {
+
+							// if the current tile type is 0, look to the tiles around it to find the edges
+							if (this._world[y][x+1].isDefined || 
+								this._world[y][x-1].isDefined || 
+								this._world[y-1][x].isDefined || 
+								this._world[y-1][x+1].isDefined || 
+								this._world[y-1][x-1].isDefined) {
+
+								// push edges above the block
+
+								let pos: Position = {x: x,y: y}
+
+								this._blockEdges.push(pos)								
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	clearMapEdges(): void {
+
+		for (let y = 0; y < this._mapLength; y++) {
+			for (let x = 0; x < this._mapWidth; x++) {
+				if (x <= this._mapEdgeWidth || x >= this._mapWidth - this._mapEdgeWidth ||
+					y <= this._mapEdgeWidth || y >= this._mapLength - this._mapEdgeWidth) {
+					this._world[y][x] = null
+					let column = new Column(false, x, y, 0)
+					this._world[y][x] = column
+				}
+			}
+		}
+	}
+
 	createPyramid(): void {
 
-		let square = (this.mapLength < this.mapWidth) ? this.mapLength - (this._mapEdgeWidth * 2) : this.mapWidth - (this._mapEdgeWidth * 2)
-		let shortestSide = (this.mapLength < this.mapWidth) ? this.mapLength : this.mapWidth
-		let remainderLength = this.mapLength - square
-		let remainderWidth = this.mapWidth - square
-		let i = 0
-		let diagonal = 0
 		let pyramid = this.primitives.getPyramid()
-		remainderLength = this.mapLength - pyramid.length
-		remainderWidth = this.mapWidth - pyramid[0].length
+		let remainderLength = this.mapLength - pyramid.length
+		let remainderWidth = this.mapWidth - pyramid[0].length
 		let edgeX = Math.round(remainderWidth / 2)
 		let edgeY = Math.round(remainderLength / 2)
 		let row: number[] = []
@@ -260,11 +402,8 @@ export default class Map {
 			}
 		}
 
-		console.log('pyramid', pyramid)
-		console.log('remainderLength', remainderLength)
-		console.log('remainderWidth', remainderWidth)
-
 		this._world = pyramid
+		let i = 0
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -284,8 +423,6 @@ export default class Map {
 						let thisPillar = 0
 						let thisWindowed = 0
 						let isRoof = (h === height-1) ? true : false
-
-						console.log('roof?', isRoof)
 
 						tileStack.push(
 							new Tile(
