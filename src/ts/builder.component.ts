@@ -109,31 +109,7 @@ export class Renderer {
 				if (map[y][x].isDefined) {
 					for (let h = 0; h < map[y][x].height; h++) {
 
-						let tile = null
-
-						if (map[y][x].edge.top && !map[y][x].corner && h === map[y][x].height-1) {
-							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'n')
-						} else if (map[y][x].edge.bottom && !map[y][x].corner && h === map[y][x].height-1) {
-							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 's')
-						} else if (map[y][x].edge.right && !map[y][x].corner && h === map[y][x].height-1) {
-							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'e')
-						} else if (map[y][x].edge.left && !map[y][x].corner && h === map[y][x].height-1) {
-							tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'w')
-						} else {
-							tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h))	
-						}
-
-						if (map[y][x].corner && h === map[y][x].height-1) {
-							if (map[y][x].edge.top && map[y][x].edge.left) {
-								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'nw')
-							} else if (map[y][x].edge.top && map[y][x].edge.right) {
-								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'ne')
-							} else if (map[y][x].edge.bottom && map[y][x].edge.left) {
-								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'sw')
-							} else if (map[y][x].edge.bottom && map[y][x].edge.right) {
-								tile = this.render.createSlopeBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].getTile(h), 'se')
-							}
-						}
+						let tile = this.addSlopedEdges(map, x, y, h, thisPosX, thisPosY)
 						
 						newData += tile.html
 					}
@@ -148,5 +124,36 @@ export class Renderer {
 		html += '</svg>'
 
 		return html
-	}	
+	}
+
+	addSlopedEdges(map: any[], x: number, y: number, h: number, xPos: number, yPos: number) {
+
+		let tile = null
+
+		if (map[y][x].edge.top && !map[y][x].corner && h === map[y][x].height-1) {
+			tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'n')
+		} else if (map[y][x].edge.bottom && !map[y][x].corner && h === map[y][x].height-1) {
+			tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 's')
+		} else if (map[y][x].edge.right && !map[y][x].corner && h === map[y][x].height-1) {
+			tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'e')
+		} else if (map[y][x].edge.left && !map[y][x].corner && h === map[y][x].height-1) {
+			tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'w')
+		} else {
+			tile = this.render.createBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h))	
+		}
+
+		if (map[y][x].corner && h === map[y][x].height-1) {
+			if (map[y][x].edge.top && map[y][x].edge.left) {
+				tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'nw')
+			} else if (map[y][x].edge.top && map[y][x].edge.right) {
+				tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'ne')
+			} else if (map[y][x].edge.bottom && map[y][x].edge.left) {
+				tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'sw')
+			} else if (map[y][x].edge.bottom && map[y][x].edge.right) {
+				tile = this.render.createSlopeBlock(xPos, yPos - this.config.tileHeight, map[y][x].getTile(h), 'se')
+			}
+		}
+
+		return tile
+	}
 }

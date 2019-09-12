@@ -9,8 +9,8 @@ class RandomBuilding {
 	private _builder: Renderer = new Renderer
 	private config: Config = new Config
 
-	constructor() {
-		this._map = new Map(20, 20, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4)
+	constructor(pyramid: boolean) {
+		this._map = new Map(20, 20, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4, pyramid)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
@@ -27,6 +27,8 @@ class RandomBuilding {
 	}
 }
 
+let allowPyramid = false
+
 /*
 const color = new Color(150, 225, 116);
 
@@ -37,6 +39,16 @@ const colorDivs = `
 
 document.querySelector('#color').innerHTML = colorDivs */
 
-const building = new RandomBuilding();
+document.querySelector('#generate').addEventListener('click', () => {
+	if (allowPyramid) {
+		allowPyramid = false	
+	} else {
+		allowPyramid = true	
+	} 
+	
+	const building2 = new RandomBuilding(allowPyramid);
+	document.querySelector("#world").innerHTML = building2.drawTileMap()
+})
 
+const building = new RandomBuilding(allowPyramid);
 document.querySelector("#world").innerHTML = building.drawTileMap()

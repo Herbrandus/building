@@ -161,39 +161,37 @@ export class RenderElements {
 
 		if (slopeDirection === 'nw') {
 
+			console.log('northwest')
+
 			let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height}`
 			let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
-			let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			let leftWallRightBottom = `${bottom.x} ${bottom.y-height-this.tileH+this.bleed}`
 
-			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height}`
-
-			let blockTopLeft = `${left.x-this.bleed} ${left.y-height}`
-			let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let blockTopRight = `${right.x+this.bleed} ${right.y-height}`
+			let blockTopLeft = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+			let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH+this.bleed}`
 			let blockTopTop = `${top.x} ${top.y-height}`
 
-			let html = `<g style="z-index:${id};"><path fill="${this.darkestColor}"
-						d="M${leftWallLeftTop} 
-						L${leftWallLeftBottom} 
-						L${leftWallRightBottom} 
-						L${leftWallRightTop} 
-						L${leftWallLeftTop} Z" />
-						<path fill="${this.regularColor}"
-						d="M${rightWallLeftTop} 
-						L${rightWallLeftBottom} 
-						L${rightWallRightBottom} 
-						L${rightWallRightTop} 
-						L${rightWallLeftTop} Z" />
-						<path fill="${this.highlight}"
-						d="M${blockTopLeft} 
-						L${blockTopBottom} 
-						L${blockTopRight} 
-						L${blockTopTop} 
-						L${blockTopLeft} Z" /></g>`
+			let blockRightBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
+			let blockRightRight = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let blockRightTop = `${top.x} ${top.y-height}`
+
+			html = `<g style="z-index:${id};">
+							<path fill="${this.darkestColor}"
+							d="M${leftWallLeftTop}
+							L${leftWallLeftBottom}
+							L${leftWallRightBottom}
+							L${leftWallLeftTop} Z" />
+							<path fill="${this.regularDarkerColor}"
+							d="M${blockTopLeft}
+							L${blockTopBottom}
+							L${blockTopTop}
+							L${blockTopLeft} Z" />
+							<path fill="${this.lightestColor}"
+							d="M${blockRightBottom}
+							L${blockRightRight}
+							L${blockRightTop}
+							L${blockRightBottom} Z" />
+						</g>`
 		}
 
 		if (slopeDirection === 's') {
@@ -224,19 +222,26 @@ export class RenderElements {
 
 		if (slopeDirection === 'se') {
 
-			let blockTopLeft = `${left.x-this.bleed} ${left.y-height+this.bleed}`
-			let blockTopBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let blockTopRight = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+			let blockLeftLeft = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+			let blockLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let blockLeftTop = `${top.x} ${top.y-height-this.tileH}`
+
+			let blockRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let blockRightRight = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let blockRightTop = `${top.x} ${top.y-height-this.tileH}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.shadowLight}"
-							d="M${blockTopLeft}
-							L${blockTopBottom}
-							L${blockTopRight}
-							L${blockTopTop}
-							L${blockTopLeft} Z" />
-						</g>`
+						<path fill="${this.shadow}"
+						d="M${blockLeftLeft}
+						L${blockLeftBottom}
+						L${blockLeftTop}
+						L${blockLeftLeft} Z" />
+						<path fill="${this.regularDarkerColor}"
+						d="M${blockRightRight}
+						L${blockRightBottom}
+						L${blockRightTop}
+						L${blockRightRight} Z" />
+					</g>`
 		}
 
 		if (slopeDirection === 'e') {
@@ -271,24 +276,31 @@ export class RenderElements {
 			let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
 			let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
 
+			let blockBottomLeft = `${left.x-this.bleed} ${left.y-height-this.tileH+this.bleed}`
+			let blockBottomRight = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let blockBottomTop = `${top.x} ${top.y-height}`
+
 			let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH+this.bleed}`
 			let blockTopBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
 			let blockTopRight = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-			let blockTopTop = `${top.x} ${top.y-height}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.darkestColor}"
-							d="M${leftWallLeftTop}
-							L${leftWallLeftBottom}
-							L${leftWallRightBottom}
-							L${leftWallLeftTop} Z" />
-							<path fill="${this.highlight}"
-							d="M${blockTopLeft}
-							L${blockTopBottom}
-							L${blockTopRight}
-							L${blockTopTop}
-							L${blockTopLeft} Z" />
-						</g>`
+						<path fill="${this.darkestColor}"
+						d="M${leftWallLeftTop}
+						L${leftWallLeftBottom}
+						L${leftWallRightBottom}
+						L${leftWallLeftTop} Z" />
+						<path fill="${this.regularDarkerColor}"
+						d="M${blockTopLeft}
+						L${blockTopBottom}
+						L${blockTopRight}
+						L${blockTopLeft} Z" />
+						<path fill="${this.lightestColor}"
+						d="M${blockBottomLeft}
+						L${blockBottomTop}
+						L${blockBottomRight}
+						L${blockBottomLeft} Z" />
+					</g>`
 		}
 
 		if (slopeDirection === 'w') {
@@ -334,11 +346,15 @@ export class RenderElements {
 							L${rightWallRightBottom}
 							L${rightWallRightTop}
 							L${rightWallLeftBottom} Z" />
-							<path fill="${this.almostDarkestColor}"
+							<path fill="${this.regularDarkerColor}"
+							d="M${blockTopLeft}
+							L${blockTopTop}
+							L${blockTopRight}
+							L${blockTopLeft} Z" />
+							<path fill="${this.shadow}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopRight}
-							L${blockTopTop}
 							L${blockTopLeft} Z" />
 						</g>`
 		}
