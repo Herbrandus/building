@@ -165,10 +165,12 @@ export default class Map {
 			}
 
 			if (thisHeight < 2) {
-				thisHeight = 2;
+				thisHeight = 2
 			} else if (thisHeight > this.config.maxAllowedHeight) {
-				thisHeight = this.config.maxAllowedHeight;
+				thisHeight = this.config.maxAllowedHeight
 			}
+
+			console.log('height', thisHeight)
 
 			let yPos = this._blockEdges[randomPositionPicker].x
 			let xPos = this._blockEdges[randomPositionPicker].y

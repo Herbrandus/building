@@ -71,6 +71,10 @@ button:focus {
     outline: 0;
 }
 
+button.hide {
+    display: none;
+}
+
 #debug {
     display: none;
 }

@@ -2,6 +2,7 @@ import { Color } from './mapGenerationFunctions.component'
 
 export class Config {
 
+	private _allowDebug: boolean = true
 	private _tileWidth: number = 35
 	private _tileLength: number = 35
 	private _tileHeight: number = 20
@@ -15,6 +16,10 @@ export class Config {
 	)
 	private _tileEdgeBleed: number = 0.3
 	private _maxAllowedHeight: number = 12
+
+	public get allowDebug(): boolean {
+		return this._allowDebug
+	}
 
 	public get tileWidth(): number {
 		return this._tileWidth

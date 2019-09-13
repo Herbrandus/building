@@ -14,6 +14,10 @@ class RandomBuilding {
 		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
+	public debug(): boolean {
+		return this.config.allowDebug
+	}
+
 	get map() {
 		return this._map
 	}
@@ -62,3 +66,7 @@ document.querySelectorAll('.blockLabel').forEach((item) => {
 		item.classList.toggle('active')
 	})
 })
+
+if (!building.debug()) {
+	document.querySelector('#debugActive').classList.add('hide')
+}

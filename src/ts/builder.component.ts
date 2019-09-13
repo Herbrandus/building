@@ -108,11 +108,13 @@ export class Renderer {
 				
 				if (map[y][x].isDefined) {
 					for (let h = 0; h < map[y][x].height; h++) {
-						let tile = this.render.createBlock(thisPosX, thisPosY, map[y][x].tileStack[h])
+						let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].tileStack[h])
 						newData += tile.html
 
-						if (h === map[y][x].height - 1) {
-							detailsHtml += `<div class="blockLabel" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div><span>id: ${map[y][x].tileStack[h].id}<br>h: ${h}</span></div>`
+						if (this.config.allowDebug) {
+							if (h === map[y][x].height - 1) {
+								detailsHtml += `<div class="blockLabel" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div><span>x: ${x}, y: ${y}<br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span></div>`
+							}
 						}
 					}
 				} 
