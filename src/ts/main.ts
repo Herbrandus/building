@@ -9,8 +9,8 @@ class RandomBuilding {
 	private _builder: Renderer = new Renderer
 	private config: Config = new Config
 
-	constructor(pyramid: boolean) {
-		this._map = new Map(20, 20, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4, pyramid)
+	constructor() {
+		this._map = new Map(20, 20, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4, false)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
@@ -27,8 +27,6 @@ class RandomBuilding {
 	}
 }
 
-let allowPyramid = false
-
 /*
 const color = new Color(150, 225, 116);
 
@@ -40,8 +38,9 @@ const colorDivs = `
 document.querySelector('#color').innerHTML = colorDivs */
 
 document.querySelector('#generate').addEventListener('click', () => {
-	const building2 = new RandomBuilding(allowPyramid);
+	const building2 = new RandomBuilding();
 	document.querySelector("#world").innerHTML = building2.drawTileMap()
+	document.querySelector('#debugActive').classList.remove('active')
 
 	document.querySelectorAll('.blockLabel').forEach((item) => {
 		item.addEventListener('click', () => {
@@ -55,7 +54,7 @@ document.querySelector('#debugActive').addEventListener('click', () => {
 	document.querySelector('#debugActive').classList.toggle('active')
 })
 
-const building = new RandomBuilding(allowPyramid);
+const building = new RandomBuilding();
 document.querySelector("#world").innerHTML = building.drawTileMap()
 
 document.querySelectorAll('.blockLabel').forEach((item) => {
