@@ -37,7 +37,7 @@ export class Renderer {
 					let tileTopColor = tile.getColor().rgb()
 					let tileColor = `rgb(${tileTopColor['r']}, ${tileTopColor['g']}, ${tileTopColor['b']})`
 
-					htmlMap += `background-color:${tileColor}">${tile.id}<br>(${x}, ${y})</div>`
+					htmlMap += `background-color:${tileColor}">${map.map[y][x].height}<br>(${x}, ${y})</div>`
 
 				} else {
 
@@ -113,7 +113,8 @@ export class Renderer {
 
 						if (this.config.allowDebug) {
 							if (h === map[y][x].height - 1) {
-								detailsHtml += `<div class="blockLabel" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div><span>x: ${x}, y: ${y}<br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span></div>`
+								let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span>`
+								detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
 							}
 						}
 					}

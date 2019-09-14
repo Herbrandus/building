@@ -139,14 +139,12 @@ export default class Map {
 			}
 		}
 
-		console.log('i: ' + this._blockIdIterator)
-
 		for (let i = 0; i < this._additionalBlockIterations; i++) {
 
 			console.log('iteration #'+i)
 			this.getEdges()
 
-			let randomPositionPicker = 2 + Math.ceil(Math.random() * (this._blockEdges.length - 2))
+			let randomPositionPicker = 3 + Math.ceil(Math.random() * (this._blockEdges.length / 2))
 			let thisHeight = 0
 
 			console.log('this._blockEdges', this._blockEdges)
@@ -169,8 +167,6 @@ export default class Map {
 			} else if (thisHeight > this.config.maxAllowedHeight) {
 				thisHeight = this.config.maxAllowedHeight
 			}
-
-			console.log('height', thisHeight)
 
 			let yPos = this._blockEdges[randomPositionPicker].x
 			let xPos = this._blockEdges[randomPositionPicker].y
@@ -239,9 +235,7 @@ export default class Map {
 		}
 
 		this.clearMapEdges()
-
-		console.log('i: ' + this._blockIdIterator)
-		console.log(this._world)
+		this.mirrorMap()
 	}
 
 	get mapWidth(): number {
@@ -462,6 +456,127 @@ export default class Map {
 				this._world[y][x] = column
 			}
 		}
+	}
+
+	mirrorMap(): void {
+
+		let mapLengthEven = false
+
+		// determine if map length is even or uneven
+		if ((this._mapHalfLength % 2) == 0) {
+			mapLengthEven = true;
+		}
+
+		let i = 0;
+
+		console.log('this._blockGroups', this._blockGroups)
+
+		for (let y = 0; y < this._mapHalfLength; y++) {
+			if (y < this._mapHalfLength) {
+							
+				for (let x = 0; x < this._mapWidth; x++) {
+
+					if (this._world[this._mapHalfLength-y-1][x].isDefined) {
+
+						let newGroupId = this._blockGroups.length + 1
+
+						let thisHeight = this._world[this._mapHalfLength-y-1][x].height
+						let tileStack = []
+
+						for (let h = 0; h < thisHeight; h++) {
+
+							let tileType = this._world[this._mapHalfLength-y-1][x].tileStack[h].type
+							let tileOptions = this._world[this._mapHalfLength-y-1][x].tileStack[h].options
+
+							tileStack.push(
+								new Tile(
+									this._blockIdIterator, 
+									x, 
+									y, 
+									h, 
+									tileType,
+									this.config.buildingBaseColor,
+									tileOptions)
+								)
+						}
+
+						this._world[y][x] = null
+
+						let column = new Column(true, x, y, thisHeight)
+
+						column.blockGroup = newGroupId
+						column.height = thisHeight
+						column.corner = this._world[this._mapHalfLength-y-1][x].corner
+						column.edge = this._world[this._mapHalfLength-y-1][x].edge
+						column.tileStack = tileStack
+
+						this._world[y][x] = column
+
+						if (this._blockGroups.indexOf(newGroupId) === -1) {
+							this._blockGroups[newGroupId] = new Array( [y,x] )
+						} else {
+							this._blockGroups[newGroupId].push([y,x])
+						}
+
+						this._blockIdIterator++
+					
+					} else {
+						this._world[y][x] = null
+						this._world[y][x] = new Column(false, x, y, 0)
+					}
+				}
+
+			}
+		}
+
+		/*
+		for (var y=0; y<mapLength; y++) {
+			if (y < mapLengthHalf) {
+							
+				for (var x=0; x<mapWidth; x++) {
+					
+					if (world[mapLength-y-1][x].blockGroup > 0) {
+						if (world[mapLength-y-1][x].blockGroup == 0) var thisGroup = 0;
+						if (world[mapLength-y-1][x].blockGroup == 1) var thisGroup = 1;
+						if (world[mapLength-y-1][x].blockGroup == 2) var thisGroup = 8;
+						if (world[mapLength-y-1][x].blockGroup == 3) var thisGroup = 9;
+						if (world[mapLength-y-1][x].blockGroup == 4) var thisGroup = 10;
+						if (world[mapLength-y-1][x].blockGroup == 5) var thisGroup = 11;
+						if (world[mapLength-y-1][x].blockGroup == 6) var thisGroup = 12;
+						if (world[mapLength-y-1][x].blockGroup == 7) var thisGroup = 13;
+					}
+
+					var clone = {
+						'id': i,
+						'tileType': world[mapLength-y-1][x].tileType, 
+						'blockGroup': thisGroup,
+						'color': world[mapLength-y-1][x].color,
+						'groupSurface': world[mapLength-y-1][x].groupSurface,
+						'noiseVal': world[mapLength-y-1][x].noiseVal, 
+						'height': world[mapLength-y-1][x].height, 
+						'floated': world[mapLength-y-1][x].floated, 
+						'pillar': world[mapLength-y-1][x].pillar,
+						'marker': world[mapLength-y-1][x].marker,
+						'edge': world[mapLength-y-1][x].edge,
+						'windowed': world[mapLength-y-1][x].windowed
+					};
+
+					world[y][x] = clone;
+
+					if (blockGroupCollection.indexOf(thisGroup) == -1 && (thisGroup) != undefined) {
+						blockGroupCollection.push(thisGroup);
+					}
+
+					if (blockGroups.indexOf( thisGroup ) == -1) {
+						blockGroups[ thisGroup ] = new Array( [y,x] );
+					} else {
+						blockGroups[ thisGroup ].push( [y,x] );
+					}
+
+					i++;
+				}		
+			}
+		} */
 	}
 
 }

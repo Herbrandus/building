@@ -31,6 +31,14 @@ class RandomBuilding {
 	}
 }
 
+const building = new RandomBuilding()
+document.querySelector('#world').innerHTML = building.colorMap()
+
+document.querySelector('#generate').addEventListener('click', () => {
+	const building = new RandomBuilding()
+	document.querySelector('#world').innerHTML = building.colorMap()
+})
+
 /*
 const color = new Color(150, 225, 116);
 
@@ -41,15 +49,17 @@ const colorDivs = `
 
 document.querySelector('#color').innerHTML = colorDivs */
 
+/*
 document.querySelector('#generate').addEventListener('click', () => {
 	const building2 = new RandomBuilding();
 	document.querySelector("#world").innerHTML = building2.drawTileMap()
 	document.querySelector('#debugActive').classList.remove('active')
 
-	document.querySelectorAll('.blockLabel').forEach((item) => {
+	document.querySelectorAll('.point').forEach((item) => {
 		item.addEventListener('click', () => {
-			item.classList.toggle('active')
-		})
+			console.log('toggled', item)
+			item.parentElement.classList.toggle('active')
+		})		
 	})
 })
 
@@ -67,6 +77,22 @@ document.querySelectorAll('.blockLabel').forEach((item) => {
 	})
 })
 
+document.querySelectorAll('.showGroups').forEach((item) => {
+	item.addEventListener('click', e => {
+		e.stopPropagation()
+		let group = item.getAttribute('data-group')
+		let groups = document.querySelectorAll('.blockLabel[data-groupid="'+group+'"]')
+		groups.forEach(point => {
+			point.addEventListener('click', () => {
+				item.classList.toggle('group__marker')
+			})
+		})
+
+	})
+})
+
 if (!building.debug()) {
 	document.querySelector('#debugActive').classList.add('hide')
 }
+*/
+
