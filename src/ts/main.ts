@@ -1,4 +1,4 @@
-import Map from './mapper.component'
+import { Map } from './mapper.component'
 import { Renderer } from './builder.component'
 import { Color } from './mapGenerationFunctions.component'
 import { Config } from './config.component'
@@ -10,7 +10,7 @@ class RandomBuilding {
 	private config: Config = new Config
 
 	constructor() {
-		this._map = new Map(20, 20, 10, 2, (4 + Math.floor(Math.random() * 7)), 2, 4, false)
+		this._map = new Map(30, 30, 10, 1, 6, 3, 4, false)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
@@ -23,7 +23,12 @@ class RandomBuilding {
 	}
 
 	public colorMap(): string {
-		return this._builder.showData(this._map) + this._builder.build2DMap(this._map)
+		return this._builder.build2DMap(this._map)
+	}
+
+	public addToBuildingAndRedraw(): string {
+		this._map.addToBuilding()
+		return this._builder.build2DMap(this._map)
 	}
 
 	public drawTileMap(): string {
@@ -31,12 +36,46 @@ class RandomBuilding {
 	}
 }
 
-const building = new RandomBuilding()
-document.querySelector('#world').innerHTML = building.colorMap()
+let building = new RandomBuilding()
+document.querySelector('#color').innerHTML = building.colorMap()
+document.querySelector("#worldtest").innerHTML = building.drawTileMap()
 
 document.querySelector('#generate').addEventListener('click', () => {
-	const building = new RandomBuilding()
-	document.querySelector('#world').innerHTML = building.colorMap()
+	building = new RandomBuilding()
+	document.querySelector('#color').innerHTML = building.colorMap()
+	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
+	document.querySelector('#debugActive').classList.remove('active')
+
+	document.querySelectorAll('.point').forEach((item) => {
+		item.addEventListener('click', () => {
+			console.log('toggled', item)
+			item.parentElement.classList.toggle('active')
+		})		
+	})
+})
+
+document.querySelector('#redraw').addEventListener('click', () => {
+	building.addToBuildingAndRedraw()
+	document.querySelector('#color').innerHTML = building.colorMap()
+	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
+	document.querySelector('#debugActive').classList.remove('active')
+
+	document.querySelectorAll('.blockLabel').forEach((item) => {
+		item.addEventListener('click', () => {
+			item.classList.toggle('active')
+		})
+	})
+})
+
+document.querySelector('#debugActive').addEventListener('click', () => {
+	document.querySelector('#debug').classList.toggle('show')
+	document.querySelector('#debugActive').classList.toggle('active')
+})
+
+document.querySelectorAll('.blockLabel').forEach((item) => {
+	item.addEventListener('click', () => {
+		item.classList.toggle('active')
+	})
 })
 
 /*

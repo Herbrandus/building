@@ -63,6 +63,10 @@ export class Tile {
 		return this._tileColor
 	}
 
+	set tileColor(color: Color) {
+		this._tileColor = color
+	}
+
 }
 
 export enum TileType {

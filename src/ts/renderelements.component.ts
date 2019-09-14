@@ -15,15 +15,6 @@ export class RenderElements {
 
 	private tileColor: string = this.config.groundColor.hex()
 	private regularColor: string = this.config.buildingBaseColor.hex()
-	/*
-	private regularDarkerColor: string = `rgb(${this.config.buildingBaseColor.getDarkerRegularRGB().r},${this.config.buildingBaseColor.getDarkerRegularRGB().g},${this.config.buildingBaseColor.getDarkerRegularRGB().b})`
-	private highlightColor: string = `rgb(${this.config.buildingBaseColor.getHighlightsRGB().r},${this.config.buildingBaseColor.getHighlightsRGB().g},${this.config.buildingBaseColor.getHighlightsRGB().b})`
-	private shadowColor: string = `rgb(${this.config.buildingBaseColor.getShadowsRGB().r},${this.config.buildingBaseColor.getShadowsRGB().g},${this.config.buildingBaseColor.getShadowsRGB().b})`
-	private halflightColor: string = `rgb(${this.config.buildingBaseColor.getHalflightsRGB().r},${this.config.buildingBaseColor.getHalflightsRGB().g},${this.config.buildingBaseColor.getHalflightsRGB().b})`
-	private darkestColor: string = `rgb(${this.config.buildingBaseColor.getDarkestRGB().r},${this.config.buildingBaseColor.getDarkestRGB().g},${this.config.buildingBaseColor.getDarkestRGB().b})`
-	private lightestColor: string = `rgb(${this.config.buildingBaseColor.getLightestRGB().r},${this.config.buildingBaseColor.getLightestRGB().g},${this.config.buildingBaseColor.getLightestRGB().b})`
-	*/
-
 	private regularDarkerColor: string = this.config.buildingBaseColor.changeColorLighting(-10, 'hex')
 	private regularLighterColor: string = this.config.buildingBaseColor.changeColorLighting(10, 'hex')
 	private shadowLight: string = this.config.buildingBaseColor.changeColorLighting(-20, 'hex')
@@ -34,7 +25,6 @@ export class RenderElements {
 	private almostLightestColor: string = this.config.buildingBaseColor.changeColorLighting(40, 'hex')
 	private darkestColor: string = this.config.buildingBaseColor.changeColorLighting(-50, 'hex')
 	private lightestColor: string = this.config.buildingBaseColor.changeColorLighting(50, 'hex')
-
 
 	createTile(xPos: number, yPos: number): TileTemplate {
 
@@ -65,10 +55,10 @@ export class RenderElements {
 		let id = tile.id
 		let height = (tile.h * this.tileH) - this.tileH
 
-		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos) }
-		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop) }
-		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight) }
-		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom) }
+		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
 
 		let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
 		let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`

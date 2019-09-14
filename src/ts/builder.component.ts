@@ -1,5 +1,5 @@
 import { MapGenerationFunctions, Color } from './mapGenerationFunctions.component'
-import Map from './mapper.component'
+import { Map } from './mapper.component'
 import { Tile, TileType } from './tile.component'
 import { Config, Coords, TileTemplate, Position } from './config.component'
 import { RenderElements } from './renderelements.component'
@@ -24,12 +24,27 @@ export class Renderer {
 
 	build2DMap(map: Map): string {
 
-		let htmlMap = `<div class="map" style="width:${this.config.getMapWidth(map.mapWidth)}px;">`
+		let htmlMap = `<div class="map" style="width:${this.config.getMapWidth(map.mapWidth+1)}px;">`
+
+		htmlMap += `<div class="tile axis" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;"></div>`
+
+		for (let i = 0; i < map.mapWidth; i++) {
+			htmlMap += `<div class="tile axis" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;">${i}</div>`
+		}
 
 		for (let y = 0; y < map.mapLength; y++) {
+
+			let halfWay = ''
+
+			if (y === Math.round(map.mapLength / 2)) {
+				halfWay = ' half'
+			}
+
+			htmlMap += `<div class="tile axis${halfWay}" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;">${y}</div>`
+
 			for (let x = 0; x < map.mapWidth; x++) {
 
-				htmlMap += `<div class="tile" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;`
+				htmlMap += `<div class="tile${halfWay}" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;`
 
 				if (map.getColumn(x, y).isDefined) {
 					
@@ -37,11 +52,13 @@ export class Renderer {
 					let tileTopColor = tile.getColor().rgb()
 					let tileColor = `rgb(${tileTopColor['r']}, ${tileTopColor['g']}, ${tileTopColor['b']})`
 
-					htmlMap += `background-color:${tileColor}">${map.map[y][x].height}<br>(${x}, ${y})</div>`
+					let edge = (map.map[y][x].edge.top || map.map[y][x].edge.right || map.map[y][x].edge.bottom || map.map[y][x].edge.left) ? true : false
+
+					htmlMap += `background-color:${tileColor}"><div class="tileInfo">(${x}, ${y})<br>height: ${map.map[y][x].height}<br>edge: ${edge}</div></div>`
 
 				} else {
 
-					htmlMap += `">${x}, ${y}</div>`
+					htmlMap += `"></div>`
 				}
 			}
 		}
@@ -69,7 +86,7 @@ export class Renderer {
 		let mapLengthTop = tileHalfLengthTop * mapTotalWidth
 		let mapLengthBottom = tileHalfLengthBottom * mapTotalLength
 		let mapWidthPx = Math.round((tileHalfWidthLeft + tileHalfWidthRight) * (mapTotalWidth ))
-		let mapLengthPx = Math.round(mapLengthTop + mapLengthBottom)
+		let mapLengthPx = Math.round(mapLengthTop + mapLengthBottom) + this.config.topMargin
 
 		const map = mapToBuild.map
 
@@ -107,8 +124,9 @@ export class Renderer {
 				let newData = ''
 				
 				if (map[y][x].isDefined) {
+
 					for (let h = 0; h < map[y][x].height; h++) {
-						let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, map[y][x].tileStack[h])
+						let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
 						newData += tile.html
 
 						if (this.config.allowDebug) {
@@ -120,7 +138,7 @@ export class Renderer {
 					}
 				} 
 
-				html += newTile.html + newData
+				html += newData
 
 				lastTile = newTile
 			}

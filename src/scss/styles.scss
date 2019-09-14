@@ -18,6 +18,18 @@ body {
 	max-width: 1100px;
 }
 
+#worldtest {
+    margin: 0;
+    width: 50%;
+    float: left;
+}
+
+#worldtest + #color {
+    width: 50%;
+    float: left;
+    border-left: #ddd solid 1px;
+}
+
 .map:after {
     content: '';
     display: block;
@@ -37,11 +49,41 @@ body {
 
     .tile {
         display: block;
+        position: relative;
         float: left;
-        text-align: center;
+        width: 25px;
+        height: 25px;
         font-size: 10px;
-        line-height: 16px;
+        line-height: 14px;
         background-color: #eee;
+        cursor: pointer;
+
+        .tileInfo {
+            display: none;
+        }
+    }
+    
+    .tile.axis {
+        text-align: center;
+    }
+
+    .tile.half {
+        border-top: #ddd solid 1px;
+    }
+
+    .tile:hover {
+        background-color: rgb(55,35,10) !important;
+    }
+
+    .tile:hover > .tileInfo {
+        display: block;
+        position: absolute;
+        bottom: calc(100% + 5px);
+        left: 0;
+        width: 90px;
+        height: 65px;
+        background: #fffd;
+        padding: 4px;
     }
 }
 
@@ -100,8 +142,8 @@ button.hide {
         .point {
             position: absolute;
             margin: 8px auto;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border: transparent solid 3px;
             background-color: #555;
             cursor: pointer;
