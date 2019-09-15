@@ -53,8 +53,9 @@ export class Renderer {
 					let tileColor = `rgb(${tileTopColor['r']}, ${tileTopColor['g']}, ${tileTopColor['b']})`
 
 					let edge = (map.map[y][x].edge.top || map.map[y][x].edge.right || map.map[y][x].edge.bottom || map.map[y][x].edge.left) ? true : false
+					let blockGroup = map.map[y][x].blockGroup
 
-					htmlMap += `background-color:${tileColor}"><div class="tileInfo">(${x}, ${y})<br>height: ${map.map[y][x].height}<br>edge: ${edge}</div></div>`
+					htmlMap += `background-color:${tileColor}"><div class="tileInfo">x: ${x} y: ${y}<br>height: ${map.map[y][x].height}<br>edge: ${edge}<br>group: ${blockGroup}</div></div>`
 
 				} else {
 

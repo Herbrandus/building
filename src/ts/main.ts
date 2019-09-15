@@ -10,7 +10,7 @@ class RandomBuilding {
 	private config: Config = new Config
 
 	constructor() {
-		this._map = new Map(30, 30, 10, 1, 6, 3, 4, false)
+		this._map = new Map(30, 30, 10, 1, 5, 3, 4, false)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
@@ -34,11 +34,23 @@ class RandomBuilding {
 	public drawTileMap(): string {
 		return this._builder.buildMap(this._map)
 	}
+
+	public getBaseColor(): Color {
+
+		const col = this.map.getFirstDefinedColumn()
+		const tile = col.tileStack[col.tileStack.length-1]
+
+		console.log(tile)
+
+		return tile.getColor()
+	}
 }
 
 let building = new RandomBuilding()
 document.querySelector('#color').innerHTML = building.colorMap()
 document.querySelector("#worldtest").innerHTML = building.drawTileMap()
+
+setColors(building)
 
 document.querySelector('#generate').addEventListener('click', () => {
 	building = new RandomBuilding()
@@ -52,6 +64,8 @@ document.querySelector('#generate').addEventListener('click', () => {
 			item.parentElement.classList.toggle('active')
 		})		
 	})
+
+	setColors(building)
 })
 
 document.querySelector('#redraw').addEventListener('click', () => {
@@ -78,60 +92,26 @@ document.querySelectorAll('.blockLabel').forEach((item) => {
 	})
 })
 
-/*
-const color = new Color(150, 225, 116);
+function setColors(building: RandomBuilding) {
 
-const colorDivs = `
-	<div class="color__tile" style="background-color: rgb(${color.getShadowsRGB().r},${color.getShadowsRGB().g},${color.getShadowsRGB().b})"></div>
-	<div class="color__tile" style="background-color: rgb(${color.rgb().r},${color.rgb().g},${color.rgb().b})"></div>
-	<div class="color__tile" style="background-color: rgb(${color.getHighlightsRGB().r},${color.getHighlightsRGB().g},${color.getHighlightsRGB().b})"></div>`
+	const color = building.getBaseColor()
+	const shade0 = color.changeColorLightingString(0)
+	const shade1 = color.changeColorLightingString(20)
+	const shade2 = color.changeColorLightingString(-20)
+	const shade3 = color.getColorStringByHue(60)
+	const shade4 = color.getColorStringByHue(120)
+	const shade5 = color.getColorStringByHue(180)
+	const shade6 = color.getColorStringByHue(240)
+	const shade7 = color.getColorStringByHue(300)
 
-document.querySelector('#color').innerHTML = colorDivs */
+	const colorDivs = `
+		<div class="color__tile" style="background-color:${shade0};"></div>
+		<div class="color__tile" style="background-color:${shade1};"></div>
+		<div class="color__tile" style="background-color:${shade3};"></div>
+		<div class="color__tile" style="background-color:${shade4};"></div>
+		<div class="color__tile" style="background-color:${shade5};"></div>
+		<div class="color__tile" style="background-color:${shade6};"></div>
+		<div class="color__tile" style="background-color:${shade7};"></div>`
 
-/*
-document.querySelector('#generate').addEventListener('click', () => {
-	const building2 = new RandomBuilding();
-	document.querySelector("#world").innerHTML = building2.drawTileMap()
-	document.querySelector('#debugActive').classList.remove('active')
-
-	document.querySelectorAll('.point').forEach((item) => {
-		item.addEventListener('click', () => {
-			console.log('toggled', item)
-			item.parentElement.classList.toggle('active')
-		})		
-	})
-})
-
-document.querySelector('#debugActive').addEventListener('click', () => {
-	document.querySelector('#debug').classList.toggle('show')
-	document.querySelector('#debugActive').classList.toggle('active')
-})
-
-const building = new RandomBuilding();
-document.querySelector("#world").innerHTML = building.drawTileMap()
-
-document.querySelectorAll('.blockLabel').forEach((item) => {
-	item.addEventListener('click', () => {
-		item.classList.toggle('active')
-	})
-})
-
-document.querySelectorAll('.showGroups').forEach((item) => {
-	item.addEventListener('click', e => {
-		e.stopPropagation()
-		let group = item.getAttribute('data-group')
-		let groups = document.querySelectorAll('.blockLabel[data-groupid="'+group+'"]')
-		groups.forEach(point => {
-			point.addEventListener('click', () => {
-				item.classList.toggle('group__marker')
-			})
-		})
-
-	})
-})
-
-if (!building.debug()) {
-	document.querySelector('#debugActive').classList.add('hide')
+	document.querySelector('#color-scheme').innerHTML = colorDivs
 }
-*/
-

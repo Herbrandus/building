@@ -31,6 +31,9 @@ export class Map {
 	private _blockIdIterator: number
 	private _blockHeightIterator: number
 	private _blockAmountIterator: number
+	private _decorationLineH: number
+	private _defaultColor: Color
+	private _lineColor: Color
 
 	constructor(	
 			mapWidth: number, 
@@ -46,7 +49,7 @@ export class Map {
 		this._mapLength = mapLength
 		this._mapMaxHeight = mapMaxHeight
 		this._mapEdgeWidth = mapEdgeWidth
-		this._averageBuildingSize = averageBuildingSize
+		this._averageBuildingSize = averageBuildingSize 
 		this._blockHeight = blockHeight
 		this._maximumBlockIterations = maximumBlockIterations
 		this._additionalBlockIterations = this.mapGen.calculateAdditionalBlockIterations(maximumBlockIterations)
@@ -57,11 +60,16 @@ export class Map {
 		this._blockIdIterator = 0
 		this._blockAmountIterator = 1
 		this._blockHeightIterator = 1
+		this._decorationLineH = -1
+		let newLineHue = this.config.buildingBaseColor.getColorStringByHue(-120)
+		let lineColor = new Color(newLineHue)
+		this._defaultColor = new Color(this.config.buildingBaseColor.hex())
+		this._lineColor = lineColor.changeColorLighting(-30)
 
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
 		let startBlockXfromCenterDeviation = 7
-		let startblockLength = (this._averageBuildingSize + 1) + Math.floor(Math.random() * 4)
+		let startblockLength = this._averageBuildingSize + Math.floor(Math.random() * 4)
 		let startblockWidth = this._averageBuildingSize + Math.floor(Math.random() * 3)
 		let startblockXfromCenter = 4 + Math.floor(Math.random() * startBlockXfromCenterDeviation)
 		let startblockLengthHalf = Math.floor(startblockLength / 2)
@@ -81,7 +89,18 @@ export class Map {
 			firstBlockHeight = this._blockHeight + Math.round(Math.random() * 4)
 		}
 
+		if (firstBlockHeight > 6) {
+			this._decorationLineH = 4
+		} else if (firstBlockHeight > 3) {
+			this._decorationLineH = 3
+		}
+
+		console.log('base color: ', )
+		console.log('line color: ', this._lineColor)
+
 		this._blockHeight = firstBlockHeight
+
+		let hollowBuildingBlock = (Math.round(Math.random()) === 1 ? true : false) 
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -93,9 +112,12 @@ export class Map {
 
 				let column = new Column(false, x, y, 0)
 
-				if (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf) ) {
+				let yConditions = (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf))
+				let xConditions = (x > startingPositionX && x <= (startingPositionX + startblockWidth))
 
-					if (x > startingPositionX && x <= (startingPositionX + startblockWidth) ) {
+				if (yConditions) {
+
+					if (xConditions) {
 
 						thisBlockGroup = 1
 						let tileStack = []
@@ -105,6 +127,13 @@ export class Map {
 							let thisPillar = 0
 							let thisWindowed = 0
 							let isRoof = (h === firstBlockHeight-1) ? true : false
+							let tileColor = this._defaultColor
+
+							if (h === this._decorationLineH) {								
+								tileColor = this._lineColor
+							} else {
+								tileColor = this._defaultColor
+							}
 
 							tileStack.push(
 								new Tile(
@@ -113,7 +142,7 @@ export class Map {
 									y, 
 									h, 
 									TileType.Body,
-									this.config.buildingBaseColor,
+									tileColor,
 									{
 										'roof':			isRoof,
 										'pillar': 		thisPillar,
@@ -144,6 +173,23 @@ export class Map {
 			}
 		}
 
+		this.setEdges(false)
+
+		/* Make hollow */
+		if (hollowBuildingBlock) {
+
+			for (let y = 0; y < this.mapLength; y++) {
+				for (let x = 0; x < this.mapWidth; x++) {
+
+					let hasEdge = (this._world[y][x].edge.left || this._world[y][x].edge.bottom || this._world[y][x].edge.right) ? true : false
+
+					if (this._world[y][x].isDefined && !hasEdge) {
+						this._world[y][x] = new Column(false, x, y, 0)
+					}
+				}
+			}
+		}
+		
 		for (let i = 0; i < this._additionalBlockIterations; i++) {
 			this._world = this.mods.addBuildingComponent(this)
 		}
@@ -151,6 +197,8 @@ export class Map {
 		this._world = this.mods.clearMapEdges(this)
 		this._world = this.mods.mirrorMap(this)
 		this.setEdges(false)
+
+		console.log(this._world)
 	}
 
 	get mapWidth(): number {
@@ -237,6 +285,18 @@ export class Map {
 		return this._blockHeightVariation
 	}
 
+	get lineHeight(): number {
+		return this._decorationLineH
+	}
+
+	get defaultColor(): Color {
+		return this._defaultColor
+	}
+
+	get decorativeColors(): object {
+		return { lineColor: this._lineColor }
+	}
+
 	public getColumn(x, y): Column {
 		return this._world[y][x]
 	}
@@ -252,6 +312,21 @@ export class Map {
 	public getTopTile(x, y): Tile {
 		let height = this._world[y][x].height
 		return this._world[y][x].getTile(height-1)
+	}
+
+	public getFirstDefinedColumn(): Column {
+		let column
+
+		for (let y = 0; y < this.mapLength; y++) {
+			for (let x = 0; x < this.mapWidth; x++) {
+				if (this._world[y][x].isDefined) {
+					column = this._world[y][x]
+					break;
+				}
+			}
+		}
+		
+		return column
 	}
 
 	public addToBuilding(): void {
@@ -337,6 +412,10 @@ export class Map {
 								!this._world[y-1][x+1].isDefined || 
 								!this._world[y-1][x-1].isDefined) {
 
+								if (y > this._mapLength - 1) {
+									y = this._mapLength - 1
+								}
+
 								let pos: Position = {x: x, y: y}
 
 								this._blockEdges.push(pos)								
@@ -348,7 +427,7 @@ export class Map {
 		}
 
 		return this._blockEdges
-	}	
+	}
 }
 
 export class Column {
