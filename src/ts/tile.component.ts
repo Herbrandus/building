@@ -52,7 +52,7 @@ export class Tile {
 	}
 
 	get options(): object {
-		if (this._tileType != TileType.None) {
+		if (this._options) {
 			return this._options
 		} else {
 			return { 'defined': false }
@@ -77,5 +77,6 @@ export enum TileType {
 	None = 'none',
 	Body = 'body',
 	Tower = 'tower',
-	Roof = 'roof'
+	Roof = 'roof',
+	Grass = 'grass'
 }

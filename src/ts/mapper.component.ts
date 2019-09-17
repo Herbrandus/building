@@ -95,12 +95,12 @@ export class Map {
 			this._decorationLineH = 3
 		}
 
-		console.log('base color: ', )
 		console.log('line color: ', this._lineColor)
 
 		this._blockHeight = firstBlockHeight
 
 		let hollowBuildingBlock = (Math.round(Math.random()) === 1 ? true : false) 
+		let openGroundLevel = (Math.round(Math.random()) === 1 ? true : false) 
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -124,7 +124,12 @@ export class Map {
 
 						for (let h = 0; h < firstBlockHeight; h++) {
 
-							let thisPillar = 0
+							let thisPillar = false
+							let tileType = TileType.Body
+							if (h < 2/* && openGroundLevel*/) {
+								thisPillar = true
+								tileType = TileType.None
+							}							
 							let thisWindowed = 0
 							let isRoof = (h === firstBlockHeight-1) ? true : false
 							let tileColor = this._defaultColor
@@ -141,13 +146,14 @@ export class Map {
 									x, 
 									y, 
 									h, 
-									TileType.Body,
+									tileType,
 									tileColor,
 									{
 										'roof':			isRoof,
 										'pillar': 		thisPillar,
 										'windowed': 	thisWindowed,
-										'tower': 		false
+										'tower': 		false,
+										'stairs':		false
 									})
 								)
 
@@ -191,13 +197,43 @@ export class Map {
 		}
 		
 		for (let i = 0; i < this._additionalBlockIterations; i++) {
+			this.getEdges()
 			this._world = this.mods.addBuildingComponent(this)
+		}
+
+		for (let e = 0; e < this._blockEdges.length; e++) {
+			let edgePointY = this._blockEdges[e].y
+			let edgePointX = this._blockEdges[e].x
+			let grass = new Column(true, edgePointX, edgePointY, 0)
+				grass.tileStack = [new Tile(
+									this._blockIdIterator, 
+									edgePointX, 
+									edgePointY, 
+									0, 
+									TileType.Grass,
+									this._defaultColor.getColorByHue(60))]
+
+			if (!this._world[edgePointY - 1][edgePointX].isDefined) {
+				this._world[edgePointY - 1][edgePointX] = grass
+			}
+			if (!this._world[edgePointY + 1][edgePointX].isDefined) {
+				this._world[edgePointY + 1][edgePointX] = grass
+			}
+			if (!this._world[edgePointY][edgePointX - 1].isDefined) {
+				this._world[edgePointY][edgePointX - 1] = grass
+			}
+			if (!this._world[edgePointY][edgePointX + 1].isDefined) {
+				this._world[edgePointY][edgePointX + 1] = grass
+			}
+
+			this._blockIdIterator++
 		}
 		
 		this._world = this.mods.clearMapEdges(this)
 		this._world = this.mods.mirrorMap(this)
 		this.setEdges(false)
 
+		console.log(this._blockEdges)
 		console.log(this._world)
 	}
 
@@ -398,7 +434,7 @@ export class Map {
 		for (let y = 0; y < this._mapLength; y++) {
 			// only check second half of map
 
-			if (y > this._mapHalfLength + 1 + this._blockAmountIterator && y < this._mapLength - 2) {
+			if (y > this._mapHalfLength + (this._blockAmountIterator - 1) && y < this._mapLength - 2) {
 
 				for (let x = 0; x < this._mapWidth; x++) {
 					
@@ -418,7 +454,18 @@ export class Map {
 
 								let pos: Position = {x: x, y: y}
 
-								this._blockEdges.push(pos)								
+								this._blockEdges.push(pos)
+
+							} else if ((!this._world[y-1][x].isDefined && !this._world[y+1][x].isDefined) ||
+								(!this._world[y][x-1].isDefined && !this._world[y][x+1].isDefined)) {
+
+								if (y > this._mapLength - 1) {
+									y = this._mapLength - 1
+								}
+
+								let pos: Position = {x: x, y: y}
+
+								this._blockEdges.push(pos)	
 							}
 						}
 					}

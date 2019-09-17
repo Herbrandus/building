@@ -13,20 +13,9 @@ export class RenderElements {
 	private bleed: number = this.config.tileEdgeBleed
 	private dimensions = this.calculations.calculateStraightLinesFromIsometricSquare(this.tileW, this.tileL)
 
-	private tileColor: string = this.config.groundColor.hex()
-	private regularColor: string = this.config.buildingBaseColor.hex()
-	private regularDarkerColor: string = this.config.buildingBaseColor.changeColorLightingString(-10)
-	private regularLighterColor: string = this.config.buildingBaseColor.changeColorLightingString(10)
-	private shadowLight: string = this.config.buildingBaseColor.changeColorLightingString(-20)
-	private shadowHighlight: string = this.config.buildingBaseColor.changeColorLightingString(20)
-	private shadow: string = this.config.buildingBaseColor.changeColorLightingString(-30)
-	private highlight: string = this.config.buildingBaseColor.changeColorLightingString(30)
-	private almostDarkestColor: string = this.config.buildingBaseColor.changeColorLightingString(-40)
-	private almostLightestColor: string = this.config.buildingBaseColor.changeColorLightingString(40)
-	private darkestColor: string = this.config.buildingBaseColor.changeColorLightingString(-50)
-	private lightestColor: string = this.config.buildingBaseColor.changeColorLightingString(50)
+	private tileColor: Color = this.config.groundColor
 
-	createTile(xPos: number, yPos: number): TileTemplate {
+	createTile(xPos: number, yPos: number, shadow: string): TileTemplate {
 
 		let top: Position = { "x": (xPos + this.dimensions.horizontalWidthFromTop), "y": yPos}
 		let left: Position = { "x": xPos, "y": (yPos + this.dimensions.verticalHeightFromTop) }
@@ -38,7 +27,12 @@ export class RenderElements {
 		let pointBottom = `${bottom.x} ${bottom.y+this.bleed}`
 		let pointRight = `${right.x+this.bleed} ${right.y}`
 
-		var html = `<path fill="${this.tileColor}"
+		let tileColor = this.tileColor.hex()
+		if (shadow === 'shade') {
+			tileColor = this.tileColor.changeColorLightingString(-50)
+		}
+
+		var html = `<path fill="${tileColor}"
 					d="M${pointLeft} 
 					L${pointBottom} 
 					L${pointRight} 
@@ -117,6 +111,43 @@ export class RenderElements {
 
 		let id = tile.id
 		let height = (tile.h * this.tileH) - this.tileH
+		let regularColor: string
+		let regularDarkerColor: string
+		let regularLighterColor: string
+		let shadowLight: string
+		let shadowHighlight: string
+		let shadow: string
+		let highlight: string
+		let almostDarkestColor: string
+		let almostLightestColor: string
+		let darkestColor: string
+		let lightestColor: string
+
+		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
+			regularColor = tile.tileColor.hex()
+			regularDarkerColor = tile.tileColor.changeColorLightingString(-10)
+			regularLighterColor = tile.tileColor.changeColorLightingString(10)
+			shadowLight = tile.tileColor.changeColorLightingString(-20)
+			shadowHighlight = tile.tileColor.changeColorLightingString(20)
+			shadow = tile.tileColor.changeColorLightingString(-30)
+			highlight = tile.tileColor.changeColorLightingString(30)
+			almostDarkestColor = tile.tileColor.changeColorLightingString(-40)
+			almostLightestColor = tile.tileColor.changeColorLightingString(40)
+			darkestColor = tile.tileColor.changeColorLightingString(-50)
+			lightestColor = tile.tileColor.changeColorLightingString(50)
+		} else {
+			regularColor = this.config.buildingBaseColor.hex()
+			regularDarkerColor = this.config.buildingBaseColor.changeColorLightingString(-10)
+			regularLighterColor = this.config.buildingBaseColor.changeColorLightingString(10)
+			shadowLight = this.config.buildingBaseColor.changeColorLightingString(-20)
+			shadowHighlight = this.config.buildingBaseColor.changeColorLightingString(20)
+			shadow = this.config.buildingBaseColor.changeColorLightingString(-30)
+			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
+			almostDarkestColor = this.config.buildingBaseColor.changeColorLightingString(-40)
+			almostLightestColor = this.config.buildingBaseColor.changeColorLightingString(40)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-50)
+			lightestColor = this.config.buildingBaseColor.changeColorLightingString(50)
+		}
 
 		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos) }
 		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop) }
@@ -143,18 +174,18 @@ export class RenderElements {
 			let blockTopTop = `${top.x} ${top.y-height}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.shadow}"
+							<path fill="${shadow}"
 							d="M${leftWallLeftTop} 
 							L${leftWallLeftBottom} 
 							L${leftWallRightBottom} 
 							L${leftWallRightTop} 
 							L${leftWallLeftTop} Z" />
-							<path fill="${this.regularColor}"
+							<path fill="${regularColor}"
 							d="M${rightWallLeftTop}
 							L${rightWallLeftBottom}
 							L${rightWallRightBottom}
 							L${rightWallLeftTop} Z" />
-							<path fill="${this.lightestColor}"
+							<path fill="${lightestColor}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopRight}
@@ -180,17 +211,17 @@ export class RenderElements {
 			let blockRightTop = `${top.x} ${top.y-height}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.darkestColor}"
+							<path fill="${darkestColor}"
 							d="M${leftWallLeftTop}
 							L${leftWallLeftBottom}
 							L${leftWallRightBottom}
 							L${leftWallLeftTop} Z" />
-							<path fill="${this.regularDarkerColor}"
+							<path fill="${regularDarkerColor}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopTop}
 							L${blockTopLeft} Z" />
-							<path fill="${this.lightestColor}"
+							<path fill="${lightestColor}"
 							d="M${blockRightBottom}
 							L${blockRightRight}
 							L${blockRightTop}
@@ -210,12 +241,12 @@ export class RenderElements {
 			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.regularColor}"
+							<path fill="${regularColor}"
 							d="M${rightWallLeftBottom}
 							L${rightWallRightBottom}
 							L${rightWallRightTop}
 							L${rightWallLeftBottom} Z" />
-							<path fill="${this.shadow}"
+							<path fill="${shadow}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopRight}
@@ -235,12 +266,12 @@ export class RenderElements {
 			let blockRightTop = `${top.x} ${top.y-height-this.tileH}`
 
 			html = `<g style="z-index:${id};">
-						<path fill="${this.shadow}"
+						<path fill="${shadow}"
 						d="M${blockLeftLeft}
 						L${blockLeftBottom}
 						L${blockLeftTop}
 						L${blockLeftLeft} Z" />
-						<path fill="${this.regularDarkerColor}"
+						<path fill="${regularDarkerColor}"
 						d="M${blockRightRight}
 						L${blockRightBottom}
 						L${blockRightTop}
@@ -260,12 +291,12 @@ export class RenderElements {
 			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.darkestColor}"
+							<path fill="${darkestColor}"
 							d="M${leftWallLeftTop}
 							L${leftWallLeftBottom}
 							L${leftWallRightBottom}
 							L${leftWallLeftTop} Z" />
-							<path fill="${this.regularDarkerColor}"
+							<path fill="${regularDarkerColor}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopRight}
@@ -289,17 +320,17 @@ export class RenderElements {
 			let blockTopRight = `${right.x+this.bleed} ${right.y-height+this.bleed}`
 
 			html = `<g style="z-index:${id};">
-						<path fill="${this.darkestColor}"
+						<path fill="${darkestColor}"
 						d="M${leftWallLeftTop}
 						L${leftWallLeftBottom}
 						L${leftWallRightBottom}
 						L${leftWallLeftTop} Z" />
-						<path fill="${this.regularDarkerColor}"
+						<path fill="${regularDarkerColor}"
 						d="M${blockTopLeft}
 						L${blockTopBottom}
 						L${blockTopRight}
 						L${blockTopLeft} Z" />
-						<path fill="${this.lightestColor}"
+						<path fill="${lightestColor}"
 						d="M${blockBottomLeft}
 						L${blockBottomTop}
 						L${blockBottomRight}
@@ -319,12 +350,12 @@ export class RenderElements {
 			let blockTopTop = `${top.x} ${top.y-height}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.darkestColor}"
+							<path fill="${darkestColor}"
 							d="M${leftWallLeftTop}
 							L${leftWallLeftBottom}
 							L${leftWallRightBottom}
 							L${leftWallLeftTop} Z" />
-							<path fill="${this.regularDarkerColor}"
+							<path fill="${regularDarkerColor}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopRight}
@@ -345,17 +376,17 @@ export class RenderElements {
 			let blockTopTop = `${top.x} ${top.y-height}`
 
 			html = `<g style="z-index:${id};">
-							<path fill="${this.regularColor}"
+							<path fill="${regularColor}"
 							d="M${rightWallLeftBottom}
 							L${rightWallRightBottom}
 							L${rightWallRightTop}
 							L${rightWallLeftBottom} Z" />
-							<path fill="${this.regularDarkerColor}"
+							<path fill="${regularDarkerColor}"
 							d="M${blockTopLeft}
 							L${blockTopTop}
 							L${blockTopRight}
 							L${blockTopLeft} Z" />
-							<path fill="${this.shadow}"
+							<path fill="${shadow}"
 							d="M${blockTopLeft}
 							L${blockTopBottom}
 							L${blockTopRight}
@@ -369,6 +400,7 @@ export class RenderElements {
 	createPillarBlock(xPos: number, yPos: number, tile: Tile): TileTemplate {
 
 		let id = tile.id
+		let tileWidth = this.config.tileWidth
 		let height = (tile.h * this.tileH) - this.tileH
 
 		let regularColor
@@ -390,42 +422,31 @@ export class RenderElements {
 		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
 		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
 
-		let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
-		let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
-		let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-		let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+		let leftWallLeftTop = `${left.x-this.bleed + (tileWidth / 3)} ${left.y-height-this.tileH}`
+		let leftWallLeftBottom = `${left.x-this.bleed + (tileWidth / 3)} ${left.y-height}`
 
-		let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
-		let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-		let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-		let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+		let rightWallRightBottom = `${right.x+this.bleed - (tileWidth / 3)} ${right.y-height}`
+		let rightWallRightTop = `${right.x+this.bleed - (tileWidth / 3)} ${right.y-height-this.tileH}`
+
+		let leftWallBezier = `${left.x-this.bleed + (tileWidth / 3) + (tileWidth / 12)} ${bottom.y-height}`
+		let rightWallBezier = `${right.x-this.bleed - (tileWidth / 3) - (tileWidth / 12)} ${bottom.y-height}`
 
 		let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
 		let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
 		let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 		let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
-		let html = `<g style="z-index:${id};"><path fill="${darkestColor}"
-					d="M${leftWallLeftTop} 
-					L${leftWallLeftBottom} 
-					L${leftWallRightBottom} 
-					L${leftWallRightTop} 
-					L${leftWallLeftTop} Z" />
-					<path fill="${regularColor}"
-					d="M${rightWallLeftTop} 
-					L${rightWallLeftBottom} 
-					L${rightWallRightBottom} 
-					L${rightWallRightTop} 
-					L${rightWallLeftTop} Z" />
-					<path fill="${highlight}"
-					d="M${blockTopLeft} 
-					L${blockTopBottom} 
-					L${blockTopRight} 
-					L${blockTopTop} 
-					L${blockTopLeft} Z" /></g>`
+		let html = `<g style="z-index:${id};">`
+			html += `<defs>${this.calculations.addGradient("pillarGradient", darkestColor, regularColor)}</defs>` 
+			html += `<path fill="url(#pillarGradient)"`
+			html += ` d="M ${leftWallLeftTop} `
+			html += `L ${leftWallLeftBottom} `
+			html += `C ${leftWallBezier}, ${rightWallBezier}, ${rightWallRightBottom} `
+			html += `L ${rightWallRightTop} `
+			html += `L ${leftWallLeftTop} Z" /></g>`
 
 		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 
-		return { html: html, coords: coords }
+		return { html: html.replace(/\n|\r|\t/g, ''), coords: coords }
 	}
 }

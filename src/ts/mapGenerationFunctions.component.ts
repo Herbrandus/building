@@ -64,6 +64,16 @@ export class MapGenerationFunctions {
 		return diagonalHeight * Math.cos(this.toRadians(largeAngle));
 	}
 
+	public addGradient(id: string, colorLeft: string, colorRight: string) {
+
+		let gradient = '<linearGradient id="'+id+'">'
+			gradient += '<stop offset="5%" stop-color="'+colorLeft+'" />'
+			gradient += '<stop offset="95%" stop-color="'+colorRight+'" />'
+			gradient += '</linearGradient>'
+
+		return gradient
+	}
+
 	toRadians (angle: number): number {
 		return angle * (Math.PI / 180);
 	}

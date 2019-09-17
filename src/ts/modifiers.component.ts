@@ -23,53 +23,59 @@ export class Modifiers {
 
 						let activeCol = world.map[world.mapLength - y - 1][x]
 						let height = activeCol.height
-						let blockGroup = oldBlockGroups.length + activeCol.blockGroup
+
+						if (height > 0) {
+							let blockGroup = oldBlockGroups.length + activeCol.blockGroup
 						
-						let tileStack = []
+							let tileStack = []
 
-						for (let h = 0; h < height; h++) {
+							for (let h = 0; h < height; h++) {
 
-							let tileColor = activeCol.tileStack[h].tileColor
-							let thisPillar = activeCol.tileStack[h].pillar
-							let thisWindowed = activeCol.tileStack[h].windowed
-							let isTower = activeCol.tileStack[h].tower
-							let isRoof = (h === height-1) ? true : false
+								let tileColor = activeCol.tileStack[h].tileColor
+								let thisPillar = activeCol.tileStack[h].options["pillar"]
+								let thisWindowed = activeCol.tileStack[h].options["windowed"]
+								let isTower = activeCol.tileStack[h].options["tower"]
+								let stairs = activeCol.tileStack[h].options["stairs"]
 
-							tileStack.push(
-								new Tile(
-									world.blockIdIterator, 
-									x, 
-									y, 
-									h, 
-									activeCol.tileStack[h].tileType,
-									tileColor,
-									{
-										'roof':			isRoof,
-										'pillar': 		thisPillar,
-										'windowed': 	thisWindowed,
-										'tower': 		isTower
-									})
-								)
+								let isRoof = (h === height-1) ? true : false
 
-							world.blockIdIterator++
-						}
+								tileStack.push(
+									new Tile(
+										world.blockIdIterator, 
+										x, 
+										y, 
+										h, 
+										activeCol.tileStack[h].type,
+										tileColor,
+										{
+											'roof':			isRoof ? true : false,
+											'pillar': 		thisPillar ? true : false,
+											'windowed': 	thisWindowed ? true : false,
+											'tower': 		isTower ? true : false,
+											'stairs':		stairs ? true : false
+										})
+									)
 
-						world.blockHeightsArray.push(height)
+								world.blockIdIterator++
+							}
 
-						if (world.blockGroups.indexOf(blockGroup) === -1) {
-							world.blockGroups.push(blockGroup)
-						}
+							world.blockHeightsArray.push(height)
 
-						world.map[y][x] = null
+							if (world.blockGroups.indexOf(blockGroup) === -1) {
+								world.blockGroups.push(blockGroup)
+							}
 
-						let column = new Column(true, x, y, height)
+							world.map[y][x] = null
 
-						column.blockGroup = blockGroup
-						column.height = height
-						column.corner = false
-						column.tileStack = tileStack
+							let column = new Column(true, x, y, height)
 
-						world.map[y][x] = column
+							column.blockGroup = blockGroup
+							column.height = height
+							column.corner = false
+							column.tileStack = tileStack
+
+							world.map[y][x] = column
+						}						
 					}
 				}
 			}
@@ -143,7 +149,6 @@ export class Modifiers {
 					hollowBuildingBlock = false
 				}
 
-				console.log('edges:', world.blockEdges)			
 				console.log('creation y left: ', creationPoint.y - (nextBlockLength - yStartOffset))
 				console.log('creation y right: ', creationPoint.y + (nextBlockLength))
 				console.log('creation x left: ', creationPoint.x - (nextBlockWidth / 2))
@@ -157,8 +162,6 @@ export class Modifiers {
 						
 						if (yConditions) {
 							if (xConditions) {
-
-								console.log('placement on y: ' + y)
 
 								let createCol = true
 

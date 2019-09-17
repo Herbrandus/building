@@ -46,7 +46,7 @@ export class Renderer {
 
 				htmlMap += `<div class="tile${halfWay}" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;`
 
-				if (map.getColumn(x, y).isDefined) {
+				if (map.getColumn(x, y).isDefined && map.getTopTile(x, y)) {
 					
 					let tile = map.getTopTile(x, y)
 					let tileTopColor = tile.getColor().rgb()
@@ -74,7 +74,7 @@ export class Renderer {
 		let mapTotalWidth = mapToBuild.mapWidth
 		let mapTotalLength = mapToBuild.mapLength
 
-		let testTile = this.render.createTile(0, 0)
+		let testTile = this.render.createTile(0, 0, '')
 
 		let xDeviation = testTile.coords.bottom.x - testTile.coords.top.x
 		let yDeviation = testTile.coords.right.y - testTile.coords.left.y
@@ -121,21 +121,30 @@ export class Renderer {
 					thisPosX = (lastTile.coords.right.x - (lastTile.coords.right.x - lastTile.coords.bottom.x))
 				}
 
-				let newTile = this.render.createTile(thisPosX, thisPosY)
+				let newTile = this.render.createTile(thisPosX, thisPosY, 'shade')
 				let newData = ''
 				
 				if (map[y][x].isDefined) {
 
 					for (let h = 0; h < map[y][x].height; h++) {
-						let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
-						newData += tile.html
+						if (map[y][x].tileStack[h].type === TileType.Body) {
+							let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+							newData += tile.html
 
-						if (this.config.allowDebug) {
-							if (h === map[y][x].height - 1) {
-								let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span>`
-								detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
+							if (this.config.allowDebug) {
+								if (h === map[y][x].height - 1) {
+									let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span>`
+									detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
+								}
 							}
-						}
+						} else if (map[y][x].tileStack[h].type === TileType.None) {
+							if (map[y][x].tileStack[h].options["pillar"]) {
+								if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
+									let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+									newData += pillar.html
+								}								
+							}
+						}						
 					}
 				} 
 
