@@ -52,7 +52,7 @@ export class RenderElements {
 		let regularColor
 
 		if (color) {
-			regularColor = color.changeColorLightingString(-20)
+			regularColor = color.hex()
 		} else {
 			regularColor = this.config.groundColor.hex()
 		}
@@ -92,11 +92,11 @@ export class RenderElements {
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
 			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-50)
+			darkestColor = tile.tileColor.changeColorLightingString(-60)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
 			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-50)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
 		}	
 
 		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
@@ -118,6 +118,69 @@ export class RenderElements {
 		let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
 		let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 		let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+
+		let html = `<g style="z-index:${id};"><path fill="${darkestColor}"
+					d="M${leftWallLeftTop} 
+					L${leftWallLeftBottom} 
+					L${leftWallRightBottom} 
+					L${leftWallRightTop} 
+					L${leftWallLeftTop} Z" />
+					<path fill="${regularColor}"
+					d="M${rightWallLeftTop} 
+					L${rightWallLeftBottom} 
+					L${rightWallRightBottom} 
+					L${rightWallRightTop} 
+					L${rightWallLeftTop} Z" />
+					<path fill="${highlight}"
+					d="M${blockTopLeft} 
+					L${blockTopBottom} 
+					L${blockTopRight} 
+					L${blockTopTop} 
+					L${blockTopLeft} Z" /></g>`
+
+		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
+
+		return { html: html, coords: coords }
+	}
+
+	createHalfBlock(xPos: number, yPos: number, tile: Tile): TileTemplate {
+
+		let id = tile.id
+		let height = (tile.h * this.tileH) - this.tileH
+
+		let regularColor
+		let highlight
+		let darkestColor
+
+		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
+			regularColor = tile.tileColor.hex()
+			highlight = tile.tileColor.changeColorLightingString(30)
+			darkestColor = tile.tileColor.changeColorLightingString(-60)
+		} else {
+			regularColor = this.config.buildingBaseColor.hex()
+			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+		}	
+
+		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+
+		let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-(this.tileH / 2)}`
+		let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+		let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+		let leftWallRightTop = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
+
+		let rightWallLeftTop = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
+		let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+		let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+		let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-(this.tileH / 2)}`
+
+		let blockTopLeft = `${left.x-this.bleed} ${left.y-height-(this.tileH / 2)}`
+		let blockTopBottom = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
+		let blockTopRight = `${right.x+this.bleed} ${right.y-height-(this.tileH / 2)}`
+		let blockTopTop = `${top.x} ${top.y-height-(this.tileH / 2)}`
 
 		let html = `<g style="z-index:${id};"><path fill="${darkestColor}"
 					d="M${leftWallLeftTop} 
@@ -169,7 +232,7 @@ export class RenderElements {
 			highlight = tile.tileColor.changeColorLightingString(30)
 			almostDarkestColor = tile.tileColor.changeColorLightingString(-40)
 			almostLightestColor = tile.tileColor.changeColorLightingString(40)
-			darkestColor = tile.tileColor.changeColorLightingString(-50)
+			darkestColor = tile.tileColor.changeColorLightingString(-60)
 			lightestColor = tile.tileColor.changeColorLightingString(50)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
@@ -181,7 +244,7 @@ export class RenderElements {
 			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
 			almostDarkestColor = this.config.buildingBaseColor.changeColorLightingString(-40)
 			almostLightestColor = this.config.buildingBaseColor.changeColorLightingString(40)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-50)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
 			lightestColor = this.config.buildingBaseColor.changeColorLightingString(50)
 		}
 
@@ -446,11 +509,11 @@ export class RenderElements {
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
 			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-50)
+			darkestColor = tile.tileColor.changeColorLightingString(-60)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
 			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-50)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
 		}	
 
 		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }

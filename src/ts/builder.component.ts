@@ -89,6 +89,8 @@ export class Renderer {
 		let mapWidthPx = Math.round((tileHalfWidthLeft + tileHalfWidthRight) * (mapTotalWidth ))
 		let mapLengthPx = Math.round(mapLengthTop + mapLengthBottom) + this.config.topMargin
 
+		const shadowColor = this.config.groundColor.changeColorLighting(-20)
+
 		const map = mapToBuild.map
 
 		let detailsHtml = ''
@@ -126,29 +128,43 @@ export class Renderer {
 				
 				if (map[y][x].isDefined) {
 
-					let color = this.config.groundColor // map[y][x].tileStack[0].tileColor
-					newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], color).html
+					if (map[y][x].tileStack[0].type === TileType.Shadow) {
+						let color = shadowColor
+						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], color).html
+					} else if (map[y][x].tileStack[0].type === TileType.Grass) {
+						let color = map[y][x].tileStack[0].tileColor
+						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], color).html
+					}
 
-					for (let h = 0; h < map[y][x].height; h++) {
-						if (map[y][x].tileStack[h].type === TileType.Body) {
-							let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
-							newData += tile.html
+					if (map[y][x].height > 0) {
 
-							if (this.config.allowDebug) {
-								if (h === map[y][x].height - 1) {
-									let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span>`
-									detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
+						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], shadowColor).html
+
+						for (let h = 0; h < map[y][x].height; h++) {
+							if (map[y][x].tileStack[h].type === TileType.Body) {
+								let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+								newData += tile.html
+
+								if (this.config.allowDebug) {
+									if (h === map[y][x].height - 1) {
+										let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span>`
+										detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
+									}
+								}
+							} else if (map[y][x].tileStack[h].type === TileType.HalfBlock) {
+								let tile = this.render.createHalfBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+								newData += tile.html
+
+							} else if (map[y][x].tileStack[h].type === TileType.None) {
+								if (map[y][x].tileStack[h].options["pillar"] && h < map[y][x].height) {
+									if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
+										let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+										newData += pillar.html
+									}
 								}
 							}
-						} else if (map[y][x].tileStack[h].type === TileType.None) {
-							if (map[y][x].tileStack[h].options["pillar"] && h < map[y][x].height) {
-								if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
-									let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
-									newData += pillar.html
-								}								
-							}
-						}						
-					}
+						}
+					}					
 				} 
 
 				html += newData

@@ -8,7 +8,7 @@ export class Config {
 	private _tileHeight: number = 15
 	private _tileSmallAngle: number = 85
 	private _tileLargeAngle: number = 100
-	private _groundColor: Color = new Color('f5f3e5')
+	private _groundColor: Color = new Color('#f5f3e5')
 	private _buildingBaseColor: Color = new Color(
 		115 + Math.floor(Math.random() * 75),
 		155 + Math.floor(Math.random() * 40),
@@ -17,6 +17,8 @@ export class Config {
 	private _tileEdgeBleed: number = 0.3
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
+
+	constructor() {	}	
 
 	public get allowDebug(): boolean {
 		return this._allowDebug

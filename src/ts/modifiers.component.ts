@@ -148,20 +148,12 @@ export class Modifiers {
 				let nextBlockLength = (world.averageBuildingSize ) + Math.floor(Math.random() * 5)
 				let yStartOffset = 1 + Math.floor(Math.random() * 2)
 				let hollowBuildingBlock = Math.round(Math.random()) === 1 ? true : false
-
-				console.log('nextBlockWidth', nextBlockWidth)
-				console.log('nextBlockLength', nextBlockLength)
 				
 				if (nextBlockWidth > 4 && nextBlockLength > 4) {
 					hollowBuildingBlock = false
 				} else {
 					hollowBuildingBlock = false
 				}
-
-				console.log('creation y left: ', creationPoint.y - (nextBlockLength - yStartOffset))
-				console.log('creation y right: ', creationPoint.y + (nextBlockLength))
-				console.log('creation x left: ', creationPoint.x - (nextBlockWidth / 2))
-				console.log('creation x right: ', creationPoint.x + (nextBlockWidth / 2))
 
 				for (let y = 0; y < world.mapLength; y++) {
 					for (let x = 0; x < world.mapWidth; x++) {
@@ -274,8 +266,7 @@ export class Modifiers {
 
 										if (world.map[y][x].height > 4) {
 											if (world.map[y-1][x].blockGroup !== blockGroup) {
-												world.map[y][x].height = world.map[y][x].height - 1
-												world.map[y][x].removeTopTile()
+												world.map[y][x].tileStack[world.map[y][x].height-1].type = TileType.HalfBlock
 											}	
 										}								
 									}		

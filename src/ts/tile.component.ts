@@ -71,12 +71,18 @@ export class Tile {
 		this._tileColor = color
 	}
 
+	set type(type: TileType) {
+		this._tileType = type
+	}
+
 }
 
 export enum TileType {
 	None = 'none',
 	Body = 'body',
 	Tower = 'tower',
+	HalfBlock = 'halfBlock',
 	Roof = 'roof',
-	Grass = 'grass'
+	Grass = 'grass',
+	Shadow = 'shadow'
 }

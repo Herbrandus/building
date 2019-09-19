@@ -31,10 +31,16 @@ export class Map {
 	private _blockIdIterator: number
 	private _blockHeightIterator: number
 	private _blockAmountIterator: number
+	private _HorizontalRemainingEmptyBlocksMin: number
+	private _HorizontalRemainingEmptyBlocksMax: number
 	private _decorationLineH: number
 	private _groundColor: Color
 	private _defaultColor: Color
 	private _lineColor: Color
+	private _surroundingsGrassColor: Color
+	private _surroundingsWaterColor: Color
+	private _surroundingsSandColor: Color
+	private _surroundingsDefaultColor: Color
 
 	constructor(	
 			mapWidth: number, 
@@ -67,6 +73,12 @@ export class Map {
 		this._defaultColor = new Color(this.config.buildingBaseColor.hex())
 		this._lineColor = lineColor.changeColorLighting(-30)
 		this._groundColor = this.config.groundColor
+		this._HorizontalRemainingEmptyBlocksMin = 0
+		this._HorizontalRemainingEmptyBlocksMax = 0
+		this._surroundingsGrassColor = new Color('#7bb376')
+		this._surroundingsWaterColor = new Color('#6fb9ca')
+		this._surroundingsSandColor = new Color('#e9e3ba')
+		this._surroundingsDefaultColor = this._surroundingsGrassColor
 
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
@@ -77,10 +89,16 @@ export class Map {
 		let startblockLengthHalf = Math.floor(startblockLength / 2)
 		let startblockWidthHalf = Math.floor(startblockWidth / 2)
 		let startingPositionX = Math.floor(this._mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
+		let useWaterGarden = false
 
 		this._world = []
 		let tileHeight = 0
 		let firstBlockHeight
+
+		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150) {
+			useWaterGarden = true
+			this._surroundingsDefaultColor = this._surroundingsWaterColor
+		}
 
 		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
 			firstBlockHeight = this._blockHeight * 3
@@ -96,8 +114,6 @@ export class Map {
 		} else if (firstBlockHeight > 3) {
 			this._decorationLineH = 3
 		}
-
-		console.log('line color: ', this._lineColor)
 
 		this._blockHeight = firstBlockHeight
 
@@ -126,10 +142,13 @@ export class Map {
 
 						for (let h = 0; h < firstBlockHeight; h++) {
 
+							let isSlope = true
 							let thisPillar = false
 							let tileType = TileType.Body
 							if (h < 2 && openGroundLevel) {
-								thisPillar = true
+								if (y % 2 === 0) {
+									thisPillar = true
+								}
 								tileType = TileType.None
 							}
 							let thisWindowed = 0
@@ -160,6 +179,7 @@ export class Map {
 									{
 										'roof':			isRoof,
 										'pillar': 		thisPillar,
+										'slope':		isSlope,
 										'windowed': 	thisWindowed,
 										'tower': 		false,
 										'stairs':		false
@@ -221,8 +241,8 @@ export class Map {
 										edgePointX, 
 										edgePointY, 
 										0, 
-										TileType.Grass,
-										this._defaultColor.getColorByHue(220))]
+										TileType.Shadow,
+										this._defaultColor)]
 
 				if (this._world[edgePointY][edgePointX].isDefined) {
 					
@@ -238,20 +258,111 @@ export class Map {
 					if (!this._world[edgePointY][edgePointX + 1].isDefined) {
 						this._world[edgePointY][edgePointX + 1] = grass
 					}
-				}			
+				}
 
 				this._blockIdIterator++
 			}
 		}
-		
-		
+
+		this._HorizontalRemainingEmptyBlocksMin = this.getLeastOpenSpaceOnX()['min']
+		this._HorizontalRemainingEmptyBlocksMax = this.getLeastOpenSpaceOnX()['max']
+
+		console.log('Space left on the left: ' + this._HorizontalRemainingEmptyBlocksMin)
+		console.log('Space left on the right: ' + this._HorizontalRemainingEmptyBlocksMax)
+
+		if (this._HorizontalRemainingEmptyBlocksMin > 7) {
+
+			let landsLength = this._HorizontalRemainingEmptyBlocksMin * 2
+			if (landsLength > 18) landsLength = 18
+			let landsEdge = this._mapLength - landsLength
+
+			for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {				
+				for (let x = 0; x < this._HorizontalRemainingEmptyBlocksMin - 2; x++) {
+					if (!this._world[y][x].isDefined) {
+						let edgeOfGarden = false
+						let tileType: TileType = TileType.Grass
+						let tileColor = this._surroundingsDefaultColor
+						let defaultHeight = 0
+						if (x === 0 || 
+							x === this._HorizontalRemainingEmptyBlocksMin - 3) {
+							if (useWaterGarden) {
+								tileColor = this._defaultColor
+								tileType = TileType.HalfBlock
+								defaultHeight = 1
+							} else {
+								tileColor = this._surroundingsSandColor
+								tileType = TileType.Grass
+							}
+						} else if (
+								(y === Math.floor(landsEdge / 2) + 1) ||
+								(y === this.mapLength - Math.floor(landsEdge / 2) - 1) ) {
+							if (useWaterGarden) {
+								tileColor = this._defaultColor
+								tileType = TileType.HalfBlock
+								defaultHeight = 1
+							} else {
+								tileColor = this._surroundingsSandColor
+								tileType = TileType.Grass
+							}
+						}
+
+						let gardenBlock = new Column(true, x, y, defaultHeight)
+							gardenBlock.tileStack = [new Tile(
+												this._blockIdIterator, 
+												x, 
+												y, 
+												0, 
+												tileType,
+												tileColor)]
+						
+
+						this._world[y][x] = gardenBlock
+						this._blockIdIterator++
+					}
+				}
+			}
+		}
+
+		if (this._HorizontalRemainingEmptyBlocksMax > 7) {
+
+			let landsLength = this._HorizontalRemainingEmptyBlocksMax * 2
+			let landsEdge = this._mapLength - landsLength
+
+			for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {
+				for (let x = this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2; x < this._mapWidth; x++) {
+					if (!this._world[y][x].isDefined) {
+						let tileColor = this._surroundingsDefaultColor
+						if (x === this._mapWidth - 1 || 
+							x === this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2) {
+							tileColor = this._surroundingsSandColor
+						} else if (
+								y === Math.floor(landsEdge / 2) + 1 ||
+								y === this.mapLength - Math.floor(landsEdge / 2) - 1) {
+							tileColor = this._surroundingsSandColor
+						}
+						let grass = new Column(true, x, y, 0)
+						grass.tileStack = [new Tile(
+											this._blockIdIterator, 
+											x, 
+											y, 
+											0, 
+											TileType.Grass,
+											tileColor)]
+						this._world[y][x] = grass
+					}
+				}
+			}
+		}
+
+		console.log(this._world)
+
 		this._world = this.mods.clearMapEdges(this)
 		this._world = this.mods.mirrorMap(this)
 		this.setEdges(false)
 
 		console.log(this._blockEdges)
 		console.log(this._world)
-	}
+	}	
 
 	get mapWidth(): number {
 		return this._mapWidth
@@ -494,6 +605,34 @@ export class Map {
 		}
 
 		return this._blockEdges
+	}
+
+	getLeastOpenSpaceOnX(): object {
+		let xMinValues = []
+		let xMaxValues = []
+
+		for (let y = 0; y < this.mapLength; y++) {
+			
+			let xMin = 0
+			let xMax = 0
+			
+			for (let x = 0; x < this.mapWidth; x++) {
+				if (x < Math.floor(this.mapWidth / 2)) {
+					if (!this._world[y][x].isDefined && this._world[y][x].height === 0) {
+						xMin++
+					}
+				} else {
+					if (!this._world[y][x].isDefined && this._world[y][x].height === 0) {
+						xMax++
+					}
+				}			
+			}
+			
+			xMinValues.push(xMin)
+			xMaxValues.push(xMax)
+		}
+
+		return {'min': Math.min(...xMinValues), 'max': Math.min(...xMaxValues) }		
 	}
 }
 
