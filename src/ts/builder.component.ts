@@ -126,6 +126,9 @@ export class Renderer {
 				
 				if (map[y][x].isDefined) {
 
+					let color = this.config.groundColor // map[y][x].tileStack[0].tileColor
+					newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], color).html
+
 					for (let h = 0; h < map[y][x].height; h++) {
 						if (map[y][x].tileStack[h].type === TileType.Body) {
 							let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
@@ -138,7 +141,7 @@ export class Renderer {
 								}
 							}
 						} else if (map[y][x].tileStack[h].type === TileType.None) {
-							if (map[y][x].tileStack[h].options["pillar"]) {
+							if (map[y][x].tileStack[h].options["pillar"] && h < map[y][x].height) {
 								if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
 									let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
 									newData += pillar.html

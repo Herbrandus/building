@@ -44,6 +44,42 @@ export class RenderElements {
 		return { html: html, coords: coords }
 	}
 
+	createPlane(xPos: number, yPos: number, tile: Tile, color?: Color): TileTemplate {
+
+		let id = tile.id
+		let height = (tile.h * this.tileH) - this.tileH
+
+		let regularColor
+
+		if (color) {
+			regularColor = color.changeColorLightingString(-20)
+		} else {
+			regularColor = this.config.groundColor.hex()
+		}
+
+		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+
+		let blockTopLeft = `${left.x-this.bleed} ${left.y}`
+		let blockTopBottom = `${bottom.x} ${bottom.y}`
+		let blockTopRight = `${right.x+this.bleed} ${right.y}`
+		let blockTopTop = `${top.x} ${top.y}`
+
+		let html = `<g style="z-index:${id};">
+					<path fill="${regularColor}"
+					d="M${blockTopLeft} 
+					L${blockTopBottom} 
+					L${blockTopRight} 
+					L${blockTopTop} 
+					L${blockTopLeft} Z" /></g>`
+
+		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
+
+		return { html: html, coords: coords }
+	}
+
 	createBlock(xPos: number, yPos: number, tile: Tile): TileTemplate {
 
 		let id = tile.id

@@ -75,7 +75,9 @@ export class Modifiers {
 							column.tileStack = tileStack
 
 							world.map[y][x] = column
-						}						
+						} else if(height === 0 && activeCol.isDefined) {
+							world.map[y][x] = activeCol
+						}					
 					}
 				}
 			}
@@ -90,10 +92,12 @@ export class Modifiers {
 			for (let x = 0; x < world.mapWidth; x++) {
 				if (x < world.mapEdgeWidth || x >= world.mapWidth - world.mapEdgeWidth ||
 					y < world.mapEdgeWidth || y >= world.mapLength - world.mapEdgeWidth) {
-					world.map[y][x] = null
-					let column = new Column(false, x, y, 0)
-					column.tileStack = []
-					world.map[y][x] = column
+					if (world.map[y][x].isDefined && world.map[y][x].height > 0) {
+						world.map[y][x] = null
+						let column = new Column(false, x, y, 0)
+						column.tileStack = []
+						world.map[y][x] = column
+					}					
 				}
 			}
 		}
@@ -110,6 +114,7 @@ export class Modifiers {
 			if (world.blockEdges.length > 0) {			
 
 				let nextHeight
+				let openFloor = 0
 
 				if (world.blockHeightVariation === BuildingHeightVariations.TallCenter) {
 					nextHeight = world.blockHeight - (world.blockAmountIterator)
@@ -122,13 +127,17 @@ export class Modifiers {
 						nextHeight = world.blockHeight - randomNum
 					} else {
 						nextHeight = world.blockHeight + randomNum
-					}				
+					}
 				}
 
 				if (nextHeight < 2) {
 					nextHeight = 1
 				} else if (nextHeight > world.mapMaxHeight) {
 					nextHeight = world.mapMaxHeight
+				}
+
+				if (nextHeight > 5) {
+					openFloor = 2 + Math.floor(Math.random() * 3)
 				}
 
 				let randomEdgePoint = Math.floor(Math.random() * world.blockEdges.length)
@@ -144,7 +153,7 @@ export class Modifiers {
 				console.log('nextBlockLength', nextBlockLength)
 				
 				if (nextBlockWidth > 4 && nextBlockLength > 4) {
-					hollowBuildingBlock = false // true
+					hollowBuildingBlock = false
 				} else {
 					hollowBuildingBlock = false
 				}
@@ -181,10 +190,22 @@ export class Modifiers {
 
 									for (let h = 0; h < nextHeight; h++) {
 
-										let thisPillar = 0
-										let thisWindowed = 0
+										let thisPillar = false
+										let thisWindowed = false
 										let isRoof = (h === nextHeight-1) ? true : false
 										let tileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
+										let tileType = TileType.Body
+
+										if (openFloor > 0 && (h === openFloor)) {
+											tileType = TileType.None
+											if (y % 2 === 0 && x % 2 !== 0) {
+												thisPillar = true
+											}
+										} else if (openFloor < 5 && nextHeight > 6 && h+1 === openFloor) {
+											if (y % 2 === 0 && x % 2 !== 0) {
+												thisPillar = true
+											}
+										}
 
 										if (h === world.lineHeight) {								
 											tileColor = world.decorativeColors['lineColor']
@@ -198,7 +219,7 @@ export class Modifiers {
 												x, 
 												y, 
 												h, 
-												TileType.Body,
+												tileType,
 												tileColor,
 												{
 													'roof':			isRoof,
@@ -236,6 +257,33 @@ export class Modifiers {
 				world.blockHeight = nextHeight
 
 				world.blockAmountIterator++
+
+				if (1 === 1) {
+
+					for (let y = 0; y < world.mapLength; y++) {
+						for (let x = 0; x < world.mapWidth; x++) {
+
+							if (x < world.mapWidth - 2 && x > 2) {
+								if (y < world.mapLength - 2 && y > 2) {
+
+									if (world.map[y][x].isDefined && 
+										world.map[y-1][x].isDefined &&
+										world.map[y+1][x].isDefined &&
+										world.map[y][x-1].isDefined &&
+										world.map[y][x+1].isDefined) {
+
+										if (world.map[y][x].height > 4) {
+											if (world.map[y-1][x].blockGroup !== blockGroup) {
+												world.map[y][x].height = world.map[y][x].height - 1
+												world.map[y][x].removeTopTile()
+											}	
+										}								
+									}		
+								}	
+							}							
+						}
+					}
+				}
 
 			} else {		
 				console.warn("Block edges array is empty.")

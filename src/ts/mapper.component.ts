@@ -32,6 +32,7 @@ export class Map {
 	private _blockHeightIterator: number
 	private _blockAmountIterator: number
 	private _decorationLineH: number
+	private _groundColor: Color
 	private _defaultColor: Color
 	private _lineColor: Color
 
@@ -65,6 +66,7 @@ export class Map {
 		let lineColor = new Color(newLineHue)
 		this._defaultColor = new Color(this.config.buildingBaseColor.hex())
 		this._lineColor = lineColor.changeColorLighting(-30)
+		this._groundColor = this.config.groundColor
 
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
@@ -126,10 +128,10 @@ export class Map {
 
 							let thisPillar = false
 							let tileType = TileType.Body
-							if (h < 2/* && openGroundLevel*/) {
+							if (h < 2 && openGroundLevel) {
 								thisPillar = true
 								tileType = TileType.None
-							}							
+							}
 							let thisWindowed = 0
 							let isRoof = (h === firstBlockHeight-1) ? true : false
 							let tileColor = this._defaultColor
@@ -138,6 +140,13 @@ export class Map {
 								tileColor = this._lineColor
 							} else {
 								tileColor = this._defaultColor
+							}
+
+							if (this._decorationLineH > 3 && h+1 === this._decorationLineH && h+1 < firstBlockHeight) {
+								tileType = TileType.None
+								if (y % 2 === 0) {
+									thisPillar = true
+								}
 							}
 
 							tileStack.push(
@@ -201,33 +210,40 @@ export class Map {
 			this._world = this.mods.addBuildingComponent(this)
 		}
 
-		for (let e = 0; e < this._blockEdges.length; e++) {
-			let edgePointY = this._blockEdges[e].y
-			let edgePointX = this._blockEdges[e].x
-			let grass = new Column(true, edgePointX, edgePointY, 0)
-				grass.tileStack = [new Tile(
-									this._blockIdIterator, 
-									edgePointX, 
-									edgePointY, 
-									0, 
-									TileType.Grass,
-									this._defaultColor.getColorByHue(60))]
+		if (!!Math.round(Math.random())) {
 
-			if (!this._world[edgePointY - 1][edgePointX].isDefined) {
-				this._world[edgePointY - 1][edgePointX] = grass
-			}
-			if (!this._world[edgePointY + 1][edgePointX].isDefined) {
-				this._world[edgePointY + 1][edgePointX] = grass
-			}
-			if (!this._world[edgePointY][edgePointX - 1].isDefined) {
-				this._world[edgePointY][edgePointX - 1] = grass
-			}
-			if (!this._world[edgePointY][edgePointX + 1].isDefined) {
-				this._world[edgePointY][edgePointX + 1] = grass
-			}
+			for (let e = 0; e < this._blockEdges.length; e++) {
+				let edgePointY = this._blockEdges[e].y
+				let edgePointX = this._blockEdges[e].x
+				let grass = new Column(true, edgePointX, edgePointY, 0)
+					grass.tileStack = [new Tile(
+										this._blockIdIterator, 
+										edgePointX, 
+										edgePointY, 
+										0, 
+										TileType.Grass,
+										this._defaultColor.getColorByHue(220))]
 
-			this._blockIdIterator++
+				if (this._world[edgePointY][edgePointX].isDefined) {
+					
+					if (!this._world[edgePointY - 1][edgePointX].isDefined) {
+						this._world[edgePointY - 1][edgePointX] = grass
+					}
+					if (!this._world[edgePointY + 1][edgePointX].isDefined) {
+						this._world[edgePointY + 1][edgePointX] = grass
+					}
+					if (!this._world[edgePointY][edgePointX - 1].isDefined) {
+						this._world[edgePointY][edgePointX - 1] = grass
+					}
+					if (!this._world[edgePointY][edgePointX + 1].isDefined) {
+						this._world[edgePointY][edgePointX + 1] = grass
+					}
+				}			
+
+				this._blockIdIterator++
+			}
 		}
+		
 		
 		this._world = this.mods.clearMapEdges(this)
 		this._world = this.mods.mirrorMap(this)
@@ -323,6 +339,10 @@ export class Map {
 
 	get lineHeight(): number {
 		return this._decorationLineH
+	}
+
+	get groundColor(): Color {
+		return this._groundColor
 	}
 
 	get defaultColor(): Color {
@@ -557,5 +577,9 @@ export class Column {
 
 	public getTile(height: number): Tile {
 		return this._tileStack[height]
+	}
+
+	public removeTopTile(): void {
+		this._tileStack.pop()
 	}
 }
