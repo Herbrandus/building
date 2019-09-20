@@ -89,8 +89,8 @@ export class Modifiers {
 	clearMapEdges(world: Map): any[][] {
 
 		for (let y = 0; y < world.mapLength; y++) {
-			for (let x = 0; x < world.mapWidth; x++) {
-				if (x < world.mapEdgeWidth || x >= world.mapWidth - world.mapEdgeWidth ||
+			for (let x = 1; x < world.mapWidth; x++) {
+				if (x < world.mapEdgeWidth || x >= world.mapWidth ||
 					y < world.mapEdgeWidth || y >= world.mapLength - world.mapEdgeWidth) {
 					if (world.map[y][x].isDefined && world.map[y][x].height > 0) {
 						world.map[y][x] = null

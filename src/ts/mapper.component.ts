@@ -95,7 +95,10 @@ export class Map {
 		let tileHeight = 0
 		let firstBlockHeight
 
-		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150) {
+		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 2) {
+			useWaterGarden = true
+			this._surroundingsDefaultColor = this._surroundingsWaterColor
+		} else if (Math.round(Math.random() * 4) >= 1) {
 			useWaterGarden = true
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
 		}
@@ -230,61 +233,63 @@ export class Map {
 			this._world = this.mods.addBuildingComponent(this)
 		}
 
-		if (!!Math.round(Math.random())) {
+		/* 	
+		 *	Add shadows around the building
+		 */
 
-			for (let e = 0; e < this._blockEdges.length; e++) {
-				let edgePointY = this._blockEdges[e].y
-				let edgePointX = this._blockEdges[e].x
-				let grass = new Column(true, edgePointX, edgePointY, 0)
-					grass.tileStack = [new Tile(
-										this._blockIdIterator, 
-										edgePointX, 
-										edgePointY, 
-										0, 
-										TileType.Shadow,
-										this._defaultColor)]
+		for (let e = 0; e < this._blockEdges.length; e++) {
+			let edgePointY = this._blockEdges[e].y
+			let edgePointX = this._blockEdges[e].x
+			let grass = new Column(true, edgePointX, edgePointY, 0)
+				grass.tileStack = [new Tile(
+									this._blockIdIterator, 
+									edgePointX, 
+									edgePointY, 
+									0, 
+									TileType.Shadow,
+									this._defaultColor)]
 
-				if (this._world[edgePointY][edgePointX].isDefined) {
-					
-					if (!this._world[edgePointY - 1][edgePointX].isDefined) {
-						this._world[edgePointY - 1][edgePointX] = grass
-					}
-					if (!this._world[edgePointY + 1][edgePointX].isDefined) {
-						this._world[edgePointY + 1][edgePointX] = grass
-					}
-					if (!this._world[edgePointY][edgePointX - 1].isDefined) {
-						this._world[edgePointY][edgePointX - 1] = grass
-					}
-					if (!this._world[edgePointY][edgePointX + 1].isDefined) {
-						this._world[edgePointY][edgePointX + 1] = grass
-					}
+			if (this._world[edgePointY][edgePointX].isDefined) {
+				
+				if (!this._world[edgePointY - 1][edgePointX].isDefined) {
+					this._world[edgePointY - 1][edgePointX] = grass
 				}
-
-				this._blockIdIterator++
+				if (!this._world[edgePointY + 1][edgePointX].isDefined) {
+					this._world[edgePointY + 1][edgePointX] = grass
+				}
+				if (!this._world[edgePointY][edgePointX - 1].isDefined) {
+					this._world[edgePointY][edgePointX - 1] = grass
+				}
+				if (!this._world[edgePointY][edgePointX + 1].isDefined) {
+					this._world[edgePointY][edgePointX + 1] = grass
+				}
 			}
+
+			this._blockIdIterator++
 		}
+
+		/* 	
+		 *	Add gardens or other ornamental features around the building
+		 */
 
 		this._HorizontalRemainingEmptyBlocksMin = this.getLeastOpenSpaceOnX()['min']
 		this._HorizontalRemainingEmptyBlocksMax = this.getLeastOpenSpaceOnX()['max']
 
-		console.log('Space left on the left: ' + this._HorizontalRemainingEmptyBlocksMin)
-		console.log('Space left on the right: ' + this._HorizontalRemainingEmptyBlocksMax)
-
 		if (this._HorizontalRemainingEmptyBlocksMin > 7) {
 
 			let landsLength = this._HorizontalRemainingEmptyBlocksMin * 2
-			if (landsLength > 18) landsLength = 18
+			if (landsLength > 16) landsLength = 16
 			let landsEdge = this._mapLength - landsLength
 
 			for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {				
-				for (let x = 0; x < this._HorizontalRemainingEmptyBlocksMin - 2; x++) {
+				for (let x = 0; x < this._HorizontalRemainingEmptyBlocksMin - 3; x++) {
 					if (!this._world[y][x].isDefined) {
 						let edgeOfGarden = false
 						let tileType: TileType = TileType.Grass
 						let tileColor = this._surroundingsDefaultColor
 						let defaultHeight = 0
 						if (x === 0 || 
-							x === this._HorizontalRemainingEmptyBlocksMin - 3) {
+							x === this._HorizontalRemainingEmptyBlocksMin - 4) {
 							if (useWaterGarden) {
 								tileColor = this._defaultColor
 								tileType = TileType.HalfBlock
@@ -331,30 +336,55 @@ export class Map {
 			for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {
 				for (let x = this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2; x < this._mapWidth; x++) {
 					if (!this._world[y][x].isDefined) {
+						let edgeOfGarden = false
+						let tileType: TileType = TileType.Grass
 						let tileColor = this._surroundingsDefaultColor
+						let defaultHeight = 0
 						if (x === this._mapWidth - 1 || 
 							x === this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2) {
-							tileColor = this._surroundingsSandColor
+							if (useWaterGarden) {
+								tileColor = this._defaultColor
+								tileType = TileType.HalfBlock
+								defaultHeight = 1
+							} else {
+								tileColor = this._surroundingsSandColor
+								tileType = TileType.Grass
+							}
 						} else if (
 								y === Math.floor(landsEdge / 2) + 1 ||
 								y === this.mapLength - Math.floor(landsEdge / 2) - 1) {
-							tileColor = this._surroundingsSandColor
+							if (useWaterGarden) {
+								tileColor = this._defaultColor
+								tileType = TileType.HalfBlock
+								defaultHeight = 1
+							} else {
+								tileColor = this._surroundingsSandColor
+								tileType = TileType.Grass
+							}
 						}
-						let grass = new Column(true, x, y, 0)
-						grass.tileStack = [new Tile(
-											this._blockIdIterator, 
-											x, 
-											y, 
-											0, 
-											TileType.Grass,
-											tileColor)]
-						this._world[y][x] = grass
+
+						let gardenBlock = new Column(true, x, y, defaultHeight)
+							gardenBlock.tileStack = [new Tile(
+												this._blockIdIterator, 
+												x, 
+												y, 
+												0, 
+												tileType,
+												tileColor)]
+						
+
+						this._world[y][x] = gardenBlock
+						this._blockIdIterator++
 					}
 				}
 			}
 		}
 
 		console.log(this._world)
+
+		/* 	
+		 *	Clear the edges and mirror the building
+		 */
 
 		this._world = this.mods.clearMapEdges(this)
 		this._world = this.mods.mirrorMap(this)
