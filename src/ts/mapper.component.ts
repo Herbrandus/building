@@ -1,5 +1,5 @@
 import { MapGenerationFunctions, BuildingHeightVariations, Color } from './mapGenerationFunctions.component'
-import { Tile, TileType } from './tile.component'
+import { Tile, TileType, TileOptions } from './tile.component'
 import { Config, Position } from './config.component'
 import { Primitives } from './primitives.component'
 import { Modifiers } from './modifiers.component'
@@ -41,6 +41,7 @@ export class Map {
 	private _surroundingsWaterColor: Color
 	private _surroundingsSandColor: Color
 	private _surroundingsDefaultColor: Color
+	private _showWindows: number
 
 	constructor(	
 			mapWidth: number, 
@@ -52,6 +53,7 @@ export class Map {
 			maximumBlockIterations: number,
 			pyramid: boolean)
 	{
+		this._world = []
 		this._mapWidth = mapWidth
 		this._mapLength = mapLength
 		this._mapMaxHeight = mapMaxHeight
@@ -79,6 +81,7 @@ export class Map {
 		this._surroundingsWaterColor = new Color('#6fb9ca')
 		this._surroundingsSandColor = new Color('#e9e3ba')
 		this._surroundingsDefaultColor = this._surroundingsGrassColor
+		this._showWindows = Math.round(Math.random() * 2)
 
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
@@ -89,16 +92,15 @@ export class Map {
 		let startblockLengthHalf = Math.floor(startblockLength / 2)
 		let startblockWidthHalf = Math.floor(startblockWidth / 2)
 		let startingPositionX = Math.floor(this._mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
-		let useWaterGarden = false
-
-		this._world = []
+		let buildGardens = !!(Math.round(Math.random() * 2))
+		let useWaterGarden = false		
 		let tileHeight = 0
 		let firstBlockHeight
 
-		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 2) {
+		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 3) {
 			useWaterGarden = true
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
-		} else if (Math.round(Math.random() * 4) >= 1) {
+		} else if (Math.round(Math.random() * 10) <= 1) {
 			useWaterGarden = true
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
 		}
@@ -122,6 +124,8 @@ export class Map {
 
 		let hollowBuildingBlock = (Math.round(Math.random()) === 1 ? true : false) 
 		let openGroundLevel = (Math.round(Math.random()) === 1 ? true : false) 
+
+		console.log('showWindows', this._showWindows)
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -154,7 +158,16 @@ export class Map {
 								}
 								tileType = TileType.None
 							}
+							if (this._decorationLineH > 3 && h+1 === this._decorationLineH && h+1 < firstBlockHeight) {
+								tileType = TileType.None
+								if (y % 2 === 0) {
+									thisPillar = true
+								}
+							}
 							let thisWindowed = 0
+							if (!thisPillar && this._showWindows > 0 && h % 2 === 1) {
+								thisWindowed = this._showWindows
+							}							
 							let isRoof = (h === firstBlockHeight-1) ? true : false
 							let tileColor = this._defaultColor
 
@@ -162,14 +175,7 @@ export class Map {
 								tileColor = this._lineColor
 							} else {
 								tileColor = this._defaultColor
-							}
-
-							if (this._decorationLineH > 3 && h+1 === this._decorationLineH && h+1 < firstBlockHeight) {
-								tileType = TileType.None
-								if (y % 2 === 0) {
-									thisPillar = true
-								}
-							}
+							}							
 
 							tileStack.push(
 								new Tile(
@@ -180,12 +186,12 @@ export class Map {
 									tileType,
 									tileColor,
 									{
-										'roof':			isRoof,
-										'pillar': 		thisPillar,
-										'slope':		isSlope,
-										'windowed': 	thisWindowed,
-										'tower': 		false,
-										'stairs':		false
+										roof:		isRoof,
+										pillar: 	thisPillar,
+										slope:		isSlope,
+										windowed: 	thisWindowed,
+										tower: 		false,
+										stairs:		false
 									})
 								)
 
@@ -272,115 +278,116 @@ export class Map {
 		 *	Add gardens or other ornamental features around the building
 		 */
 
-		this._HorizontalRemainingEmptyBlocksMin = this.getLeastOpenSpaceOnX()['min']
-		this._HorizontalRemainingEmptyBlocksMax = this.getLeastOpenSpaceOnX()['max']
+		if (buildGardens) {
 
-		if (this._HorizontalRemainingEmptyBlocksMin > 7) {
+			this._HorizontalRemainingEmptyBlocksMin = this.getLeastOpenSpaceOnX()['min']
+			this._HorizontalRemainingEmptyBlocksMax = this.getLeastOpenSpaceOnX()['max']
 
-			let landsLength = this._HorizontalRemainingEmptyBlocksMin * 2
-			if (landsLength > 16) landsLength = 16
-			let landsEdge = this._mapLength - landsLength
+			if (this._HorizontalRemainingEmptyBlocksMin > 7) {
 
-			for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {				
-				for (let x = 0; x < this._HorizontalRemainingEmptyBlocksMin - 3; x++) {
-					if (!this._world[y][x].isDefined) {
-						let edgeOfGarden = false
-						let tileType: TileType = TileType.Grass
-						let tileColor = this._surroundingsDefaultColor
-						let defaultHeight = 0
-						if (x === 0 || 
-							x === this._HorizontalRemainingEmptyBlocksMin - 4) {
-							if (useWaterGarden) {
-								tileColor = this._defaultColor
-								tileType = TileType.HalfBlock
-								defaultHeight = 1
-							} else {
-								tileColor = this._surroundingsSandColor
-								tileType = TileType.Grass
+				let landsLength = this._HorizontalRemainingEmptyBlocksMin * 2
+				if (landsLength > 16) landsLength = 16
+				let landsEdge = this._mapLength - landsLength
+
+				for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {				
+					for (let x = 0; x < this._HorizontalRemainingEmptyBlocksMin - 3; x++) {
+						if (!this._world[y][x].isDefined) {
+							let edgeOfGarden = false
+							let tileType: TileType = TileType.Grass
+							let tileColor = this._surroundingsDefaultColor
+							let defaultHeight = 0
+							if (x === 0 || 
+								x === this._HorizontalRemainingEmptyBlocksMin - 4) {
+								if (useWaterGarden) {
+									tileColor = this._defaultColor
+									tileType = TileType.HalfBlock
+									defaultHeight = 1
+								} else {
+									tileColor = this._surroundingsSandColor
+									tileType = TileType.Grass
+								}
+							} else if (
+									(y === Math.floor(landsEdge / 2) + 1) ||
+									(y === this.mapLength - Math.floor(landsEdge / 2) - 1) ) {
+								if (useWaterGarden) {
+									tileColor = this._defaultColor
+									tileType = TileType.HalfBlock
+									defaultHeight = 1
+								} else {
+									tileColor = this._surroundingsSandColor
+									tileType = TileType.Grass
+								}
 							}
-						} else if (
-								(y === Math.floor(landsEdge / 2) + 1) ||
-								(y === this.mapLength - Math.floor(landsEdge / 2) - 1) ) {
-							if (useWaterGarden) {
-								tileColor = this._defaultColor
-								tileType = TileType.HalfBlock
-								defaultHeight = 1
-							} else {
-								tileColor = this._surroundingsSandColor
-								tileType = TileType.Grass
-							}
+
+							let gardenBlock = new Column(true, x, y, defaultHeight)
+								gardenBlock.tileStack = [new Tile(
+													this._blockIdIterator, 
+													x, 
+													y, 
+													0, 
+													tileType,
+													tileColor)]
+							
+
+							this._world[y][x] = gardenBlock
+							this._blockIdIterator++
 						}
+					}
+				}
+			}
 
-						let gardenBlock = new Column(true, x, y, defaultHeight)
-							gardenBlock.tileStack = [new Tile(
-												this._blockIdIterator, 
-												x, 
-												y, 
-												0, 
-												tileType,
-												tileColor)]
-						
+			if (this._HorizontalRemainingEmptyBlocksMax > 7) {
 
-						this._world[y][x] = gardenBlock
-						this._blockIdIterator++
+				let landsLength = this._HorizontalRemainingEmptyBlocksMax * 2
+				let landsEdge = this._mapLength - landsLength
+
+				for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {
+					for (let x = this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2; x < this._mapWidth; x++) {
+						if (!this._world[y][x].isDefined) {
+							let edgeOfGarden = false
+							let tileType: TileType = TileType.Grass
+							let tileColor = this._surroundingsDefaultColor
+							let defaultHeight = 0
+							if (x === this._mapWidth - 1 || 
+								x === this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2) {
+								if (useWaterGarden) {
+									tileColor = this._defaultColor
+									tileType = TileType.HalfBlock
+									defaultHeight = 1
+								} else {
+									tileColor = this._surroundingsSandColor
+									tileType = TileType.Grass
+								}
+							} else if (
+									y === Math.floor(landsEdge / 2) + 1 ||
+									y === this.mapLength - Math.floor(landsEdge / 2) - 1) {
+								if (useWaterGarden) {
+									tileColor = this._defaultColor
+									tileType = TileType.HalfBlock
+									defaultHeight = 1
+								} else {
+									tileColor = this._surroundingsSandColor
+									tileType = TileType.Grass
+								}
+							}
+
+							let gardenBlock = new Column(true, x, y, defaultHeight)
+								gardenBlock.tileStack = [new Tile(
+													this._blockIdIterator, 
+													x, 
+													y, 
+													0, 
+													tileType,
+													tileColor)]
+							
+
+							this._world[y][x] = gardenBlock
+							this._blockIdIterator++
+						}
 					}
 				}
 			}
 		}
-
-		if (this._HorizontalRemainingEmptyBlocksMax > 7) {
-
-			let landsLength = this._HorizontalRemainingEmptyBlocksMax * 2
-			let landsEdge = this._mapLength - landsLength
-
-			for (let y = Math.floor(landsEdge / 2); y < this.mapLength - Math.floor(landsEdge / 2); y++) {
-				for (let x = this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2; x < this._mapWidth; x++) {
-					if (!this._world[y][x].isDefined) {
-						let edgeOfGarden = false
-						let tileType: TileType = TileType.Grass
-						let tileColor = this._surroundingsDefaultColor
-						let defaultHeight = 0
-						if (x === this._mapWidth - 1 || 
-							x === this._mapWidth - this._HorizontalRemainingEmptyBlocksMax + 2) {
-							if (useWaterGarden) {
-								tileColor = this._defaultColor
-								tileType = TileType.HalfBlock
-								defaultHeight = 1
-							} else {
-								tileColor = this._surroundingsSandColor
-								tileType = TileType.Grass
-							}
-						} else if (
-								y === Math.floor(landsEdge / 2) + 1 ||
-								y === this.mapLength - Math.floor(landsEdge / 2) - 1) {
-							if (useWaterGarden) {
-								tileColor = this._defaultColor
-								tileType = TileType.HalfBlock
-								defaultHeight = 1
-							} else {
-								tileColor = this._surroundingsSandColor
-								tileType = TileType.Grass
-							}
-						}
-
-						let gardenBlock = new Column(true, x, y, defaultHeight)
-							gardenBlock.tileStack = [new Tile(
-												this._blockIdIterator, 
-												x, 
-												y, 
-												0, 
-												tileType,
-												tileColor)]
-						
-
-						this._world[y][x] = gardenBlock
-						this._blockIdIterator++
-					}
-				}
-			}
-		}
-
-		console.log(this._world)
 
 		/* 	
 		 *	Clear the edges and mirror the building
@@ -494,6 +501,10 @@ export class Map {
 		return { lineColor: this._lineColor }
 	}
 
+	get showWindows(): number {
+		return this._showWindows
+	}
+
 	public getColumn(x, y): Column {
 		return this._world[y][x]
 	}
@@ -577,10 +588,10 @@ export class Map {
 						}
 					}
 
-					if ( (this._world[y][x].edge['top'] && this._world[y][x].edge['right']) ||
-						 (this._world[y][x].edge['top'] && this._world[y][x].edge['left']) ||
-						 (this._world[y][x].edge['bottom'] && this._world[y][x].edge['right']) ||
-						 (this._world[y][x].edge['bottom'] && this._world[y][x].edge['left']) ) {
+					if ( (this._world[y][x].edge.top && this._world[y][x].edge.right) ||
+						 (this._world[y][x].edge.top && this._world[y][x].edge.left) ||
+						 (this._world[y][x].edge.bottom && this._world[y][x].edge.right) ||
+						 (this._world[y][x].edge.bottom && this._world[y][x].edge.left) ) {
 						this._world[y][x].corner = true
 					}
 				}				
@@ -674,7 +685,7 @@ export class Column {
 	private _height: number
 	private _blockGroup: number
 	private _corner: boolean
-	private _edge: object = { 'top': false, 'right': false, 'bottom': false, 'left': false }
+	private _edge: ColumnEdge = { top: false, right: false, bottom: false, left: false }
 	private _tileStack: Tile[] = []
 
 	constructor(private defined: boolean, private colX: number, private colY: number, private colHeight: number) {
@@ -704,7 +715,7 @@ export class Column {
 		this._corner = corner
 	}
 
-	set edge(edge: object) {
+	set edge(edge: ColumnEdge) {
 		this._edge = edge
 	}
 
@@ -736,7 +747,7 @@ export class Column {
 		return this._corner
 	}
 
-	get edge(): object {
+	get edge(): ColumnEdge {
 		return this._edge
 	}
 
@@ -751,4 +762,11 @@ export class Column {
 	public removeTopTile(): void {
 		this._tileStack.pop()
 	}
+}
+
+export interface ColumnEdge {
+	top: boolean,
+	right: boolean,
+	bottom: boolean,
+	left: boolean
 }

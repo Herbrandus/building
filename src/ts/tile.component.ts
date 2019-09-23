@@ -8,7 +8,7 @@ export class Tile {
 	_h: number
 	_tileType: TileType
 	_tileColor: Color
-	_options?: object = {}
+	_options?: TileOptions
 
 	constructor(			
 			id: number,
@@ -17,7 +17,7 @@ export class Tile {
 			h: number,
 			tileType: TileType,
 			tileColor: Color,
-			options?: object)
+			options?: TileOptions)
 	{
 		this._id = id
 		this._x = x
@@ -51,11 +51,11 @@ export class Tile {
 		return this._tileType
 	}
 
-	get options(): object {
+	get options(): TileOptions | undefined {
 		if (this._options) {
 			return this._options
 		} else {
-			return { 'defined': false }
+			return undefined
 		}
 	}
 
@@ -74,7 +74,15 @@ export class Tile {
 	set type(type: TileType) {
 		this._tileType = type
 	}
+}
 
+export interface TileOptions {
+	roof: boolean,
+	pillar: boolean,
+	slope: boolean,
+	windowed: number,
+	tower: boolean,
+	stairs:	boolean
 }
 
 export enum TileType {

@@ -1,6 +1,7 @@
 import { Config, Coords, TileTemplate, Position } from './config.component'
 import { MapGenerationFunctions, Color } from './mapGenerationFunctions.component'
 import { Tile, TileType } from './tile.component'
+import { Column, ColumnEdge } from './mapper.component'
 
 export class RenderElements {
 
@@ -97,12 +98,12 @@ export class RenderElements {
 			regularColor = this.config.buildingBaseColor.hex()
 			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
 			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
-		}	
+		}
 
-		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
 
 		let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
 		let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
@@ -119,7 +120,8 @@ export class RenderElements {
 		let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 		let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
-		let html = `<g style="z-index:${id};"><path fill="${darkestColor}"
+		let html = `<g style="z-index:${id};">
+					<path fill="${darkestColor}"
 					d="M${leftWallLeftTop} 
 					L${leftWallLeftBottom} 
 					L${leftWallRightBottom} 
@@ -136,7 +138,8 @@ export class RenderElements {
 					L${blockTopBottom} 
 					L${blockTopRight} 
 					L${blockTopTop} 
-					L${blockTopLeft} Z" /></g>`
+					L${blockTopLeft} Z" />
+				</g>`
 
 		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 
@@ -546,6 +549,101 @@ export class RenderElements {
 
 		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 
-		return { html: html.replace(/\n|\r|\t/g, ''), coords: coords }
+		return { html: html, coords: coords }
+	}
+
+	createWindow(xPos: number, yPos: number, tile: Tile, columnInfo: Column): TileTemplate {
+
+		let id = tile.id
+		let height = (tile.h * this.tileH) - this.tileH
+		let regularColor
+		let darkestColor
+		let highlight
+		let highlightLeft
+		let highlightRight
+		let html
+
+		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
+			regularColor = tile.tileColor.hex()
+			highlight = tile.tileColor.changeColorLightingString(30)
+			darkestColor = tile.tileColor.changeColorLightingString(-60)
+			highlightLeft = tile.tileColor.changeColorLightingString(15)
+			highlightRight = tile.tileColor.changeColorLightingString(30)
+		} else {
+			regularColor = this.config.buildingBaseColor.hex()
+			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(15)
+			highlightRight = this.config.buildingBaseColor.changeColorLightingString(30)
+		}
+
+		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+
+		let size = 4
+
+		if (tile.options.windowed === 2) {
+			size = 6
+		}
+
+		let windowBorderWidth = (top.x - left.x) / 10		
+		let sizeModifierY = (bottom.y - top.y) / size
+		let isometricHeightDifferenceLeft = (bottom.y - left.y) / size
+		let isometricHeightDifferenceRight = (bottom.y - right.y) / size
+
+		html += `<g style="z-index:${id+columnInfo.height};">`
+
+		if (columnInfo.edge.bottom) {
+
+			let sizeModifierX = (top.x - left.x) / size
+
+			let leftEdge = left.x + sizeModifierX
+			let rightEdge = top.x - sizeModifierX
+			let topEdge = top.y + sizeModifierY + 2
+			let bottomEdge = top.y + this.tileH - sizeModifierY
+
+			let windowInsideLeftTop = `${leftEdge} ${topEdge - height - isometricHeightDifferenceLeft}`
+			let windowInsideLeftBottom = `${leftEdge} ${bottomEdge - height - isometricHeightDifferenceLeft}`
+			let windowInsideRightBottom = `${rightEdge} ${bottomEdge - height}`
+			let windowInsideRightTop = `${rightEdge} ${topEdge - height}`
+
+			html += `<path fill="#111"
+						d="M${windowInsideLeftTop} 
+						L${windowInsideLeftBottom} 
+						L${windowInsideRightBottom} 
+						L${windowInsideRightTop} 
+						L${windowInsideLeftTop} Z" />`
+
+		} 
+
+		if (columnInfo.edge.right) {
+
+			let sizeModifierX = (right.x - top.x) / size
+
+			let leftEdge = top.x + sizeModifierX
+			let rightEdge = right.x - sizeModifierX
+			let topEdge = top.y + sizeModifierY
+			let bottomEdge = top.y + this.tileH - sizeModifierY
+
+			let windowInsideLeftTop = `${leftEdge} ${topEdge - height}`
+			let windowInsideLeftBottom = `${leftEdge} ${bottomEdge - height}`
+			let windowInsideRightBottom = `${rightEdge} ${bottomEdge - height - isometricHeightDifferenceRight}`
+			let windowInsideRightTop = `${rightEdge} ${topEdge - height - isometricHeightDifferenceRight}`
+
+			html += `<path fill="#111"
+						d="M${windowInsideLeftTop} 
+						L${windowInsideLeftBottom} 
+						L${windowInsideRightBottom} 
+						L${windowInsideRightTop} 
+						L${windowInsideLeftTop} Z" />`
+		}
+
+		html += `</g>`
+
+		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
+
+		return { html: html, coords: coords }
 	}
 }

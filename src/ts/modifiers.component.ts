@@ -1,6 +1,6 @@
 import { Map, Column } from './mapper.component'
 import { MapGenerationFunctions, BuildingHeightVariations, Color } from './mapGenerationFunctions.component'
-import { Tile, TileType } from './tile.component'
+import { Tile, TileType, TileOptions } from './tile.component'
 import { Config, Position } from './config.component'
 
 export class Modifiers {
@@ -32,29 +32,54 @@ export class Modifiers {
 							for (let h = 0; h < height; h++) {
 
 								let tileColor = activeCol.tileStack[h].tileColor
-								let thisPillar = activeCol.tileStack[h].options["pillar"]
-								let thisWindowed = activeCol.tileStack[h].options["windowed"]
-								let isTower = activeCol.tileStack[h].options["tower"]
-								let stairs = activeCol.tileStack[h].options["stairs"]
 
-								let isRoof = (h === height-1) ? true : false
+								let thisPillar
+								let slope
+								let thisWindowed
+								let isTower
+								let stairs
+								let isRoof
 
-								tileStack.push(
-									new Tile(
-										world.blockIdIterator, 
-										x, 
-										y, 
-										h, 
-										activeCol.tileStack[h].type,
-										tileColor,
-										{
-											'roof':			isRoof ? true : false,
-											'pillar': 		thisPillar ? true : false,
-											'windowed': 	thisWindowed ? true : false,
-											'tower': 		isTower ? true : false,
-											'stairs':		stairs ? true : false
-										})
+								if (activeCol.tileStack[h].options) {
+									thisPillar = activeCol.tileStack[h].options.pillar
+									slope = activeCol.tileStack[h].options.slope
+									thisWindowed = activeCol.tileStack[h].options.windowed
+									isTower = activeCol.tileStack[h].options.tower
+									stairs = activeCol.tileStack[h].options.stairs
+									isRoof = (h === height-1) ? true : false
+
+									tileStack.push(
+										new Tile(
+											world.blockIdIterator, 
+											x, 
+											y, 
+											h, 
+											activeCol.tileStack[h].type,
+											tileColor,
+											{
+												roof: isRoof,
+												pillar: thisPillar,
+												slope: slope,
+												windowed: thisWindowed,
+												tower: isTower,
+												stairs:	stairs
+											}
+										)
 									)
+									
+								} else {
+									tileStack.push(
+										new Tile(
+											world.blockIdIterator, 
+											x, 
+											y, 
+											h, 
+											activeCol.tileStack[h].type,
+											tileColor											
+										)
+									)
+								}
+								
 
 								world.blockIdIterator++
 							}
@@ -115,6 +140,7 @@ export class Modifiers {
 
 				let nextHeight
 				let openFloor = 0
+				let showWindows = world.showWindows
 
 				if (world.blockHeightVariation === BuildingHeightVariations.TallCenter) {
 					nextHeight = world.blockHeight - (world.blockAmountIterator)
@@ -183,10 +209,16 @@ export class Modifiers {
 									for (let h = 0; h < nextHeight; h++) {
 
 										let thisPillar = false
-										let thisWindowed = false
+										let thisWindowed = 0
+										if (showWindows > 0 && h % 2 === 1) {
+											thisWindowed = showWindows
+										}	
 										let isRoof = (h === nextHeight-1) ? true : false
 										let tileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
 										let tileType = TileType.Body
+										let slope = false
+										let isTower = false
+										let stairs = false
 
 										if (openFloor > 0 && (h === openFloor)) {
 											tileType = TileType.None
@@ -214,10 +246,12 @@ export class Modifiers {
 												tileType,
 												tileColor,
 												{
-													'roof':			isRoof,
-													'pillar': 		thisPillar,
-													'windowed': 	thisWindowed,
-													'tower': 		false
+													roof: isRoof,
+													pillar: thisPillar,
+													slope: slope,
+													windowed: thisWindowed,
+													tower: isTower,
+													stairs:	stairs
 												})
 											)								
 

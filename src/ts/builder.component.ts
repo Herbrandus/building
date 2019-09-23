@@ -141,24 +141,35 @@ export class Renderer {
 						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], shadowColor).html
 
 						for (let h = 0; h < map[y][x].height; h++) {
-							if (map[y][x].tileStack[h].type === TileType.Body) {
-								let tile = this.render.createBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+
+							let currentTile = map[y][x].tileStack[h]
+
+							if (currentTile.type === TileType.Body) {
+								let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, currentTile)
 								newData += tile.html
+
+								if (currentTile.options.windowed > 0) {
+									//let window = this.render.createWindow(thisPosX, thisPosY - (this.config.tileHeight * h), currentTile, map[y][x])
+									//newData += window.html
+								}								
 
 								if (this.config.allowDebug) {
 									if (h === map[y][x].height - 1) {
-										let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${map[y][x].tileStack[h].id}  h: ${h}</span>`
+										let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${currentTile.id}  h: ${h}</span>`
 										detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
 									}
 								}
-							} else if (map[y][x].tileStack[h].type === TileType.HalfBlock) {
-								let tile = this.render.createHalfBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+
+							} else if (currentTile.type === TileType.HalfBlock) {
+
+								let tile = this.render.createHalfBlock(thisPosX, thisPosY- this.config.tileHeight, currentTile)
 								newData += tile.html
 
-							} else if (map[y][x].tileStack[h].type === TileType.None) {
-								if (map[y][x].tileStack[h].options["pillar"] && h < map[y][x].height) {
+							} else if (currentTile.type === TileType.None) {
+
+								if (currentTile.options.pillar && h < map[y][x].height) {
 									if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
-										let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, map[y][x].tileStack[h])
+										let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, currentTile)
 										newData += pillar.html
 									}
 								}
