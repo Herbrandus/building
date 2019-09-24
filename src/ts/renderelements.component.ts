@@ -646,4 +646,118 @@ export class RenderElements {
 
 		return { html: html, coords: coords }
 	}
+
+	createHalfArch(xPos: number, yPos: number, tile: Tile, orientation: string): TileTemplate {
+
+		let id = tile.id
+		let height = (tile.h * this.tileH) - this.tileH
+		let regularColor
+		let darkestColor
+		let highlight
+		let highlightLeft
+		let highlightRight
+		let html
+
+		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
+			regularColor = tile.tileColor.hex()
+			highlight = tile.tileColor.changeColorLightingString(30)
+			darkestColor = tile.tileColor.changeColorLightingString(-60)
+			highlightLeft = tile.tileColor.changeColorLightingString(15)
+			highlightRight = tile.tileColor.changeColorLightingString(30)
+		} else {
+			regularColor = this.config.buildingBaseColor.hex()
+			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(15)
+			highlightRight = this.config.buildingBaseColor.changeColorLightingString(30)
+		}
+
+		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+
+		if (orientation === 'right-bottom') {
+
+			let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+			let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+
+			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+
+			let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
+			let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+
+			html = `<g style="z-index:${id};">
+						<path fill="${darkestColor}"
+						d="M${leftWallLeftTop} 
+						L${leftWallLeftBottom} 
+						L${leftWallRightBottom} 
+						L${leftWallRightTop} 
+						L${leftWallLeftTop} Z" />
+						<path fill="${regularColor}"
+						d="M${rightWallLeftTop} 
+						L${rightWallLeftBottom} 
+						L${rightWallRightBottom} 
+						L${rightWallRightTop} 
+						L${rightWallLeftTop} Z" />
+						<path fill="${highlight}"
+						d="M${blockTopLeft} 
+						L${blockTopBottom} 
+						L${blockTopRight} 
+						L${blockTopTop} 
+						L${blockTopLeft} Z" />
+					</g>`
+
+		} 
+
+		if (orientation === 'right-top') {
+
+			let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+			let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+
+			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+
+			let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
+			let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+
+			html = `<g style="z-index:${id};">
+						<path fill="${darkestColor}"
+						d="M${leftWallLeftTop} 
+						L${leftWallLeftBottom} 
+						L${leftWallRightBottom} 
+						L${leftWallRightTop} 
+						L${leftWallLeftTop} Z" />
+						<path fill="${regularColor}"
+						d="M${rightWallLeftTop} 
+						L${rightWallLeftBottom} 
+						L${rightWallRightBottom} 
+						L${rightWallRightTop} 
+						L${rightWallLeftTop} Z" />
+						<path fill="${highlight}"
+						d="M${blockTopLeft} 
+						L${blockTopBottom} 
+						L${blockTopRight} 
+						L${blockTopTop} 
+						L${blockTopLeft} Z" />
+					</g>`
+		}
+
+		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
+
+		return { html: html, coords: coords }
+	}
 }

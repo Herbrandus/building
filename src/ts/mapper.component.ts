@@ -191,7 +191,9 @@ export class Map {
 										slope:		isSlope,
 										windowed: 	thisWindowed,
 										tower: 		false,
-										stairs:		false
+										stairs:		false,
+										halfArch: 	false,
+										wholeArch:	false
 									})
 								)
 
@@ -278,7 +280,7 @@ export class Map {
 		 *	Add gardens or other ornamental features around the building
 		 */
 
-		if (buildGardens) {
+		if (this.config.allowSurroundingDecorations && buildGardens) {
 
 			this._HorizontalRemainingEmptyBlocksMin = this.getLeastOpenSpaceOnX()['min']
 			this._HorizontalRemainingEmptyBlocksMax = this.getLeastOpenSpaceOnX()['max']
@@ -541,7 +543,8 @@ export class Map {
 		this._world = this.mods.addBuildingComponent(this)
 		this._world = this.mods.mirrorMap(this)
 		this._world = this.mods.clearMapEdges(this)
-		this.setEdges(false)		
+		this.setEdges(false)
+		console.log(this._world)	
 	}
 
 	setEdges(considerLowerEdges: boolean): void {

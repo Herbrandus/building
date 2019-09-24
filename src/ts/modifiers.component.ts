@@ -39,6 +39,8 @@ export class Modifiers {
 								let isTower
 								let stairs
 								let isRoof
+								let halfArches
+								let wholeArch
 
 								if (activeCol.tileStack[h].options) {
 									thisPillar = activeCol.tileStack[h].options.pillar
@@ -47,6 +49,8 @@ export class Modifiers {
 									isTower = activeCol.tileStack[h].options.tower
 									stairs = activeCol.tileStack[h].options.stairs
 									isRoof = (h === height-1) ? true : false
+									halfArches = activeCol.tileStack[h].options.halfArch
+									wholeArch = activeCol.tileStack[h].options.wholeArch
 
 									tileStack.push(
 										new Tile(
@@ -62,7 +66,9 @@ export class Modifiers {
 												slope: slope,
 												windowed: thisWindowed,
 												tower: isTower,
-												stairs:	stairs
+												stairs:	stairs,
+												halfArch: halfArches,
+												wholeArch: wholeArch
 											}
 										)
 									)
@@ -181,14 +187,43 @@ export class Modifiers {
 					hollowBuildingBlock = false
 				}
 
-				for (let y = 0; y < world.mapLength; y++) {
+				let chanceForHigherSpace = Math.round(Math.random() * 8)
+				let changeForHighCorridor = true // Math.round(Math.random() * 8) > 5 ? true : false
+
+				let yLowEdge = creationPoint.y - yStartOffset + 1
+				let yHighEdge = creationPoint.y + nextBlockLength - yStartOffset - 1
+				let xLowEdge = creationPoint.x - (nextBlockWidth / 2) + 1
+				let xHighEdge = creationPoint.x + (nextBlockWidth / 2) - 1
+				let yEdgeLowActive = false
+				let yEdgeHighActive = false				
+
+				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
+
+				for (let y = 0; y < world.mapLength; y++) {	
+
+					if (yLowEdge === y) {
+						yEdgeLowActive = true
+					} else if (yHighEdge === y) {
+						yEdgeHighActive = true
+					} else {
+						yEdgeLowActive = false
+						yEdgeHighActive = false
+					}
+
+					let xEdgeLowActive = false
+					let xEdgeHighActive = false
+
 					for (let x = 0; x < world.mapWidth; x++) {
 
-						let yConditions = x > (creationPoint.x - (nextBlockWidth / 2)) && x < (creationPoint.x + (nextBlockWidth / 2))
-						let xConditions = (y > creationPoint.y - yStartOffset && y < creationPoint.y + nextBlockLength - yStartOffset)
-						
-						if (yConditions) {
-							if (xConditions) {
+						if (x === xLowEdge) {
+							xEdgeLowActive = true
+						} else if (x === xHighEdge) {
+							xEdgeHighActive = true
+						}
+
+						if (y >= yLowEdge && y <= yHighEdge) {
+
+							if (x >= xLowEdge && x <= xHighEdge) {
 
 								let createCol = true
 
@@ -214,22 +249,59 @@ export class Modifiers {
 											thisWindowed = showWindows
 										}	
 										let isRoof = (h === nextHeight-1) ? true : false
-										let tileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
-										let tileType = TileType.Body
 										let slope = false
+										let tileColor = defaultTileColor									
+										let tileType = TileType.Body										
 										let isTower = false
 										let stairs = false
+										let thisHalfArch = false
+										let thisWholeArch = false
 
-										if (openFloor > 0 && (h === openFloor)) {
-											tileType = TileType.None
-											if (y % 2 === 0 && x % 2 !== 0) {
-												thisPillar = true
+										if (nextHeight > 6) {
+											if (changeForHighCorridor) {
+
+												if (nextBlockLength > 4) {
+
+													let maxWallPoint = creationPoint.y + 5
+													if (creationPoint.y + 5 > creationPoint.y + (nextBlockLength / 2)) {
+														maxWallPoint = creationPoint.y + 4
+													}
+
+													if (y > creationPoint.y + 1 && y < maxWallPoint) {
+														if (h < nextHeight - 2) {
+															tileType = TileType.None
+
+															if (creationPoint.y + 5 > 27) {
+																if (y % 2 === 0 && x % 2 !== 0) {
+																	thisPillar = true
+																}																
+															}
+
+															if (h === nextHeight - 3) {
+																thisHalfArch = true
+															}
+														}
+													} 
+												}
+
+											} else {
+												if (chanceForHigherSpace > 4) {
+													if (openFloor > 0 && (h === openFloor || h+1 === openFloor)) {
+														tileType = TileType.None
+														if (y % 2 === 0 && x % 2 !== 0) {
+															thisPillar = true
+														}
+													}
+												} else {
+													if (nextHeight > 7 && openFloor > 0 && h > openFloor && h < openFloor + 4) {
+														tileType = TileType.None
+														if (y % 2 === 0 && x % 2 !== 0) {
+															thisPillar = true
+														}
+													}
+												}
 											}
-										} else if (openFloor < 5 && nextHeight > 6 && h+1 === openFloor) {
-											if (y % 2 === 0 && x % 2 !== 0) {
-												thisPillar = true
-											}
-										}
+										}																				
 
 										if (h === world.lineHeight) {								
 											tileColor = world.decorativeColors['lineColor']
@@ -251,13 +323,17 @@ export class Modifiers {
 													slope: slope,
 													windowed: thisWindowed,
 													tower: isTower,
-													stairs:	stairs
+													stairs:	stairs,
+													halfArch: thisHalfArch,
+													wholeArch: thisWholeArch
 												})
 											)								
 
 										world.blockHeightsArray.push(nextHeight)
 
 										world.blockIdIterator++
+
+										tileColor = undefined
 									}
 
 									if (world.blockGroups.indexOf(blockGroup) === -1) {

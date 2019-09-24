@@ -17,6 +17,7 @@ export class Config {
 	private _tileEdgeBleed: number = 0.3
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
+	private _allowSurroundingDecorations: boolean = false
 
 	constructor() {	}	
 
@@ -62,6 +63,10 @@ export class Config {
 
 	public get topMargin(): number {
 		return this._topMargin
+	}
+
+	public get allowSurroundingDecorations(): boolean {
+		return this._allowSurroundingDecorations
 	}
 
 	public getMapWidth(mapArrayWidth: number): number {
