@@ -173,6 +173,22 @@ export class Renderer {
 										newData += pillar.html
 									}
 								}
+
+								if (currentTile.options.halfArch) {
+
+									console.log('x: '+x+', y: '+y)
+									console.log('map[y-1][x]', map[y-1][x])
+									console.log('map[y][x]', map[y][x])
+									console.log('map[y+1][x]', map[y+1][x])
+
+									if (map[y+1][x].isDefined && map[y+1][x].height > 0 && map[y+1][x].height >= h && map[y+1][x].tileStack[h].type === TileType.None) {
+										let arch = this.render.createHalfArch(thisPosX, thisPosY - this.config.tileHeight, currentTile, 'right-top')
+										newData += arch.html
+									} else if (map[y-1][x].isDefined && map[y-1][x].height > 0 && map[y-1][x].height >= h && map[y-1][x].tileStack[h].type === TileType.None) {
+										let arch = this.render.createHalfArch(thisPosX, thisPosY - this.config.tileHeight, currentTile, 'right-bottom')
+										newData += arch.html
+									}
+								}
 							}
 						}
 					}					

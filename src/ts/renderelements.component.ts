@@ -677,6 +677,8 @@ export class RenderElements {
 		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
 		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
 
+		let halfTileWidth = ((right.x - bottom.x) / 3)
+
 		if (orientation === 'right-bottom') {
 
 			let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
@@ -686,7 +688,8 @@ export class RenderElements {
 
 			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
 			let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let rightWallLeftBottomBezier = `${bottom.x} ${bottom.y-height-(this.tileH * 0.5)}`
+			let rightWallRightTopBezier = `${bottom.x + (halfTileWidth*0.4)} ${bottom.y-height-this.tileH}`
 			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 
 			let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
@@ -703,9 +706,8 @@ export class RenderElements {
 						L${leftWallLeftTop} Z" />
 						<path fill="${regularColor}"
 						d="M${rightWallLeftTop} 
-						L${rightWallLeftBottom} 
-						L${rightWallRightBottom} 
-						L${rightWallRightTop} 
+						L${rightWallLeftBottom}
+						C${rightWallLeftBottomBezier}, ${rightWallRightTopBezier}, ${rightWallRightTop}
 						L${rightWallLeftTop} Z" />
 						<path fill="${highlight}"
 						d="M${blockTopLeft} 
@@ -725,7 +727,8 @@ export class RenderElements {
 			let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
 
 			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			let rightWallLeftTopBezier = `${right.x+this.bleed-(halfTileWidth*0.3)} ${right.y-height-(this.tileH*0.7)}`
+			let rightWallRightBottomBezier = `${right.x+this.bleed} ${right.y-height-(this.tileH*0.7)}`
 			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
 			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 
@@ -734,17 +737,21 @@ export class RenderElements {
 			let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
+			let blockBackRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			let blockBackLeftBottom = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			let blockBackLeftTop = `${top.x-this.bleed} ${top.y-height-this.tileH}`
+			let blockBackRightTop = `${top.x-this.bleed} ${top.y-height}`
+
 			html = `<g style="z-index:${id};">
 						<path fill="${darkestColor}"
-						d="M${leftWallLeftTop} 
-						L${leftWallLeftBottom} 
-						L${leftWallRightBottom} 
-						L${leftWallRightTop} 
-						L${leftWallLeftTop} Z" />
+						d="M${blockBackRightBottom} 
+						L${blockBackLeftBottom} 
+						L${blockBackLeftTop} 
+						L${blockBackRightTop} 
+						L${blockBackRightBottom} Z" />
 						<path fill="${regularColor}"
 						d="M${rightWallLeftTop} 
-						L${rightWallLeftBottom} 
-						L${rightWallRightBottom} 
+						C${rightWallLeftTopBezier}, ${rightWallRightBottomBezier}, ${rightWallRightBottom}
 						L${rightWallRightTop} 
 						L${rightWallLeftTop} Z" />
 						<path fill="${highlight}"
