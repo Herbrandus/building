@@ -728,7 +728,7 @@ export class RenderElements {
 
 			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
 			let rightWallLeftTopBezier = `${right.x+this.bleed-(halfTileWidth*0.3)} ${right.y-height-(this.tileH*0.7)}`
-			let rightWallRightBottomBezier = `${right.x+this.bleed} ${right.y-height-(this.tileH*0.7)}`
+			let rightWallRightBottomBezier = `${right.x} ${right.y-height-(this.tileH*0.4)}`
 			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
 			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 

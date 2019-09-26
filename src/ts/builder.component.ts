@@ -51,11 +51,19 @@ export class Renderer {
 					let tile = map.getTopTile(x, y)
 					let tileTopColor = tile.getColor().rgb()
 					let tileColor = `rgb(${tileTopColor['r']}, ${tileTopColor['g']}, ${tileTopColor['b']})`
-
+					let emptyBlocksPresent = false
+					for (let h = 0; h < map.map[y][x].height; h++) {
+						if (map.map[y][x].tileStack[h].type === TileType.None) {
+							emptyBlocksPresent = true
+							break;
+						}
+					}
 					let edge = (map.map[y][x].edge.top || map.map[y][x].edge.right || map.map[y][x].edge.bottom || map.map[y][x].edge.left) ? true : false
 					let blockGroup = map.map[y][x].blockGroup
 
-					htmlMap += `background-color:${tileColor}"><div class="tileInfo">x: ${x} y: ${y}<br>height: ${map.map[y][x].height}<br>edge: ${edge}<br>group: ${blockGroup}</div></div>`
+					let indicateEmptyBlocks = emptyBlocksPresent ? 'x' : ''
+
+					htmlMap += `background-color:${tileColor}">${indicateEmptyBlocks}<div class="tileInfo">x: ${x} y: ${y}<br>height: ${map.map[y][x].height}<br>edge: ${edge}<br>group: ${blockGroup}</div></div>`
 
 				} else {
 
@@ -143,6 +151,22 @@ export class Renderer {
 						for (let h = 0; h < map[y][x].height; h++) {
 
 							let currentTile = map[y][x].tileStack[h]
+							let options
+
+							if (currentTile.options) {
+								options = currentTile.options
+							} else {
+								options = {
+									roof: false,
+									pillar: false,
+									slope: false,
+									windowed: 0,
+									tower: false,
+									stairs:	false,
+									halfArch: false,
+									wholeArch: false
+								}
+							}
 
 							if (currentTile.type === TileType.Body) {
 								let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, currentTile)
@@ -160,12 +184,12 @@ export class Renderer {
 									}
 								}
 
-							} else if (currentTile.type === TileType.HalfBlock) {
+							} else if (!options.tower && currentTile.type === TileType.HalfBlock) {
 
 								let tile = this.render.createHalfBlock(thisPosX, thisPosY- this.config.tileHeight, currentTile)
 								newData += tile.html
 
-							} else if (currentTile.type === TileType.None) {
+							} else if (!options.tower && currentTile.type === TileType.None) {
 
 								if (currentTile.options.pillar && h < map[y][x].height) {
 									if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
@@ -176,19 +200,17 @@ export class Renderer {
 
 								if (currentTile.options.halfArch) {
 
-									console.log('x: '+x+', y: '+y)
-									console.log('map[y-1][x]', map[y-1][x])
-									console.log('map[y][x]', map[y][x])
-									console.log('map[y+1][x]', map[y+1][x])
-
-									if (map[y+1][x].isDefined && map[y+1][x].height > 0 && map[y+1][x].height >= h && map[y+1][x].tileStack[h].type === TileType.None) {
+									if (map[y+1][x].isDefined && map[y+1][x].height > 0 && map[y+1][x].height > h && map[y+1][x].tileStack[h].type === TileType.None) {
 										let arch = this.render.createHalfArch(thisPosX, thisPosY - this.config.tileHeight, currentTile, 'right-top')
 										newData += arch.html
-									} else if (map[y-1][x].isDefined && map[y-1][x].height > 0 && map[y-1][x].height >= h && map[y-1][x].tileStack[h].type === TileType.None) {
+									} else if (map[y-1][x].isDefined && map[y-1][x].height > 0 && map[y-1][x].height > h && map[y-1][x].tileStack[h].type === TileType.None) {
 										let arch = this.render.createHalfArch(thisPosX, thisPosY - this.config.tileHeight, currentTile, 'right-bottom')
 										newData += arch.html
 									}
 								}
+							} else if (currentTile.options.tower) {
+								let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, currentTile)
+								newData += tile.html
 							}
 						}
 					}					

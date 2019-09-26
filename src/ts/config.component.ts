@@ -17,7 +17,7 @@ export class Config {
 	private _tileEdgeBleed: number = 0.3
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
-	private _allowSurroundingDecorations: boolean = false
+	private _allowSurroundingDecorations: boolean = true
 
 	constructor() {	}	
 

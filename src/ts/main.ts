@@ -44,19 +44,52 @@ class RandomBuilding {
 
 		return tile.getColor()
 	}
+
+	public getImageTag(): void {
+		if (document.querySelector('#buildingimg')) {
+			document.querySelector('#buildingimg').remove()
+		}
+
+		let svg = new XMLSerializer().serializeToString(document.querySelector('svg'))
+		let base64 = window.btoa(svg)
+
+		let newImg = document.createElement('img')
+		newImg.setAttribute('id', 'buildingimg')
+		if (window['debug']) {
+			newImg.setAttribute('class', 'debug-active')
+		}
+		newImg.setAttribute('src', 'data:image/svg+xml;base64,'+base64)
+		
+		let beforeElement = document.querySelector('#worldtest')
+		let parent = document.querySelector("body")
+		parent.insertBefore(newImg, beforeElement)		
+	}
+}
+
+window['debug'] = false
+
+window['activateDebug'] = () => { 
+	window['debug'] = true
+	document.querySelector('#color').classList.remove('hide')
+	document.querySelector('#color-scheme').classList.remove('hide')
+	document.querySelector('#buildingimg').classList.add('debug-active')
+	document.querySelector('#color').innerHTML = building.colorMap()
 }
 
 let building = new RandomBuilding()
-document.querySelector('#color').innerHTML = building.colorMap()
+
 document.querySelector("#worldtest").innerHTML = building.drawTileMap()
+building.getImageTag()
 
 setColors(building)
 
 document.querySelector('#generate').addEventListener('click', () => {
 	building = new RandomBuilding()
-	document.querySelector('#color').innerHTML = building.colorMap()
+	if (window['debug']) {
+		document.querySelector('#color').innerHTML = building.colorMap()
+	}	
 	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
-	document.querySelector('#debugActive').classList.remove('active')
+	building.getImageTag()
 
 	document.querySelectorAll('.point').forEach((item) => {
 		item.addEventListener('click', () => {
@@ -67,20 +100,7 @@ document.querySelector('#generate').addEventListener('click', () => {
 
 	setColors(building)
 })
-
-document.querySelector('#redraw').addEventListener('click', () => {
-	building.addToBuildingAndRedraw()
-	document.querySelector('#color').innerHTML = building.colorMap()
-	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
-	document.querySelector('#debugActive').classList.remove('active')
-
-	document.querySelectorAll('.blockLabel').forEach((item) => {
-		item.addEventListener('click', () => {
-			item.classList.toggle('active')
-		})
-	})
-})
-
+/*
 document.querySelector('#debugActive').addEventListener('click', () => {
 	document.querySelector('#debug').classList.toggle('show')
 	document.querySelector('#debugActive').classList.toggle('active')
@@ -90,7 +110,7 @@ document.querySelectorAll('.blockLabel').forEach((item) => {
 	item.addEventListener('click', () => {
 		item.classList.toggle('active')
 	})
-})
+}) */
 
 function setColors(building: RandomBuilding) {
 
@@ -115,3 +135,12 @@ function setColors(building: RandomBuilding) {
 
 	document.querySelector('#color-scheme').innerHTML = colorDivs
 }
+/*
+document.querySelector('#download').addEventListener('click', () => {
+	let svg = new XMLSerializer().serializeToString(document.querySelector('svg'))
+	let base64 = window.btoa(svg)
+
+	let newImg = document.createElement('img')
+	newImg.setAttribute('src', 'data:image/svg+xml;base64,'+base64)
+	document.querySelector('body').appendChild(newImg)
+}); */

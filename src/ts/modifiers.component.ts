@@ -6,6 +6,7 @@ import { Config, Position } from './config.component'
 export class Modifiers {
 
 	private config: Config = new Config()
+	private _lastBlockHollow: boolean = false
 
 	mirrorMap(world: Map): any[][] {
 
@@ -180,9 +181,19 @@ export class Modifiers {
 				let nextBlockLength = (world.averageBuildingSize ) + Math.floor(Math.random() * 5)
 				let yStartOffset = 1 + Math.floor(Math.random() * 2)
 				let hollowBuildingBlock = Math.round(Math.random()) === 1 ? true : false
+
+				if (creationPoint.y + nextBlockLength - yStartOffset > world.mapLength - 1) {
+					nextBlockLength = world.mapLength - (creationPoint.y + yStartOffset) - 1
+				}
 				
 				if (nextBlockWidth > 4 && nextBlockLength > 4) {
-					hollowBuildingBlock = false
+					if (!this._lastBlockHollow) {
+						hollowBuildingBlock = Math.round(Math.random() * 8) > 5 ? true : false
+						this._lastBlockHollow = true
+					} else {
+						hollowBuildingBlock = false
+						this._lastBlockHollow = false
+					}					
 				} else {
 					hollowBuildingBlock = false
 				}
@@ -195,9 +206,17 @@ export class Modifiers {
 				let xLowEdge = creationPoint.x - (nextBlockWidth / 2) + 1
 				let xHighEdge = creationPoint.x + (nextBlockWidth / 2) - 1
 				let yEdgeLowActive = false
-				let yEdgeHighActive = false				
+				let yEdgeHighActive = false
+
+				let createTower = (nextHeight < 7 && Math.round(Math.random() * 8) > 5) ? true : false
+				let towerLocation = 0
+				if (createTower) {
+					towerLocation = Math.round(Math.random() * 2)
+				}
 
 				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
+
+				console.log('nextBlockLength: ', nextBlockLength)
 
 				for (let y = 0; y < world.mapLength; y++) {	
 
@@ -228,39 +247,61 @@ export class Modifiers {
 								let createCol = true
 
 								if (hollowBuildingBlock) {
-									if (y > creationPoint.y + 1 && y < creationPoint.y + nextBlockLength - 1) {
-										if ((x > (creationPoint.x - (nextBlockWidth / 2)) && x < creationPoint.x - (nextBlockWidth / 2) + 2)
-											||
-											(x < (creationPoint.x + (nextBlockWidth / 2)) && x > creationPoint.x - (nextBlockWidth / 2) - 2)) {
-											createCol = false
-										}
+									if (y > yLowEdge && y < yHighEdge && x > xLowEdge+1 && x < xHighEdge-1) {
+										createCol = false
 									}
 								}
 
 								if (createCol) {
 
+									let buildTowerHere = false
+
+									if (createTower) {
+										if (towerLocation === 0) {
+											if (y <= yLowEdge + 1 && x <= xLowEdge + 1) {
+												buildTowerHere = true
+											}
+										} else if (towerLocation === 1) {
+											if (y <= yLowEdge + 1 && x >= xHighEdge - 1) {
+												buildTowerHere = true
+											}
+										} else if (towerLocation === 2) {
+											if (y >= yHighEdge - 1 && x >= xHighEdge - 1) {
+												buildTowerHere = true
+											}
+										}
+									}
+
+									let thisHeight = nextHeight
+									if (buildTowerHere) {
+										thisHeight = nextHeight + 5
+									}
+
 									let tileStack = []
 
-									for (let h = 0; h < nextHeight; h++) {
+									for (let h = 0; h < thisHeight; h++) {
 
 										let thisPillar = false
 										let thisWindowed = 0
 										if (showWindows > 0 && h % 2 === 1) {
 											thisWindowed = showWindows
 										}	
-										let isRoof = (h === nextHeight-1) ? true : false
+										let isRoof = (h === thisHeight-1) ? true : false
 										let slope = false
 										let tileColor = defaultTileColor									
 										let tileType = TileType.Body										
 										let isTower = false
+										if (buildTowerHere) {
+											isTower = true
+										}
 										let stairs = false
 										let thisHalfArch = false
 										let thisWholeArch = false
 
-										if (nextHeight > 6) {
+										if (thisHeight > 4) {
 											if (changeForHighCorridor) {
 
-												if (nextBlockLength > 4) {
+												if (nextBlockLength > 4 && nextBlockLength < 6) {
 
 													let maxWallPoint = creationPoint.y + 5
 													if (creationPoint.y + 5 > creationPoint.y + (nextBlockLength / 2)) {
@@ -268,7 +309,7 @@ export class Modifiers {
 													}
 
 													if (y > creationPoint.y + 1 && y < maxWallPoint) {
-														if (h < nextHeight - 2) {
+														if (h < thisHeight - 2) {
 															tileType = TileType.None
 
 															if (creationPoint.y + 5 > 27) {
@@ -277,11 +318,42 @@ export class Modifiers {
 																}																
 															}
 
-															if (h === nextHeight - 3) {
+															if (h === thisHeight - 3) {
 																thisHalfArch = true
 															}
 														}
 													} 
+												}
+
+												if (nextBlockLength === 6) {
+													if (y === yLowEdge + 1 || 
+														y === yLowEdge + 2 ||
+														y === yHighEdge - 2 ||
+														y === yHighEdge - 3) {
+														if (h < thisHeight - 2) {
+															tileType = TileType.None
+														}
+														if (h === thisHeight - 3) {
+															thisHalfArch = true
+														}													
+													}
+												}
+
+												if (nextBlockLength === 8) {
+													if (y === yLowEdge + 1 || 
+														y === yLowEdge + 2 ||
+														y === yLowEdge + 4 ||
+														y === yLowEdge + 5) {
+														if (h < thisHeight - 2) {
+															tileType = TileType.None
+														}
+														if (h === thisHeight - 3) {
+															thisHalfArch = true
+														}
+													} else if (y === yLowEdge + 3 || y === yLowEdge + 6) {
+														tileType = TileType.Body
+														thisHalfArch = false
+													}
 												}
 
 											} else {
@@ -293,7 +365,7 @@ export class Modifiers {
 														}
 													}
 												} else {
-													if (nextHeight > 7 && openFloor > 0 && h > openFloor && h < openFloor + 4) {
+													if (thisHeight > 7 && openFloor > 0 && h > openFloor && h < openFloor + 4) {
 														tileType = TileType.None
 														if (y % 2 === 0 && x % 2 !== 0) {
 															thisPillar = true
@@ -305,6 +377,8 @@ export class Modifiers {
 
 										if (h === world.lineHeight) {								
 											tileColor = world.decorativeColors['lineColor']
+										} else if (h === 0) {
+											tileColor = world.firstLevelColor
 										} else {
 											tileColor = world.defaultColor
 										}
@@ -329,7 +403,7 @@ export class Modifiers {
 												})
 											)								
 
-										world.blockHeightsArray.push(nextHeight)
+										world.blockHeightsArray.push(thisHeight)
 
 										world.blockIdIterator++
 
@@ -342,10 +416,10 @@ export class Modifiers {
 
 									world.map[y][x] = null
 
-									let column = new Column(true, x, y, nextHeight)
+									let column = new Column(true, x, y, thisHeight)
 
 									column.blockGroup = blockGroup
-									column.height = nextHeight
+									column.height = thisHeight
 									column.corner = false
 									column.tileStack = tileStack
 

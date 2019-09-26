@@ -37,6 +37,7 @@ export class Map {
 	private _groundColor: Color
 	private _defaultColor: Color
 	private _lineColor: Color
+	private _firstLevelColor: Color
 	private _surroundingsGrassColor: Color
 	private _surroundingsWaterColor: Color
 	private _surroundingsSandColor: Color
@@ -74,6 +75,7 @@ export class Map {
 		let lineColor = new Color(newLineHue)
 		this._defaultColor = new Color(this.config.buildingBaseColor.hex())
 		this._lineColor = lineColor.changeColorLighting(-30)
+		this._firstLevelColor = new Color(this.config.buildingBaseColor.getColorStringByHue(10)).changeColorLighting(-20)
 		this._groundColor = this.config.groundColor
 		this._HorizontalRemainingEmptyBlocksMin = 0
 		this._HorizontalRemainingEmptyBlocksMax = 0
@@ -173,6 +175,8 @@ export class Map {
 
 							if (h === this._decorationLineH) {								
 								tileColor = this._lineColor
+							} else if (h === 0) { 
+								tileColor = this._firstLevelColor
 							} else {
 								tileColor = this._defaultColor
 							}							
@@ -497,6 +501,10 @@ export class Map {
 
 	get defaultColor(): Color {
 		return this._defaultColor
+	}
+
+	get firstLevelColor(): Color {
+		return this._firstLevelColor
 	}
 
 	get decorativeColors(): object {
