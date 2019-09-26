@@ -36,12 +36,8 @@ class RandomBuilding {
 	}
 
 	public getBaseColor(): Color {
-
 		const col = this.map.getFirstDefinedColumn()
 		const tile = col.tileStack[col.tileStack.length-1]
-
-		console.log(tile)
-
 		return tile.getColor()
 	}
 
@@ -72,14 +68,20 @@ window['activateDebug'] = () => {
 	window['debug'] = true
 	document.querySelector('#color').classList.remove('hide')
 	document.querySelector('#color-scheme').classList.remove('hide')
-	document.querySelector('#buildingimg').classList.add('debug-active')
+	if (document.querySelector('#buildingimg')) {
+		document.querySelector('#buildingimg').classList.add('debug-active')
+	}	
 	document.querySelector('#color').innerHTML = building.colorMap()
 }
 
 let building = new RandomBuilding()
 
+if (building.debug()) {
+	window['activateDebug']();
+}
+
 document.querySelector("#worldtest").innerHTML = building.drawTileMap()
-building.getImageTag()
+//building.getImageTag()
 
 setColors(building)
 
@@ -89,7 +91,7 @@ document.querySelector('#generate').addEventListener('click', () => {
 		document.querySelector('#color').innerHTML = building.colorMap()
 	}	
 	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
-	building.getImageTag()
+	//building.getImageTag()
 
 	document.querySelectorAll('.point').forEach((item) => {
 		item.addEventListener('click', () => {

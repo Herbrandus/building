@@ -100,10 +100,10 @@ export class Map {
 		let firstBlockHeight
 
 		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 3) {
-			useWaterGarden = true
+			useWaterGarden = (Math.round(Math.random() * 10) > 6) ? true : false
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
 		} else if (Math.round(Math.random() * 10) <= 1) {
-			useWaterGarden = true
+			useWaterGarden = (Math.round(Math.random() * 10) > 3) ? true : false
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
 		}
 
@@ -151,7 +151,7 @@ export class Map {
 
 						for (let h = 0; h < firstBlockHeight; h++) {
 
-							let isSlope = true
+							let isSlope = false
 							let thisPillar = false
 							let tileType = TileType.Body
 							if (h < 2 && openGroundLevel) {
@@ -247,7 +247,7 @@ export class Map {
 
 		/* 	
 		 *	Add shadows around the building
-		 */
+		
 
 		for (let e = 0; e < this._blockEdges.length; e++) {
 			let edgePointY = this._blockEdges[e].y
@@ -278,7 +278,7 @@ export class Map {
 			}
 
 			this._blockIdIterator++
-		}
+		} */
 
 		/* 	
 		 *	Add gardens or other ornamental features around the building
@@ -401,9 +401,8 @@ export class Map {
 
 		this._world = this.mods.clearMapEdges(this)
 		this._world = this.mods.mirrorMap(this)
-		this.setEdges(false)
+		this.setEdges(true)
 
-		console.log(this._blockEdges)
 		console.log(this._world)
 	}	
 
@@ -545,15 +544,7 @@ export class Map {
 		}
 		
 		return column
-	}
-
-	public addToBuilding(): void {
-		this._world = this.mods.addBuildingComponent(this)
-		this._world = this.mods.mirrorMap(this)
-		this._world = this.mods.clearMapEdges(this)
-		this.setEdges(false)
-		console.log(this._world)	
-	}
+	}	
 
 	setEdges(considerLowerEdges: boolean): void {
 
@@ -686,6 +677,14 @@ export class Map {
 
 		return {'min': Math.min(...xMinValues), 'max': Math.min(...xMaxValues) }		
 	}
+
+	public addToBuilding(): void {
+		this._world = this.mods.addBuildingComponent(this)
+		this._world = this.mods.mirrorMap(this)
+		this._world = this.mods.clearMapEdges(this)
+		this.setEdges(false)
+		console.log(this._world)	
+	}
 }
 
 export class Column {
@@ -714,8 +713,8 @@ export class Column {
 		this._y = y
 	}
 
-	set height(height: number) {
-		this._height = height
+	set height(h: number) {
+		this._height = h
 	}
 
 	set blockGroup(groupNum: number) {

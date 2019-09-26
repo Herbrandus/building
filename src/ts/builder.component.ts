@@ -173,15 +173,12 @@ export class Renderer {
 								newData += tile.html
 
 								if (currentTile.options.windowed > 0) {
-									//let window = this.render.createWindow(thisPosX, thisPosY - (this.config.tileHeight * h), currentTile, map[y][x])
-									//newData += window.html
-								}								
-
-								if (this.config.allowDebug) {
-									if (h === map[y][x].height - 1) {
-										let debugInfo = `<span>x: ${x}, y: ${y} <span class="debugLink showGroups" data-group="${map[y][x].blockGroup}">groupId: ${map[y][x].blockGroup}</span><br>id: ${currentTile.id}  h: ${h}</span>`
-										detailsHtml += `<div class="blockLabel" data-groupId="${map[y][x].blockGroup}" style="left: ${tile.coords.top.x}px; top: ${tile.coords.top.y - (this.config.tileHeight * h-1)}px;"><div class="point"></div>${debugInfo}</div>`
-									}
+									if (map[y][x].edge.right || map[y][x].edge.bottom) {
+										if (Math.round(Math.random() * 4) > 2) {
+											let window = this.render.createWindow(thisPosX, thisPosY - this.config.tileHeight, currentTile, map[y][x])
+											newData += window.html
+										}										
+									}									
 								}
 
 							} else if (!options.tower && currentTile.type === TileType.HalfBlock) {

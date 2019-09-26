@@ -262,12 +262,14 @@ export class Modifiers {
 												buildTowerHere = true
 											}
 										} else if (towerLocation === 1) {
-											if (y <= yLowEdge + 1 && x >= xHighEdge - 1) {
+											if (y <= yLowEdge + 1 && x >= xHighEdge - 2) {
 												buildTowerHere = true
 											}
 										} else if (towerLocation === 2) {
-											if (y >= yHighEdge - 1 && x >= xHighEdge - 1) {
-												buildTowerHere = true
+											if (y >= yHighEdge - 1 && x >= xHighEdge - 2) {
+												if ((world.blockHeightVariation !== BuildingHeightVariations.TallCenter)) {
+													buildTowerHere = true
+												}												
 											}
 										}
 									}

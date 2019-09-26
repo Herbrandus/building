@@ -561,18 +561,17 @@ export class RenderElements {
 		let highlight
 		let highlightLeft
 		let highlightRight
-		let html
 
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
-			regularColor = tile.tileColor.hex()
+			regularColor = tile.tileColor.changeColorLightingString(-120)
 			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-60)
+			darkestColor = tile.tileColor.changeColorLightingString(-140)
 			highlightLeft = tile.tileColor.changeColorLightingString(15)
 			highlightRight = tile.tileColor.changeColorLightingString(30)
 		} else {
-			regularColor = this.config.buildingBaseColor.hex()
+			regularColor = this.config.buildingBaseColor.changeColorLightingString(-120)
 			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-140)
 			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(15)
 			highlightRight = this.config.buildingBaseColor.changeColorLightingString(30)
 		}
@@ -582,67 +581,54 @@ export class RenderElements {
 		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
 		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
 
-		let size = 4
+		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
 
-		if (tile.options.windowed === 2) {
-			size = 6
-		}
+		let windowBorderWidth = (top.x - left.x) / 10
 
-		let windowBorderWidth = (top.x - left.x) / 10		
-		let sizeModifierY = (bottom.y - top.y) / size
-		let isometricHeightDifferenceLeft = (bottom.y - left.y) / size
-		let isometricHeightDifferenceRight = (bottom.y - right.y) / size
-
-		html += `<g style="z-index:${id+columnInfo.height};">`
+		let html = `<g style="z-index:${id+columnInfo.height};">`
 
 		if (columnInfo.edge.bottom) {
 
-			let sizeModifierX = (top.x - left.x) / size
+			let xEdge = (bottom.x - left.x) / 3
+			let yEdge = (bottom.y - left.y) / 8
 
-			let leftEdge = left.x + sizeModifierX
-			let rightEdge = top.x - sizeModifierX
-			let topEdge = top.y + sizeModifierY + 2
-			let bottomEdge = top.y + this.tileH - sizeModifierY
-
-			let windowInsideLeftTop = `${leftEdge} ${topEdge - height - isometricHeightDifferenceLeft}`
-			let windowInsideLeftBottom = `${leftEdge} ${bottomEdge - height - isometricHeightDifferenceLeft}`
-			let windowInsideRightBottom = `${rightEdge} ${bottomEdge - height}`
-			let windowInsideRightTop = `${rightEdge} ${topEdge - height}`
+			let leftWindowLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 7)}`
+			let leftWindowLeftBottom = `${left.x + xEdge} ${left.y - height + (yEdge)}`
+			let leftWindowRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 4)}`
+			let leftWindowRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 2)}`
+			let leftWindowRightBezier = `${bottom.x - xEdge} ${bottom.y - height - this.tileH - yEdge}`
+			let leftWindowLeftBezier = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4)}`
 
 			html += `<path fill="#111"
-						d="M${windowInsideLeftTop} 
-						L${windowInsideLeftBottom} 
-						L${windowInsideRightBottom} 
-						L${windowInsideRightTop} 
-						L${windowInsideLeftTop} Z" />`
-
-		} 
-
-		if (columnInfo.edge.right) {
-
-			let sizeModifierX = (right.x - top.x) / size
-
-			let leftEdge = top.x + sizeModifierX
-			let rightEdge = right.x - sizeModifierX
-			let topEdge = top.y + sizeModifierY
-			let bottomEdge = top.y + this.tileH - sizeModifierY
-
-			let windowInsideLeftTop = `${leftEdge} ${topEdge - height}`
-			let windowInsideLeftBottom = `${leftEdge} ${bottomEdge - height}`
-			let windowInsideRightBottom = `${rightEdge} ${bottomEdge - height - isometricHeightDifferenceRight}`
-			let windowInsideRightTop = `${rightEdge} ${topEdge - height - isometricHeightDifferenceRight}`
-
-			html += `<path fill="#111"
-						d="M${windowInsideLeftTop} 
-						L${windowInsideLeftBottom} 
-						L${windowInsideRightBottom} 
-						L${windowInsideRightTop} 
-						L${windowInsideLeftTop} Z" />`
+						d="M${leftWindowLeftTop} 
+						L${leftWindowLeftBottom} 
+						L${leftWindowRightBottom} 
+						L${leftWindowRightTop} 
+						C${leftWindowRightBezier}, ${leftWindowLeftBezier}, ${leftWindowLeftTop} Z" />`
 		}
 
-		html += `</g>`
+		
+		if (columnInfo.edge.right) {
 
-		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
+			let xEdge = (right.x - bottom.x) / 3
+			let yEdge = (right.y - bottom.y) / 8
+
+			let rightWindowLeftTop = `${bottom.x + xEdge} ${bottom.y - height - this.tileH - (yEdge * 2)}`
+			let rightWindowLeftBottom = `${bottom.x + xEdge} ${bottom.y - height + (yEdge * 3.6)}`
+			let rightWindowRightBottom = `${right.x - xEdge} ${right.y - height - (yEdge * 1)}`
+			let rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 6.5)}`
+			let rightWindowRightBezier = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 3.2)}`
+			let rightWindowLeftBezier = `${bottom.x + xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.3)}`
+
+			html += `<path fill="#222"
+						d="M${rightWindowLeftTop} 
+						L${rightWindowLeftBottom} 
+						L${rightWindowRightBottom} 
+						L${rightWindowRightTop} 
+						C${rightWindowRightBezier}, ${rightWindowLeftBezier}, ${rightWindowLeftTop} Z" />`
+		}
+
+		html += `</g>`		
 
 		return { html: html, coords: coords }
 	}
