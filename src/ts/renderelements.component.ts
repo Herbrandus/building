@@ -552,29 +552,13 @@ export class RenderElements {
 		return { html: html, coords: coords }
 	}
 
-	createWindow(xPos: number, yPos: number, tile: Tile, columnInfo: Column): TileTemplate {
+	createWindow(xPos: number, yPos: number, tile: Tile, columnInfo: Column, windowLights: boolean): TileTemplate {
 
 		let id = tile.id
 		let height = (tile.h * this.tileH) - this.tileH
-		let regularColor
-		let darkestColor
-		let highlight
-		let highlightLeft
-		let highlightRight
-
-		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
-			regularColor = tile.tileColor.changeColorLightingString(-120)
-			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-140)
-			highlightLeft = tile.tileColor.changeColorLightingString(15)
-			highlightRight = tile.tileColor.changeColorLightingString(30)
-		} else {
-			regularColor = this.config.buildingBaseColor.changeColorLightingString(-120)
-			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-140)
-			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(15)
-			highlightRight = this.config.buildingBaseColor.changeColorLightingString(30)
-		}
+		let regularColor = '#222'
+		let darkestColor = '#111'
+		let light = '#f3ef76'
 
 		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
 		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
@@ -599,7 +583,12 @@ export class RenderElements {
 			let leftWindowRightBezier = `${bottom.x - xEdge} ${bottom.y - height - this.tileH - yEdge}`
 			let leftWindowLeftBezier = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4)}`
 
-			html += `<path fill="#111"
+			let windowColor = darkestColor
+			if (windowLights) {
+				let windowColor = (Math.round(Math.random() * 20) > 18) ? light : darkestColor
+			}		
+
+			html += `<path fill="${windowColor}"
 						d="M${leftWindowLeftTop} 
 						L${leftWindowLeftBottom} 
 						L${leftWindowRightBottom} 
@@ -619,13 +608,111 @@ export class RenderElements {
 			let rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 6.5)}`
 			let rightWindowRightBezier = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 3.2)}`
 			let rightWindowLeftBezier = `${bottom.x + xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.3)}`
+			
+			let windowColor = regularColor
+			if (windowLights) {
+				let windowColor = (Math.round(Math.random() * 20) > 18) ? light : regularColor
+			}	
 
-			html += `<path fill="#222"
+			html += `<path fill="${windowColor}"
 						d="M${rightWindowLeftTop} 
 						L${rightWindowLeftBottom} 
 						L${rightWindowRightBottom} 
 						L${rightWindowRightTop} 
 						C${rightWindowRightBezier}, ${rightWindowLeftBezier}, ${rightWindowLeftTop} Z" />`
+		}
+
+		html += `</g>`		
+
+		return { html: html, coords: coords }
+	}
+
+	createDoor(xPos: number, yPos: number, tile: Tile, columnInfo: Column, direction?: string): TileTemplate {
+
+		let id = tile.id
+		let height = (tile.h * this.tileH) - this.tileH
+		let regularColor
+		let darkestColor
+		let doorHandleColor
+
+		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
+			doorHandleColor = new Color(tile.tileColor.hex()).getColorByHue(110).changeColorLightingString(60)
+			regularColor = new Color(tile.tileColor.hex()).getColorByHue(220).changeColorLightingString(-80)
+			darkestColor = new Color(tile.tileColor.hex()).getColorByHue(220).changeColorLightingString(-110)
+		} else {
+			doorHandleColor = new Color(this.config.buildingBaseColor.hex()).getColorByHue(110).changeColorLightingString(60)
+			regularColor = new Color(this.config.buildingBaseColor.hex()).getColorByHue(220).changeColorLightingString(-80)
+			darkestColor = new Color(this.config.buildingBaseColor.hex()).getColorByHue(220).changeColorLightingString(-110)
+		}
+
+		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
+		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
+		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
+		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+
+		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
+
+		let windowBorderWidth = (top.x - left.x) / 10
+
+		let html = `<g style="z-index:${id+columnInfo.height};">`
+
+		if (direction === 'bottom') {
+
+			let xEdge = (bottom.x - left.x) / 4
+			let yEdge = (bottom.y - left.y) / 8
+
+			console.log(yEdge)
+
+			let leftWindowLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4.5)}`
+			let leftWindowLeftBottom = `${left.x + xEdge} ${left.y - height + (yEdge * 2)}`
+			let leftWindowRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 2)}`
+			let leftWindowRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.5)}`
+
+			let leftWindowBorderLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4.5)}`
+			let leftWindowBorderRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 2)}`
+			let leftWindowBorderRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.5)}`
+
+			html += `<path stroke="#111" stroke-width="1.3"
+						d="M${leftWindowBorderLeftTop}
+						L${leftWindowBorderRightTop}
+						L${leftWindowBorderRightBottom}" />
+					<path fill="${darkestColor}"
+						d="M${leftWindowLeftTop} 
+						L${leftWindowLeftBottom} 
+						L${leftWindowRightBottom} 
+						L${leftWindowRightTop} 
+						L${leftWindowLeftTop} Z" />
+					<circle fill="${doorHandleColor}" 
+						cx="${left.x + (xEdge * 1.4)}" 
+						cy="${bottom.y - height - this.tileH + (yEdge * 2.8)}" 
+						r="0.8" />`
+		}
+
+		
+		if (direction === 'right') {
+
+			let xEdge = (right.x - bottom.x) / 4
+			let yEdge = (right.y - bottom.y) / 8
+
+			let rightWindowLeftTop = `${bottom.x + xEdge} ${bottom.y - height - this.tileH - (yEdge)}`
+			let rightWindowLeftBottom = `${bottom.x + xEdge} ${bottom.y - height + (yEdge * 2)}`
+			let rightWindowRightBottom = `${right.x - xEdge} ${right.y - height - (yEdge * 1.5)}`
+			let rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 4.5)}`
+
+			html += `<path stroke="#444" stroke-width="1.3"
+						d="M${rightWindowRightTop}
+						L${rightWindowLeftTop}
+						L${rightWindowLeftBottom}" />
+					<path fill="${regularColor}"
+						d="M${rightWindowLeftTop} 
+						L${rightWindowLeftBottom} 
+						L${rightWindowRightBottom} 
+						L${rightWindowRightTop} 
+						L${rightWindowLeftTop} Z" />
+					<circle fill="${doorHandleColor}" 
+						cx="${bottom.x + (xEdge * 1.3)}" 
+						cy="${bottom.y - height - this.tileH - (yEdge * 4.5)}" 
+						r="0.8" />`
 		}
 
 		html += `</g>`		

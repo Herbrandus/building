@@ -81,6 +81,10 @@ export class Renderer {
 
 		let mapTotalWidth = mapToBuild.mapWidth
 		let mapTotalLength = mapToBuild.mapLength
+		const tileHeight = this.config.tileHeight
+		const windowLights = this.config.lightInWindows
+
+		console.log('windowLights', windowLights)
 
 		let testTile = this.render.createTile(0, 0, '')
 
@@ -169,28 +173,41 @@ export class Renderer {
 							}
 
 							if (currentTile.type === TileType.Body) {
-								let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, currentTile)
-								newData += tile.html
+								
+								if (currentTile.options.slope) {
+									let slope = this.render.createSlopeBlock(thisPosX, thisPosY + (tileHeight * 4), map[y][x].getTile(h), 'e')
+									newData += slope.html
+								} else {
+									let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile)
+									newData += tile.html
 
-								if (currentTile.options.windowed > 0) {
-									if (map[y][x].edge.right || map[y][x].edge.bottom) {
-										if (Math.round(Math.random() * 4) > 2) {
-											let window = this.render.createWindow(thisPosX, thisPosY - this.config.tileHeight, currentTile, map[y][x])
-											newData += window.html
-										}										
-									}									
-								}
+									if (currentTile.options.windowed > 0) {
+										if (map[y][x].edge.right || map[y][x].edge.bottom) {
+											if (Math.round(Math.random() * 6) > 4) {
+												let window = this.render.createWindow(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], windowLights)
+												newData += window.html
+											}										
+										}
+										if (map[y][x].edge.bottom && (h === map[y+1][x].height || h === 0) && Math.round(Math.random() * 10) > 8) {
+											let door = this.render.createDoor(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], 'bottom')
+											newData += door.html
+										} else if (map[y][x].edge.right && (h === map[y][x+1].height || h === 0) && Math.round(Math.random() * 10) > 8) {
+											let door = this.render.createDoor(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], 'right')
+											newData += door.html
+										}								
+									}
+								}								
 
 							} else if (!options.tower && currentTile.type === TileType.HalfBlock) {
 
-								let tile = this.render.createHalfBlock(thisPosX, thisPosY- this.config.tileHeight, currentTile)
+								let tile = this.render.createHalfBlock(thisPosX, thisPosY - tileHeight, currentTile)
 								newData += tile.html
 
 							} else if (!options.tower && currentTile.type === TileType.None) {
 
 								if (currentTile.options.pillar && h < map[y][x].height) {
 									if (y < (mapTotalLength/2)-1 || y > (mapTotalLength/2)) {
-										let pillar = this.render.createPillarBlock(thisPosX, thisPosY- this.config.tileHeight, currentTile)
+										let pillar = this.render.createPillarBlock(thisPosX, thisPosY - tileHeight, currentTile)
 										newData += pillar.html
 									}
 								}
@@ -198,15 +215,15 @@ export class Renderer {
 								if (currentTile.options.halfArch) {
 
 									if (map[y+1][x].isDefined && map[y+1][x].height > 0 && map[y+1][x].height > h && map[y+1][x].tileStack[h].type === TileType.None) {
-										let arch = this.render.createHalfArch(thisPosX, thisPosY - this.config.tileHeight, currentTile, 'right-top')
+										let arch = this.render.createHalfArch(thisPosX, thisPosY - tileHeight, currentTile, 'right-top')
 										newData += arch.html
 									} else if (map[y-1][x].isDefined && map[y-1][x].height > 0 && map[y-1][x].height > h && map[y-1][x].tileStack[h].type === TileType.None) {
-										let arch = this.render.createHalfArch(thisPosX, thisPosY - this.config.tileHeight, currentTile, 'right-bottom')
+										let arch = this.render.createHalfArch(thisPosX, thisPosY - tileHeight, currentTile, 'right-bottom')
 										newData += arch.html
 									}
 								}
 							} else if (currentTile.options.tower) {
-								let tile = this.render.createBlock(thisPosX, thisPosY - this.config.tileHeight, currentTile)
+								let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile)
 								newData += tile.html
 							}
 						}

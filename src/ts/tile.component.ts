@@ -79,7 +79,7 @@ export class Tile {
 export interface TileOptions {
 	roof: boolean,
 	pillar: boolean,
-	slope: boolean,
+	slope: string | boolean,
 	windowed: number,
 	tower: boolean,
 	stairs:	boolean,

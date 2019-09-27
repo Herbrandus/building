@@ -10,8 +10,9 @@ class RandomBuilding {
 	private config: Config = new Config
 
 	constructor() {
-		this._map = new Map(30, 30, 10, 1, 5, 3, 4, false)
+		this._map = new Map(30, 30, 10, 1, 5, 3, 3, false)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
+		console.log("this.config.lightInWindows", this.config.lightInWindows)
 	}
 
 	public debug(): boolean {

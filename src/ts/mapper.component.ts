@@ -98,6 +98,7 @@ export class Map {
 		let useWaterGarden = false		
 		let tileHeight = 0
 		let firstBlockHeight
+		let slopeY = 0
 
 		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 3) {
 			useWaterGarden = (Math.round(Math.random() * 10) > 6) ? true : false
@@ -120,6 +121,12 @@ export class Map {
 			this._decorationLineH = 4
 		} else if (firstBlockHeight > 3) {
 			this._decorationLineH = 3
+		}
+
+		if (firstBlockHeight < 4) {
+			if (Math.round(Math.random() * 5) > 2) {
+				slopeY = startingPositionX + Math.ceil(Math.random() * startblockWidth - 2)
+			}
 		}
 
 		this._blockHeight = firstBlockHeight
@@ -149,9 +156,8 @@ export class Map {
 						thisBlockGroup = 1
 						let tileStack = []
 
-						for (let h = 0; h < firstBlockHeight; h++) {
-
-							let isSlope = false
+						for (let h = 0; h < firstBlockHeight; h++) {			
+							
 							let thisPillar = false
 							let tileType = TileType.Body
 							if (h < 2 && openGroundLevel) {
@@ -179,7 +185,28 @@ export class Map {
 								tileColor = this._firstLevelColor
 							} else {
 								tileColor = this._defaultColor
-							}							
+							}
+
+							let slope = false
+							if (h < firstBlockHeight && y === slopeY) {
+								if (h === 0) {
+									if (x === startingPositionX + startblockWidth) {
+										slope = true
+									}
+								} else if (h === 1) {
+									if (x === startingPositionX + startblockWidth - 1) {
+										slope = true
+									} else if (x === startingPositionX + startblockWidth) {
+										tileType = TileType.None
+									}
+								} else if (h === 2) {
+									if (x === startingPositionX + startblockWidth - 2) {
+										slope = true
+									} else if (x > startingPositionX + startblockWidth - 2) {
+										tileType = TileType.None
+									}
+								}
+							}					
 
 							tileStack.push(
 								new Tile(
@@ -192,7 +219,7 @@ export class Map {
 									{
 										roof:		isRoof,
 										pillar: 	thisPillar,
-										slope:		isSlope,
+										slope:		slope,
 										windowed: 	thisWindowed,
 										tower: 		false,
 										stairs:		false,
@@ -247,7 +274,7 @@ export class Map {
 
 		/* 	
 		 *	Add shadows around the building
-		
+		 */
 
 		for (let e = 0; e < this._blockEdges.length; e++) {
 			let edgePointY = this._blockEdges[e].y
@@ -278,7 +305,7 @@ export class Map {
 			}
 
 			this._blockIdIterator++
-		} */
+		}
 
 		/* 	
 		 *	Add gardens or other ornamental features around the building

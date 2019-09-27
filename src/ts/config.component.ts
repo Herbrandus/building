@@ -18,6 +18,7 @@ export class Config {
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
 	private _allowSurroundingDecorations: boolean = true
+	private _lightInWindows: boolean = Math.round(Math.random() * 8) > 6 ? true : false
 
 	constructor() {	}	
 
@@ -63,6 +64,10 @@ export class Config {
 
 	public get topMargin(): number {
 		return this._topMargin
+	}
+
+	public get lightInWindows(): boolean {
+		return this._lightInWindows
 	}
 
 	public get allowSurroundingDecorations(): boolean {

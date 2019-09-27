@@ -216,7 +216,12 @@ export class Modifiers {
 
 				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
 
-				console.log('nextBlockLength: ', nextBlockLength)
+				let slopeY
+				if (nextHeight < 4) {
+					if (Math.round(Math.random() * 5) > 0) {
+						slopeY = creationPoint.x + Math.ceil(Math.random() * Math.round(nextBlockWidth / 2) - 2)
+					}
+				}
 
 				for (let y = 0; y < world.mapLength; y++) {	
 
@@ -290,6 +295,11 @@ export class Modifiers {
 										}	
 										let isRoof = (h === thisHeight-1) ? true : false
 										let slope = false
+										if (h < nextHeight) {
+											if (y === slopeY && x === creationPoint.x + Math.round(nextBlockWidth / 2) - h) {
+												slope = true
+											}
+										}	
 										let tileColor = defaultTileColor									
 										let tileType = TileType.Body										
 										let isTower = false
