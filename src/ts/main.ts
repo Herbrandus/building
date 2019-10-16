@@ -82,7 +82,10 @@ if (building.debug()) {
 }
 
 document.querySelector("#worldtest").innerHTML = building.drawTileMap()
-//building.getImageTag()
+if (!building.debug()) {
+	building.getImageTag()
+	document.querySelector("#worldtest").classList.add('hide')
+}
 
 setColors(building)
 
@@ -92,7 +95,10 @@ document.querySelector('#generate').addEventListener('click', () => {
 		document.querySelector('#color').innerHTML = building.colorMap()
 	}	
 	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
-	//building.getImageTag()
+	if (!building.debug()) {
+		building.getImageTag()
+		document.querySelector("#worldtest").classList.add('hide')
+	}
 
 	document.querySelectorAll('.point').forEach((item) => {
 		item.addEventListener('click', () => {

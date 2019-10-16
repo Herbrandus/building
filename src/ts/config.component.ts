@@ -20,7 +20,7 @@ export class Config {
 	private _allowSurroundingDecorations: boolean = true
 	private _lightInWindows: boolean = Math.round(Math.random() * 8) > 6 ? true : false
 
-	constructor() {	}	
+	constructor() {	}
 
 	public get allowDebug(): boolean {
 		return this._allowDebug
