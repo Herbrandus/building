@@ -6,7 +6,9 @@ import { Config, Position } from './config.component'
 export class Modifiers {
 
 	private config: Config = new Config()
+	private mapGen: MapGenerationFunctions = new MapGenerationFunctions()
 	private _lastBlockHollow: boolean = false
+	private _lastBlockShortestSide: number
 
 	mirrorMap(world: Map): any[][] {
 
@@ -139,7 +141,7 @@ export class Modifiers {
 
 	addBuildingComponent(world: Map): any[][] {
 
-		if (world.blockAmountIterator < world.maxBlockIterations) {
+		if (world.blockAmountIterator < world.maxBlockIterations + 1) {
 
 			world.blockEdges = world.getEdges()
 
@@ -148,9 +150,13 @@ export class Modifiers {
 				let nextHeight
 				let openFloor = 0
 				let showWindows = world.showWindows
+				let shortestSide
 
-				console.log('world.blockHeightVariation', world.blockHeightVariation)
-				console.log('i', world.blockAmountIterator)
+				if (world.blockAmountIterator === 1) {
+					shortestSide = Math.min(world.startBlockSize.w, world.startBlockSize.l)
+				} else {
+					shortestSide = this._lastBlockShortestSide
+				}
 
 				if (world.blockHeightVariation === BuildingHeightVariations.TallCenter) {
 					nextHeight = this.config.fibonacci[ world.maxBlockIterations - world.blockAmountIterator + 1 ]
@@ -176,12 +182,65 @@ export class Modifiers {
 					openFloor = 2 + Math.floor(Math.random() * 3)
 				}
 
-				let randomEdgePoint = Math.floor(Math.random() * world.blockEdges.length)
-				let creationPoint: Position = world.blockEdges[randomEdgePoint]
+				/* determine which side for placement */
+				let yHigh = this.mapGen.getHighestYfromArray(world.blockEdges)
+				let xLow = this.mapGen.getLowestXfromArray(world.blockEdges)
+				let xHigh = this.mapGen.getHighestXfromArray(world.blockEdges)
+				
+				let yHighEdges = world.blockEdges.filter((edgePoint: Position) => edgePoint.y === yHigh.y)
+				let xLowEdges = world.blockEdges.filter((edgePoint: Position) => edgePoint.x === xLow.x)
+				let xHighEdges = world.blockEdges.filter((edgePoint: Position) => edgePoint.x === xHigh.x)
+
+				console.log('Y High:', yHighEdges)
+				console.log('X Low:', xLowEdges)
+				console.log('X High:', xHighEdges)
+
+				let sideSelectionForGeneration = Math.floor(Math.random() * 3)	
+				if (yHigh.y > world.mapLength - 5) {
+					sideSelectionForGeneration = Math.floor(Math.random() * 2)
+				}
+				
+				let creationPoint: Position
+				let nextBlockWidth = shortestSide - world.blockAmountIterator
+				let nextBlockLength = Math.floor(nextBlockWidth * this.config.goldenRatio)
+				let yLowEdge, yHighEdge, xLowEdge, xHighEdge
+
+				// maybe function to build next block inside last block if too little space?
+
+				if (sideSelectionForGeneration === 0) {
+					// lowest x point
+					let randomEdgePoint = 3 + Math.floor(Math.random() * (xLowEdges.length - 3))
+					creationPoint = xLowEdges[randomEdgePoint]
+
+					yLowEdge = creationPoint.y - Math.round(nextBlockLength / 2) - 1
+					yHighEdge = creationPoint.y + Math.round(nextBlockLength / 2) + 1
+					xLowEdge = creationPoint.x - nextBlockWidth
+					xHighEdge = creationPoint.x
+
+				} else if (sideSelectionForGeneration === 1) {
+					// highest x point
+					let randomEdgePoint = 3 + Math.floor(Math.random() * (xHighEdges.length - 3))
+					creationPoint = xHighEdges[randomEdgePoint]
+
+					yLowEdge = creationPoint.y - Math.round(nextBlockLength / 2) - 1
+					yHighEdge = creationPoint.y + Math.round(nextBlockLength / 2) + 1
+					xLowEdge = creationPoint.x
+					xHighEdge = creationPoint.x + nextBlockWidth
+
+				} else if (sideSelectionForGeneration === 2) {
+					// highest y point
+					let randomEdgePoint = Math.floor(Math.random() * yHighEdges.length)
+					creationPoint = yHighEdges[randomEdgePoint]
+
+					yLowEdge = creationPoint.y
+					yHighEdge = creationPoint.y + nextBlockLength
+					xLowEdge = creationPoint.x - Math.round(nextBlockWidth / 2) + 1
+					xHighEdge = creationPoint.x + Math.round(nextBlockWidth / 2) - 1
+				}
+
+				this._lastBlockShortestSide = Math.min(nextBlockWidth, nextBlockLength)
 				let blockGroup = world.blockGroups.length + 1
-				let manipulateExistingCols = (Math.round(Math.random()) < 1) ? false : true
-				let nextBlockWidth = (world.averageBuildingSize ) + Math.floor(Math.random() * 5)
-				let nextBlockLength = (world.averageBuildingSize ) + Math.floor(Math.random() * 5)
+				let manipulateExistingCols = (Math.round(Math.random()) < 1) ? false : true				
 				let yStartOffset = 0
 				let hollowBuildingBlock = Math.round(Math.random()) === 1 ? true : false
 
@@ -203,11 +262,7 @@ export class Modifiers {
 
 				let chanceForHigherSpace = Math.round(Math.random() * 8)
 				let changeForHighCorridor = true // Math.round(Math.random() * 8) > 5 ? true : false
-
-				let yLowEdge = creationPoint.y - yStartOffset + 1
-				let yHighEdge = creationPoint.y + nextBlockLength - yStartOffset - 1
-				let xLowEdge = creationPoint.x - (nextBlockWidth / 2) + 1
-				let xHighEdge = creationPoint.x + (nextBlockWidth / 2) - 1
+				
 				let yEdgeLowActive = false
 				let yEdgeHighActive = false
 

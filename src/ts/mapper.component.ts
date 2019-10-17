@@ -1,6 +1,6 @@
 import { MapGenerationFunctions, BuildingHeightVariations, Color } from './mapGenerationFunctions.component'
 import { Tile, TileType, TileOptions } from './tile.component'
-import { Config, Position } from './config.component'
+import { Config, Position, Dimensions } from './config.component'
 import { Primitives } from './primitives.component'
 import { Modifiers } from './modifiers.component'
 
@@ -21,6 +21,8 @@ export class Map {
 	private _mapEdgeWidth: number
 	private _highestPoint: number
 	private _startBlockXfromCenterDeviation: number
+	private _startBlockWidth: number
+	private _startBlockLength: number
 	private _mapHalfLength: number
 	private _world: any[][]
 	private _blockHeightsArray: number[]
@@ -83,16 +85,16 @@ export class Map {
 		this._surroundingsWaterColor = new Color('#6fb9ca')
 		this._surroundingsSandColor = new Color('#e9e3ba')
 		this._surroundingsDefaultColor = this._surroundingsGrassColor
-		this._showWindows = (this.config.allowWindows) ? Math.round(Math.random() * 2) : 0
+		this._showWindows = this.config.allowWindows ? Math.round(Math.random() * 2) : 0
 
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
 		let startBlockXfromCenterDeviation = 7
-		let startblockWidth = this._averageBuildingSize + Math.floor(Math.random() * 3)
-		let startblockLength = startblockWidth * this.config.goldenRatio
+		this._startBlockWidth = this._averageBuildingSize + Math.floor(Math.random() * 3)
+		this._startBlockLength = this._startBlockWidth * this.config.goldenRatio
 		let startblockXfromCenter = 4 + Math.floor(Math.random() * startBlockXfromCenterDeviation)
-		let startblockLengthHalf = Math.floor(startblockLength / 2)
-		let startblockWidthHalf = Math.floor(startblockWidth / 2)
+		let startblockLengthHalf = Math.floor(this._startBlockLength / 2)
+		let startblockWidthHalf = Math.floor(this._startBlockWidth / 2)
 		let startingPositionX = Math.floor(this._mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
 		let buildGardens = !!(Math.round(Math.random() * 2))
 		let useWaterGarden = false
@@ -107,8 +109,6 @@ export class Map {
 			useWaterGarden = (Math.round(Math.random() * 10) > 3) ? true : false
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
 		}
-
-		console.log(maximumBlockIterations)
 
 		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
 			firstBlockHeight = this.config.fibonacci[maximumBlockIterations]
@@ -127,14 +127,14 @@ export class Map {
 
 		if (firstBlockHeight < 4) {
 			if (Math.round(Math.random() * 5) > 2) {
-				slopeY = startingPositionX + Math.ceil(Math.random() * startblockWidth - 2)
+				slopeY = startingPositionX + Math.ceil(Math.random() * this._startBlockWidth - 2)
 			}
 		}
 
 		this._blockHeight = firstBlockHeight
 
 		let hollowBuildingBlock = (Math.round(Math.random()) === 1 ? true : false) 
-		let openGroundLevel = (Math.round(Math.random()) === 1 ? true : false) 
+		let openGroundLevel = (this._blockHeight > 2) ? (Math.round(Math.random()) === 1 ? true : false) : false
 
 		console.log('showWindows', this._showWindows)
 
@@ -149,7 +149,7 @@ export class Map {
 				let column = new Column(false, x, y, 0)
 
 				let yConditions = (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf))
-				let xConditions = (x > startingPositionX && x <= (startingPositionX + startblockWidth))
+				let xConditions = (x > startingPositionX && x <= (startingPositionX + this._startBlockWidth))
 
 				if (yConditions) {
 
@@ -192,19 +192,19 @@ export class Map {
 							let slope = false
 							if (h < firstBlockHeight && y === slopeY) {
 								if (h === 0) {
-									if (x === startingPositionX + startblockWidth) {
+									if (x === startingPositionX + this._startBlockWidth) {
 										slope = true
 									}
 								} else if (h === 1) {
-									if (x === startingPositionX + startblockWidth - 1) {
+									if (x === startingPositionX + this._startBlockWidth - 1) {
 										slope = true
-									} else if (x === startingPositionX + startblockWidth) {
+									} else if (x === startingPositionX + this._startBlockWidth) {
 										tileType = TileType.None
 									}
 								} else if (h === 2) {
-									if (x === startingPositionX + startblockWidth - 2) {
+									if (x === startingPositionX + this._startBlockWidth - 2) {
 										slope = true
-									} else if (x > startingPositionX + startblockWidth - 2) {
+									} else if (x > startingPositionX + this._startBlockWidth - 2) {
 										tileType = TileType.None
 									}
 								}
@@ -470,6 +470,10 @@ export class Map {
 
 	get mapMaxHeight(): number {
 		return this._mapMaxHeight
+	}
+
+	get startBlockSize(): Dimensions {
+		return { w: this._startBlockWidth, l: this._startBlockLength }
 	}
 
 	set blockHeight(height: number) {

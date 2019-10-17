@@ -114,3 +114,8 @@ export interface Position {
 	x?: number,
 	y?: number
 }
+
+export interface Dimensions {
+	w?: number,
+	l?: number
+}

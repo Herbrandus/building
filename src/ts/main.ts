@@ -91,7 +91,7 @@ if (!building.debug()) {
 setColors(building)
 
 document.querySelector('#add').addEventListener('click', () => {
-	building.addToBuildingAndRedraw()
+	document.querySelector('#color').innerHTML = building.addToBuildingAndRedraw()
 	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
 })
 
