@@ -68,6 +68,7 @@ window['debug'] = false
 window['activateDebug'] = () => { 
 	window['debug'] = true
 	document.querySelector('#color').classList.remove('hide')
+	document.querySelector('#add').classList.remove('hide')
 	document.querySelector('#color-scheme').classList.remove('hide')
 	if (document.querySelector('#buildingimg')) {
 		document.querySelector('#buildingimg').classList.add('debug-active')
@@ -88,6 +89,11 @@ if (!building.debug()) {
 }
 
 setColors(building)
+
+document.querySelector('#add').addEventListener('click', () => {
+	building.addToBuildingAndRedraw()
+	document.querySelector("#worldtest").innerHTML = building.drawTileMap()
+})
 
 document.querySelector('#generate').addEventListener('click', () => {
 	building = new RandomBuilding()

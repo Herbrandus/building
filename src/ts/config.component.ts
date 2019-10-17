@@ -18,7 +18,10 @@ export class Config {
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
 	private _allowSurroundingDecorations: boolean = true
+	private _allowWindows: boolean = false
 	private _lightInWindows: boolean = Math.round(Math.random() * 8) > 6 ? true : false
+	private _goldenRatio: number = 1.61803399
+	private _fibonacci: number[] = [1, 2, 3, 5, 8, 13, 21]
 
 	constructor() {	}
 
@@ -70,8 +73,20 @@ export class Config {
 		return this._lightInWindows
 	}
 
+	public get allowWindows(): boolean {
+		return this._allowWindows
+	}
+
 	public get allowSurroundingDecorations(): boolean {
 		return this._allowSurroundingDecorations
+	}
+
+	public get goldenRatio(): number {
+		return this._goldenRatio
+	}
+
+	public get fibonacci(): number[] {
+		return this._fibonacci
 	}
 
 	public getMapWidth(mapArrayWidth: number): number {

@@ -83,19 +83,19 @@ export class Map {
 		this._surroundingsWaterColor = new Color('#6fb9ca')
 		this._surroundingsSandColor = new Color('#e9e3ba')
 		this._surroundingsDefaultColor = this._surroundingsGrassColor
-		this._showWindows = Math.round(Math.random() * 2)
+		this._showWindows = (this.config.allowWindows) ? Math.round(Math.random() * 2) : 0
 
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
 		let startBlockXfromCenterDeviation = 7
-		let startblockLength = this._averageBuildingSize + Math.floor(Math.random() * 4)
 		let startblockWidth = this._averageBuildingSize + Math.floor(Math.random() * 3)
+		let startblockLength = startblockWidth * this.config.goldenRatio
 		let startblockXfromCenter = 4 + Math.floor(Math.random() * startBlockXfromCenterDeviation)
 		let startblockLengthHalf = Math.floor(startblockLength / 2)
 		let startblockWidthHalf = Math.floor(startblockWidth / 2)
 		let startingPositionX = Math.floor(this._mapWidth / 2) - Math.floor(startblockXfromCenter / 2)
 		let buildGardens = !!(Math.round(Math.random() * 2))
-		let useWaterGarden = false		
+		let useWaterGarden = false
 		let tileHeight = 0
 		let firstBlockHeight
 		let slopeY = 0
@@ -108,13 +108,15 @@ export class Map {
 			this._surroundingsDefaultColor = this._surroundingsWaterColor
 		}
 
+		console.log(maximumBlockIterations)
+
 		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
-			firstBlockHeight = this._blockHeight * 3
+			firstBlockHeight = this.config.fibonacci[maximumBlockIterations]
 		} else if (this._blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
-			firstBlockHeight = 3 + Math.round(Math.random())
+			firstBlockHeight = this.config.fibonacci[0]
 			this._blockHeight = firstBlockHeight
 		} else {
-			firstBlockHeight = this._blockHeight + Math.round(Math.random() * 4)
+			firstBlockHeight = this.config.fibonacci[Math.round(Math.random() * this.config.fibonacci.length)]
 		}
 
 		if (firstBlockHeight > 6) {
@@ -266,15 +268,16 @@ export class Map {
 				}
 			}
 		}
-		
+
+		/*
 		for (let i = 0; i < this._additionalBlockIterations; i++) {
 			this.getEdges()
 			this._world = this.mods.addBuildingComponent(this)
 		}
 
-		/* 	
+		 	
 		 *	Add shadows around the building
-		 */
+		
 
 		for (let e = 0; e < this._blockEdges.length; e++) {
 			let edgePointY = this._blockEdges[e].y
@@ -305,11 +308,11 @@ export class Map {
 			}
 
 			this._blockIdIterator++
-		}
+		} */
 
 		/* 	
 		 *	Add gardens or other ornamental features around the building
-		 */
+		
 
 		if (this.config.allowSurroundingDecorations && buildGardens) {
 
@@ -420,7 +423,7 @@ export class Map {
 					}
 				}
 			}
-		}
+		} */
 
 		/* 	
 		 *	Clear the edges and mirror the building
@@ -707,7 +710,7 @@ export class Map {
 
 	public addToBuilding(): void {
 		this._world = this.mods.addBuildingComponent(this)
-		this._world = this.mods.mirrorMap(this)
+		// this._world = this.mods.mirrorMap(this)
 		this._world = this.mods.clearMapEdges(this)
 		this.setEdges(false)
 		console.log(this._world)	

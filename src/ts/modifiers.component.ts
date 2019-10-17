@@ -149,10 +149,13 @@ export class Modifiers {
 				let openFloor = 0
 				let showWindows = world.showWindows
 
+				console.log('world.blockHeightVariation', world.blockHeightVariation)
+				console.log('i', world.blockAmountIterator)
+
 				if (world.blockHeightVariation === BuildingHeightVariations.TallCenter) {
-					nextHeight = world.blockHeight - (world.blockAmountIterator)
+					nextHeight = this.config.fibonacci[ world.maxBlockIterations - world.blockAmountIterator + 1 ]
 				} else if (world.blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
-					nextHeight = world.blockHeight + (world.blockAmountIterator * Math.ceil(Math.random() * 2))
+					nextHeight = this.config.fibonacci[world.blockAmountIterator + 1]
 				} else if (world.blockHeightVariation === BuildingHeightVariations.Random) {
 					let randomNum = Math.ceil(Math.random() * 4)
 					let randomAdd = Math.round(Math.random())
@@ -179,10 +182,10 @@ export class Modifiers {
 				let manipulateExistingCols = (Math.round(Math.random()) < 1) ? false : true
 				let nextBlockWidth = (world.averageBuildingSize ) + Math.floor(Math.random() * 5)
 				let nextBlockLength = (world.averageBuildingSize ) + Math.floor(Math.random() * 5)
-				let yStartOffset = 1 + Math.floor(Math.random() * 2)
+				let yStartOffset = 0
 				let hollowBuildingBlock = Math.round(Math.random()) === 1 ? true : false
 
-				if (creationPoint.y + nextBlockLength - yStartOffset > world.mapLength - 1) {
+				if (creationPoint.y + nextBlockLength > world.mapLength - 1) {
 					nextBlockLength = world.mapLength - (creationPoint.y + yStartOffset) - 1
 				}
 				

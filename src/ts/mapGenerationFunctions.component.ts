@@ -1,4 +1,4 @@
-import { Config } from './config.component'
+import { Config, Position } from './config.component'
 
 export class MapGenerationFunctions {
 
@@ -76,6 +76,56 @@ export class MapGenerationFunctions {
 
 	toRadians (angle: number): number {
 		return angle * (Math.PI / 180);
+	}
+
+	public getHighestXfromArray(array: Position[]): Position {
+		let highest: Position = {x: 0, y: 0}
+
+		array.forEach(item => {
+			if (item.x > highest.x) {
+				highest = item
+			}
+		})
+
+		return highest
+	}
+
+	public getHighestYfromArray(array: Position[]): Position {
+		let highest: Position = {x: 0, y: 0}
+
+		array.forEach(item => {
+			if (item.y > highest.y) {
+				highest = item
+			}
+		})
+
+		return highest
+	}
+
+	public getLowestXfromArray(array: Position[]): Position {
+		let highest = this.getHighestXfromArray(array)
+		let lowest: Position = highest
+
+		array.forEach(item => {
+			if (item.x < lowest.x) {
+				lowest = item
+			}
+		})
+
+		return lowest
+	}
+
+	public getLowestYfromArray(array: Position[]): Position {
+		let highest = this.getHighestYfromArray(array)
+		let lowest: Position = highest
+
+		array.forEach(item => {
+			if (item.y < lowest.y) {
+				lowest = item
+			}
+		})
+
+		return lowest
 	}
 }
 
