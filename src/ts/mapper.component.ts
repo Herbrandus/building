@@ -54,7 +54,7 @@ export class Map {
 			averageBuildingSize: number,
 			blockHeight: number,
 			maximumBlockIterations: number,
-			pyramid: boolean)
+			mirrorAtCenter: boolean = false)
 	{
 		this._world = []
 		this._mapWidth = mapWidth
@@ -63,6 +63,22 @@ export class Map {
 		this._mapEdgeWidth = mapEdgeWidth
 		this._averageBuildingSize = averageBuildingSize 
 		this._blockHeight = blockHeight
+		let baseHeight = 2
+		let scaleFactor
+		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
+			scaleFactor = 2
+		} else if (this._blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
+			scaleFactor = 8
+		} else {
+			scaleFactor = 4
+		}
+		if (Math.round(Math.random()) === 0) {
+			this._startBlockWidth = this._averageBuildingSize + Math.floor(Math.random() * scaleFactor)
+			this._startBlockLength = Math.floor(this._startBlockWidth * this.config.goldenRatio)
+		} else {
+			this._startBlockLength = this._averageBuildingSize + Math.floor(Math.random() * scaleFactor)
+			this._startBlockWidth = Math.floor(this._startBlockLength * this.config.goldenRatio)
+		}		
 		this._maximumBlockIterations = maximumBlockIterations
 		this._additionalBlockIterations = this.mapGen.calculateAdditionalBlockIterations(maximumBlockIterations)
 		this._blockGroups = []
@@ -87,11 +103,18 @@ export class Map {
 		this._surroundingsDefaultColor = this._surroundingsGrassColor
 		this._showWindows = this.config.allowWindows ? Math.round(Math.random() * 2) : 0
 
+		let startblockYfromCenterDeviation = 0
+		if (!mirrorAtCenter) {			
+			startblockYfromCenterDeviation = -8
+			if (Math.round(Math.random()) === 0) {
+				startblockYfromCenterDeviation = 8
+			}
+			console.log('not mirrorred: dev:', startblockYfromCenterDeviation)
+		}
+
 		let mapLengthHalf = Math.floor(mapLength / 2) 
 		let mapWidthHalf = Math.floor(mapWidth / 2)
-		let startBlockXfromCenterDeviation = 7
-		this._startBlockWidth = this._averageBuildingSize + Math.floor(Math.random() * 3)
-		this._startBlockLength = this._startBlockWidth * this.config.goldenRatio
+		let startBlockXfromCenterDeviation = 7		
 		let startblockXfromCenter = 4 + Math.floor(Math.random() * startBlockXfromCenterDeviation)
 		let startblockLengthHalf = Math.floor(this._startBlockLength / 2)
 		let startblockWidthHalf = Math.floor(this._startBlockWidth / 2)
@@ -99,7 +122,7 @@ export class Map {
 		let buildGardens = !!(Math.round(Math.random() * 2))
 		let useWaterGarden = false
 		let tileHeight = 0
-		let firstBlockHeight
+		let firstBlockHeight = this.config.fibonacci[Math.round(Math.random() * this.config.fibonacci.length)]
 		let slopeY = 0
 
 		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 3) {
@@ -113,10 +136,8 @@ export class Map {
 		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
 			firstBlockHeight = this.config.fibonacci[maximumBlockIterations]
 		} else if (this._blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
-			firstBlockHeight = this.config.fibonacci[0]
+			firstBlockHeight = baseHeight + this.config.fibonacci[0]
 			this._blockHeight = firstBlockHeight
-		} else {
-			firstBlockHeight = this.config.fibonacci[Math.round(Math.random() * this.config.fibonacci.length)]
 		}
 
 		if (firstBlockHeight > 6) {
@@ -136,7 +157,10 @@ export class Map {
 		let hollowBuildingBlock = (Math.round(Math.random()) === 1 ? true : false) 
 		let openGroundLevel = (this._blockHeight > 2) ? (Math.round(Math.random()) === 1 ? true : false) : false
 
-		console.log('showWindows', this._showWindows)
+		console.log('y deviation:', startblockYfromCenterDeviation)
+		console.log('y min: ', mapLengthHalf + startblockYfromCenterDeviation)
+		console.log('y max: ', mapLengthHalf + (startblockYfromCenterDeviation + this._startBlockLength))
+		console.log('this._blockHeight', this._blockHeight)
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -147,9 +171,15 @@ export class Map {
 				let thisBlockGroup = 0
 
 				let column = new Column(false, x, y, 0)
-
-				let yConditions = (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf))
+				let yConditions
 				let xConditions = (x > startingPositionX && x <= (startingPositionX + this._startBlockWidth))
+
+				if (!mirrorAtCenter) {
+					yConditions = (y >= mapLengthHalf + startblockYfromCenterDeviation && y <= mapLengthHalf + (startblockYfromCenterDeviation + this._startBlockLength))
+				} else {
+					yConditions = (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf))
+				}
+				
 
 				if (yConditions) {
 
@@ -158,7 +188,7 @@ export class Map {
 						thisBlockGroup = 1
 						let tileStack = []
 
-						for (let h = 0; h < firstBlockHeight; h++) {			
+						for (let h = 0; h < this._blockHeight; h++) {			
 							
 							let thisPillar = false
 							let tileType = TileType.Body
@@ -168,7 +198,7 @@ export class Map {
 								}
 								tileType = TileType.None
 							}
-							if (this._decorationLineH > 3 && h+1 === this._decorationLineH && h+1 < firstBlockHeight) {
+							if (this._decorationLineH > 3 && h+1 === this._decorationLineH && h+1 < this._blockHeight) {
 								tileType = TileType.None
 								if (y % 2 === 0) {
 									thisPillar = true
@@ -178,7 +208,7 @@ export class Map {
 							if (!thisPillar && this._showWindows > 0 && h % 2 === 1) {
 								thisWindowed = this._showWindows
 							}							
-							let isRoof = (h === firstBlockHeight-1) ? true : false
+							let isRoof = (h === this._blockHeight-1) ? true : false
 							let tileColor = this._defaultColor
 
 							if (h === this._decorationLineH) {								
@@ -190,7 +220,7 @@ export class Map {
 							}
 
 							let slope = false
-							if (h < firstBlockHeight && y === slopeY) {
+							if (h < this._blockHeight && y === slopeY) {
 								if (h === 0) {
 									if (x === startingPositionX + this._startBlockWidth) {
 										slope = true
@@ -234,15 +264,15 @@ export class Map {
 								this._blockGroups.push(thisBlockGroup)
 							}
 
-							this._blockHeightsArray.push(firstBlockHeight)
+							this._blockHeightsArray.push(this._blockHeight)
 
 							this._blockIdIterator++
 						}
 
-						column = new Column(true, x, y, firstBlockHeight)
+						column = new Column(true, x, y, this._blockHeight)
 
 						column.blockGroup = thisBlockGroup
-						column.height = firstBlockHeight
+						column.height = this._blockHeight
 						column.corner = false
 						column.tileStack = tileStack
 					}
@@ -255,10 +285,23 @@ export class Map {
 		this.setEdges(false)
 
 		/* Make hollow */
-		if (hollowBuildingBlock) {
+		if (hollowBuildingBlock && this._blockHeight > 2) {
 
 			for (let y = 0; y < this.mapLength; y++) {
 				for (let x = 0; x < this.mapWidth; x++) {
+
+					if (!!this._world[y][x].edge.left) {
+						console.log('left? ', this._world[y][x].edge.left)	
+					} 
+					if (!!this._world[y][x].edge.bottom) {
+						console.log('bottom? ', this._world[y][x].edge.bottom)
+					}
+					if (!!this._world[y][x].edge.right) {
+						console.log('right? ', this._world[y][x].edge.right)
+					}
+					if (!!this._world[y][x].edge.top) {
+						console.log('top? ', this._world[y][x].edge.top)
+					}
 
 					let hasEdge = (this._world[y][x].edge.left || this._world[y][x].edge.bottom || this._world[y][x].edge.right) ? true : false
 
@@ -269,15 +312,11 @@ export class Map {
 			}
 		}
 
-		/*
+		
 		for (let i = 0; i < this._additionalBlockIterations; i++) {
 			this.getEdges()
 			this._world = this.mods.addBuildingComponent(this)
-		}
-
-		 	
-		 *	Add shadows around the building
-		
+		}		
 
 		for (let e = 0; e < this._blockEdges.length; e++) {
 			let edgePointY = this._blockEdges[e].y
@@ -308,11 +347,10 @@ export class Map {
 			}
 
 			this._blockIdIterator++
-		} */
+		}
 
-		/* 	
-		 *	Add gardens or other ornamental features around the building
-		
+		/*	
+		 *	Add gardens or other ornamental features around the building */		
 
 		if (this.config.allowSurroundingDecorations && buildGardens) {
 
@@ -423,15 +461,17 @@ export class Map {
 					}
 				}
 			}
-		} */
+		}
 
 		/* 	
 		 *	Clear the edges and mirror the building
 		 */
 
 		this._world = this.mods.clearMapEdges(this)
-		this._world = this.mods.mirrorMap(this)
-		this.setEdges(true)
+		if (mirrorAtCenter) {
+			this._world = this.mods.mirrorMap(this)
+		}		
+		// this.setEdges(true)
 
 		console.log(this._world)
 	}	
@@ -570,7 +610,7 @@ export class Map {
 
 		for (let y = 0; y < this.mapLength; y++) {
 			for (let x = 0; x < this.mapWidth; x++) {
-				if (this._world[y][x].isDefined) {
+				if (this._world[y][x].isDefined && this._world[y][x].height > 0) {
 					column = this._world[y][x]
 					break;
 				}

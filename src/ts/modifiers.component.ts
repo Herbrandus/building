@@ -209,8 +209,14 @@ export class Modifiers {
 
 				if (sideSelectionForGeneration === 0) {
 					// lowest x point
-					let randomEdgePoint = 3 + Math.floor(Math.random() * (xLowEdges.length - 3))
+					let randomEdgePoint = Math.floor(Math.random() * (xLowEdges.length))
+					if (xLowEdges.length > 4) {
+						randomEdgePoint = 2 + Math.floor(Math.random() * (xLowEdges.length - 2))
+					}
+					
 					creationPoint = xLowEdges[randomEdgePoint]
+
+					console.log('chosen next point:', creationPoint)
 
 					yLowEdge = creationPoint.y - Math.round(nextBlockLength / 2) - 1
 					yHighEdge = creationPoint.y + Math.round(nextBlockLength / 2) + 1
@@ -219,8 +225,13 @@ export class Modifiers {
 
 				} else if (sideSelectionForGeneration === 1) {
 					// highest x point
-					let randomEdgePoint = 3 + Math.floor(Math.random() * (xHighEdges.length - 3))
+					let randomEdgePoint = Math.floor(Math.random() * (xHighEdges.length))
+					if (xHighEdges.length > 4) {
+						randomEdgePoint = 2 + Math.floor(Math.random() * (xHighEdges.length - 2))
+					}					
 					creationPoint = xHighEdges[randomEdgePoint]
+
+					console.log('chosen next point:', creationPoint)
 
 					yLowEdge = creationPoint.y - Math.round(nextBlockLength / 2) - 1
 					yHighEdge = creationPoint.y + Math.round(nextBlockLength / 2) + 1
@@ -231,6 +242,8 @@ export class Modifiers {
 					// highest y point
 					let randomEdgePoint = Math.floor(Math.random() * yHighEdges.length)
 					creationPoint = yHighEdges[randomEdgePoint]
+
+					console.log('chosen next point:', creationPoint)
 
 					yLowEdge = creationPoint.y
 					yHighEdge = creationPoint.y + nextBlockLength
@@ -272,7 +285,7 @@ export class Modifiers {
 					towerLocation = Math.round(Math.random() * 2)
 				}
 
-				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor
+				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor							
 
 				let slopeY
 				if (nextHeight < 4) {

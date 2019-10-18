@@ -3,9 +3,9 @@ import { Color } from './mapGenerationFunctions.component'
 export class Config {
 
 	private _allowDebug: boolean = true
-	private _tileWidth: number = 20
-	private _tileLength: number = 20
-	private _tileHeight: number = 15
+	private _tileWidth: number = 16
+	private _tileLength: number = 16
+	private _tileHeight: number = 14
 	private _tileSmallAngle: number = 85
 	private _tileLargeAngle: number = 100
 	private _groundColor: Color = new Color('#f5f3e5')
@@ -21,7 +21,7 @@ export class Config {
 	private _allowWindows: boolean = false
 	private _lightInWindows: boolean = Math.round(Math.random() * 8) > 6 ? true : false
 	private _goldenRatio: number = 1.61803399
-	private _fibonacci: number[] = [1, 2, 3, 5, 8, 13, 21]
+	private _fibonacci: number[] = [1, 2, 3, 5, 8, 13]
 
 	constructor() {	}
 

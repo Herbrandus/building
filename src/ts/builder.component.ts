@@ -152,6 +152,8 @@ export class Renderer {
 
 						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], shadowColor).html
 
+						let slopeInCol = false
+
 						for (let h = 0; h < map[y][x].height; h++) {
 
 							let currentTile = map[y][x].tileStack[h]
@@ -172,30 +174,36 @@ export class Renderer {
 								}
 							}
 
+							if (options.slope) {
+								slopeInCol = true
+							}
+
 							if (currentTile.type === TileType.Body) {
 								
 								if (currentTile.options.slope) {
-									let slope = this.render.createSlopeBlock(thisPosX, thisPosY + (tileHeight * 4), map[y][x].getTile(h), 'e')
+									let slope = this.render.createSlopeBlock(thisPosX, thisPosY + (tileHeight * 4.75), map[y][x].getTile(h), 'e')
 									newData += slope.html
 								} else {
-									let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile)
-									newData += tile.html
+									if (!slopeInCol) {
+										let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile)
+										newData += tile.html
 
-									if (currentTile.options.windowed > 0) {
-										if (map[y][x].edge.right || map[y][x].edge.bottom) {
-											if (Math.round(Math.random() * 6) > 4) {
-												let window = this.render.createWindow(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], windowLights)
-												newData += window.html
-											}										
+										if (currentTile.options.windowed > 0) {
+											if (map[y][x].edge.right || map[y][x].edge.bottom) {
+												if (Math.round(Math.random() * 6) > 4) {
+													let window = this.render.createWindow(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], windowLights)
+													newData += window.html
+												}										
+											}
+											if (map[y][x].edge.bottom && (h === map[y+1][x].height || h === 0) && Math.round(Math.random() * 10) > 8) {
+												let door = this.render.createDoor(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], 'bottom')
+												newData += door.html
+											} else if (map[y][x].edge.right && (h === map[y][x+1].height || h === 0) && Math.round(Math.random() * 10) > 8) {
+												let door = this.render.createDoor(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], 'right')
+												newData += door.html
+											}								
 										}
-										if (map[y][x].edge.bottom && (h === map[y+1][x].height || h === 0) && Math.round(Math.random() * 10) > 8) {
-											let door = this.render.createDoor(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], 'bottom')
-											newData += door.html
-										} else if (map[y][x].edge.right && (h === map[y][x+1].height || h === 0) && Math.round(Math.random() * 10) > 8) {
-											let door = this.render.createDoor(thisPosX, thisPosY - tileHeight, currentTile, map[y][x], 'right')
-											newData += door.html
-										}								
-									}
+									}									
 								}								
 
 							} else if (!options.tower && currentTile.type === TileType.HalfBlock) {
