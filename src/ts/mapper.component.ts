@@ -25,6 +25,7 @@ export class Map {
 	private _startBlockLength: number
 	private _mapHalfLength: number
 	private _world: any[][]
+	private _mirrorAtCenter: boolean
 	private _blockHeightsArray: number[]
 	private _blockGroups: number[]
 	private _blockEdges: Position[]	
@@ -63,6 +64,7 @@ export class Map {
 		this._mapEdgeWidth = mapEdgeWidth
 		this._averageBuildingSize = averageBuildingSize 
 		this._blockHeight = blockHeight
+		this._mirrorAtCenter = mirrorAtCenter
 		let baseHeight = 2
 		let scaleFactor
 		if (this._blockHeightVariation === BuildingHeightVariations.TallCenter) {
@@ -104,7 +106,7 @@ export class Map {
 		this._showWindows = this.config.allowWindows ? Math.round(Math.random() * 2) : 0
 
 		let startblockYfromCenterDeviation = 0
-		if (!mirrorAtCenter) {			
+		if (!this._mirrorAtCenter) {			
 			startblockYfromCenterDeviation = -8
 			if (Math.round(Math.random()) === 0) {
 				startblockYfromCenterDeviation = 8
@@ -122,7 +124,8 @@ export class Map {
 		let buildGardens = !!(Math.round(Math.random() * 2))
 		let useWaterGarden = false
 		let tileHeight = 0
-		let firstBlockHeight = this.config.fibonacci[Math.round(Math.random() * this.config.fibonacci.length)]
+		let firstBlockHeightRandom = Math.floor(Math.random() * this.config.fibonacci.length)
+		let firstBlockHeight = this.config.fibonacci[firstBlockHeightRandom]
 		let slopeY = 0
 
 		if (this._defaultColor.rgb().g >= 180 && this._defaultColor.rgb().b >= 150 && Math.round(Math.random() * 4) >= 3) {
@@ -138,6 +141,12 @@ export class Map {
 		} else if (this._blockHeightVariation === BuildingHeightVariations.TallSurrounds) {
 			firstBlockHeight = baseHeight + this.config.fibonacci[0]
 			this._blockHeight = firstBlockHeight
+		}
+
+		let hollowArchWays = false
+
+		if (firstBlockHeight === 3) {
+			hollowArchWays = true
 		}
 
 		if (firstBlockHeight > 6) {
@@ -174,7 +183,7 @@ export class Map {
 				let yConditions
 				let xConditions = (x > startingPositionX && x <= (startingPositionX + this._startBlockWidth))
 
-				if (!mirrorAtCenter) {
+				if (!this._mirrorAtCenter) {
 					yConditions = (y >= mapLengthHalf + startblockYfromCenterDeviation && y <= mapLengthHalf + (startblockYfromCenterDeviation + this._startBlockLength))
 				} else {
 					yConditions = (y >= mapLengthHalf && y <= (mapLengthHalf + startblockLengthHalf))
@@ -238,7 +247,14 @@ export class Map {
 										tileType = TileType.None
 									}
 								}
-							}					
+							}
+
+							if (hollowArchWays && h < 2) {
+								tileType = TileType.None
+								if ((y % 2 === 0 && x % 2 === 1) || (y % 2 === 1 && x % 2 === 0)) {
+									thisPillar = true
+								}
+							}				
 
 							tileStack.push(
 								new Tile(
@@ -291,16 +307,44 @@ export class Map {
 				for (let x = 0; x < this.mapWidth; x++) {
 
 					if (!!this._world[y][x].edge.left) {
-						console.log('left? ', this._world[y][x].edge.left)	
+						console.log('left? ', this._world[y][x].edge.left)
+						for (let h = 0; h < this._blockHeight; h++) {
+							if (this._world[y][x].tileStack[h].type === TileType.None) {
+								if (y % 2 === 0) {
+									this._world[y][x].tileStack[h].options.pillar = true
+								}
+							}
+						}
 					} 
 					if (!!this._world[y][x].edge.bottom) {
 						console.log('bottom? ', this._world[y][x].edge.bottom)
+						for (let h = 0; h < this._blockHeight; h++) {
+							if (this._world[y][x].tileStack[h].type === TileType.None) {
+								if (x % 2 === 0) {
+									this._world[y][x].tileStack[h].options.pillar = true
+								}
+							}
+						}
 					}
 					if (!!this._world[y][x].edge.right) {
 						console.log('right? ', this._world[y][x].edge.right)
+						for (let h = 0; h < this._blockHeight; h++) {
+							if (this._world[y][x].tileStack[h].type === TileType.None) {
+								if (y % 2 === 0) {
+									this._world[y][x].tileStack[h].options.pillar = true
+								}
+							}
+						}
 					}
 					if (!!this._world[y][x].edge.top) {
 						console.log('top? ', this._world[y][x].edge.top)
+						for (let h = 0; h < this._blockHeight; h++) {
+							if (this._world[y][x].tileStack[h].type === TileType.None) {
+								if (x % 2 === 0) {
+									this._world[y][x].tileStack[h].options.pillar = true
+								}
+							}
+						}
 					}
 
 					let hasEdge = (this._world[y][x].edge.left || this._world[y][x].edge.bottom || this._world[y][x].edge.right) ? true : false
@@ -316,37 +360,6 @@ export class Map {
 		for (let i = 0; i < this._additionalBlockIterations; i++) {
 			this.getEdges()
 			this._world = this.mods.addBuildingComponent(this)
-		}		
-
-		for (let e = 0; e < this._blockEdges.length; e++) {
-			let edgePointY = this._blockEdges[e].y
-			let edgePointX = this._blockEdges[e].x
-			let grass = new Column(true, edgePointX, edgePointY, 0)
-				grass.tileStack = [new Tile(
-									this._blockIdIterator, 
-									edgePointX, 
-									edgePointY, 
-									0, 
-									TileType.Shadow,
-									this._defaultColor)]
-
-			if (this._world[edgePointY][edgePointX].isDefined) {
-				
-				if (!this._world[edgePointY - 1][edgePointX].isDefined) {
-					this._world[edgePointY - 1][edgePointX] = grass
-				}
-				if (!this._world[edgePointY + 1][edgePointX].isDefined) {
-					this._world[edgePointY + 1][edgePointX] = grass
-				}
-				if (!this._world[edgePointY][edgePointX - 1].isDefined) {
-					this._world[edgePointY][edgePointX - 1] = grass
-				}
-				if (!this._world[edgePointY][edgePointX + 1].isDefined) {
-					this._world[edgePointY][edgePointX + 1] = grass
-				}
-			}
-
-			this._blockIdIterator++
 		}
 
 		/*	
@@ -381,7 +394,7 @@ export class Map {
 									tileType = TileType.Grass
 								}
 							} else if (
-									(y === Math.floor(landsEdge / 2) + 1) ||
+									(y === Math.floor(landsEdge / 2)) ||
 									(y === this.mapLength - Math.floor(landsEdge / 2) - 1) ) {
 								if (useWaterGarden) {
 									tileColor = this._defaultColor
@@ -433,7 +446,7 @@ export class Map {
 									tileType = TileType.Grass
 								}
 							} else if (
-									y === Math.floor(landsEdge / 2) + 1 ||
+									y === Math.floor(landsEdge / 2) ||
 									y === this.mapLength - Math.floor(landsEdge / 2) - 1) {
 								if (useWaterGarden) {
 									tileColor = this._defaultColor
@@ -463,12 +476,43 @@ export class Map {
 			}
 		}
 
+		for (let e = 0; e < this._blockEdges.length; e++) {
+			let edgePointY = this._blockEdges[e].y
+			let edgePointX = this._blockEdges[e].x
+			let grass = new Column(true, edgePointX, edgePointY, 0)
+				grass.tileStack = [new Tile(
+									this._blockIdIterator, 
+									edgePointX, 
+									edgePointY, 
+									0, 
+									TileType.Shadow,
+									this._defaultColor)]
+
+			if (this._world[edgePointY][edgePointX].isDefined) {
+				
+				if (!this._world[edgePointY - 1][edgePointX].isDefined) {
+					this._world[edgePointY - 1][edgePointX] = grass
+				}
+				if (!this._world[edgePointY + 1][edgePointX].isDefined) {
+					this._world[edgePointY + 1][edgePointX] = grass
+				}
+				if (!this._world[edgePointY][edgePointX - 1].isDefined) {
+					this._world[edgePointY][edgePointX - 1] = grass
+				}
+				if (!this._world[edgePointY][edgePointX + 1].isDefined) {
+					this._world[edgePointY][edgePointX + 1] = grass
+				}
+			}
+
+			this._blockIdIterator++
+		}
+
 		/* 	
 		 *	Clear the edges and mirror the building
 		 */
 
 		this._world = this.mods.clearMapEdges(this)
-		if (mirrorAtCenter) {
+		if (this._mirrorAtCenter) {
 			this._world = this.mods.mirrorMap(this)
 		}		
 		// this.setEdges(true)
@@ -678,11 +722,18 @@ export class Map {
 	public getEdges(): Position[] {
 
 		this._blockEdges = []
+		let yConditions		
 
 		for (let y = 0; y < this._mapLength; y++) {
 			// only check second half of map
 
-			if (y > this._mapHalfLength + (this._blockAmountIterator - 1) && y < this._mapLength - 2) {
+			if (!this._mirrorAtCenter) {	
+				yConditions = y > 2 && y < this._mapLength - 2
+			} else {
+				yConditions = y > this._mapHalfLength + (this._blockAmountIterator - 1) && y < this._mapLength - 2
+			}
+
+			if (yConditions) {
 
 				for (let x = 0; x < this._mapWidth; x++) {
 					

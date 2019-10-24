@@ -268,7 +268,8 @@ export class Modifiers {
 					} else {
 						hollowBuildingBlock = false
 						this._lastBlockHollow = false
-					}					
+					}
+					hollowBuildingBlock = true				
 				} else {
 					hollowBuildingBlock = false
 				}
@@ -284,6 +285,9 @@ export class Modifiers {
 				if (createTower) {
 					towerLocation = Math.round(Math.random() * 2)
 				}
+
+				console.log('world', world.map)
+				console.log('world.getFirstDefinedColumn()', world.getFirstDefinedColumn())
 
 				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor							
 
@@ -465,6 +469,15 @@ export class Modifiers {
 										} else {
 											tileColor = world.defaultColor
 										}
+
+										if (world.map[y][x].isDefined) {
+											if (world.map[y][x].tileStack[0].type === TileType.Grass) {
+												if (h === 0 && tileType === TileType.None) {
+													tileType = TileType.Grass
+													tileColor = world.map[y][x].tileStack[0].tileColor
+												}
+											}
+										}																				
 
 										tileStack.push(
 											new Tile(
