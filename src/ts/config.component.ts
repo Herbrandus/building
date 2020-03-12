@@ -10,9 +10,9 @@ export class Config {
 	private _tileLargeAngle: number = 100
 	private _groundColor: Color = new Color('#f5f3e5')
 	private _buildingBaseColor: Color = new Color(
-		115 + Math.floor(Math.random() * 75),
-		155 + Math.floor(Math.random() * 40),
-		150 + Math.floor(Math.random() * 30)
+		125 + Math.floor(Math.random() * 75),
+		125 + Math.floor(Math.random() * 40),
+		160 + Math.floor(Math.random() * 30)
 	)
 	private _tileEdgeBleed: number = 0.3
 	private _maxAllowedHeight: number = 12

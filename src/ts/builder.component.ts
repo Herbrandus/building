@@ -111,6 +111,16 @@ export class Renderer {
 		let lastTile = null
 		let startTileX = tileHalfWidthLeft * (mapTotalWidth - 1)
 
+		const topPavementType = Math.floor(Math.random() * 5)
+		const randomPaving = Math.floor(Math.random() * 5)
+		let pavementType = ''
+
+		if (topPavementType === 1) {
+			pavementType = 'triangles'
+		} else if (topPavementType === 3) {
+			pavementType = 'squares'	
+		}	
+
 		for (let y = 0; y < mapTotalLength; y++) {
 
 			for (let x = 0; x < mapTotalWidth; x++) {
@@ -185,7 +195,22 @@ export class Renderer {
 									newData += slope.html
 								} else {
 									if (!slopeInCol) {
-										let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile)
+										
+										let isTop = ''
+										if (map[y][x].blockGroup % 2 === 1 && h === map[y][x].height-1) {
+											
+											isTop = pavementType
+
+											if (randomPaving > 2) {
+												if (topPavementType === 1) {
+													isTop = 'triangles'
+												} else if (topPavementType === 3) {
+													isTop = 'squares'	
+												}
+											}																												
+										}
+
+										let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile, isTop)
 										newData += tile.html
 
 										if (currentTile.options.windowed > 0) {
@@ -203,7 +228,7 @@ export class Renderer {
 												newData += door.html
 											}								
 										}
-									}									
+									}
 								}								
 
 							} else if (!options.tower && currentTile.type === TileType.HalfBlock) {
@@ -230,9 +255,27 @@ export class Renderer {
 										newData += arch.html
 									}
 								}
-							} else if (currentTile.options.tower) {
-								let tile = this.render.createBlock(thisPosX, thisPosY - tileHeight, currentTile)
-								newData += tile.html
+							}
+
+							if (h === map[y][x].height - 1 && currentTile.options.tower) {
+
+								let orientationTop = ''
+
+								if (y > 0 && y < mapTotalLength && x < mapTotalWidth) {
+
+									if (map[y - 1][x].tileStack[h] && map[y - 1][x].tileStack[h].options.tower) {
+										orientationTop = 'se';
+									}
+
+									if (map[y + 1][x].tileStack[h] && map[y + 1][x].tileStack[h].options.tower) {
+										orientationTop = 'ne';
+									}
+
+									if (orientationTop !== '') {
+										let tile = this.render.createSlopeBlock(thisPosX, thisPosY = tileHeight, currentTile, orientationTop)
+										newData += tile.html
+									}
+								}																
 							}
 						}
 					}					

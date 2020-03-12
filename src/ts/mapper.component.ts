@@ -3,6 +3,7 @@ import { Tile, TileType, TileOptions } from './tile.component'
 import { Config, Position, Dimensions } from './config.component'
 import { Primitives } from './primitives.component'
 import { Modifiers } from './modifiers.component'
+import { Decorations } from './decorations.component'
 
 export class Map {
 
@@ -10,6 +11,7 @@ export class Map {
 	private config: Config = new Config()
 	private primitives: Primitives = new Primitives()
 	private mods: Modifiers = new Modifiers()
+	private deco: Decorations = new Decorations()
 
 	private _mapWidth: number
 	private _mapLength: number
@@ -166,10 +168,10 @@ export class Map {
 		let hollowBuildingBlock = (Math.round(Math.random()) === 1 ? true : false) 
 		let openGroundLevel = (this._blockHeight > 2) ? (Math.round(Math.random()) === 1 ? true : false) : false
 
-		console.log('y deviation:', startblockYfromCenterDeviation)
-		console.log('y min: ', mapLengthHalf + startblockYfromCenterDeviation)
-		console.log('y max: ', mapLengthHalf + (startblockYfromCenterDeviation + this._startBlockLength))
-		console.log('this._blockHeight', this._blockHeight)
+		// console.log('y deviation:', startblockYfromCenterDeviation)
+		// console.log('y min: ', mapLengthHalf + startblockYfromCenterDeviation)
+		// console.log('y max: ', mapLengthHalf + (startblockYfromCenterDeviation + this._startBlockLength))
+		// console.log('this._blockHeight', this._blockHeight)
 
 		for (let y = 0; y < this.mapLength; y++) {
 
@@ -272,7 +274,8 @@ export class Map {
 										tower: 		false,
 										stairs:		false,
 										halfArch: 	false,
-										wholeArch:	false
+										wholeArch:	false,
+										areaDecoration: ''
 									})
 								)
 
@@ -307,7 +310,7 @@ export class Map {
 				for (let x = 0; x < this.mapWidth; x++) {
 
 					if (!!this._world[y][x].edge.left) {
-						console.log('left? ', this._world[y][x].edge.left)
+						// console.log('left? ', this._world[y][x].edge.left)
 						for (let h = 0; h < this._blockHeight; h++) {
 							if (this._world[y][x].tileStack[h].type === TileType.None) {
 								if (y % 2 === 0) {
@@ -317,7 +320,7 @@ export class Map {
 						}
 					} 
 					if (!!this._world[y][x].edge.bottom) {
-						console.log('bottom? ', this._world[y][x].edge.bottom)
+						// console.log('bottom? ', this._world[y][x].edge.bottom)
 						for (let h = 0; h < this._blockHeight; h++) {
 							if (this._world[y][x].tileStack[h].type === TileType.None) {
 								if (x % 2 === 0) {
@@ -327,7 +330,7 @@ export class Map {
 						}
 					}
 					if (!!this._world[y][x].edge.right) {
-						console.log('right? ', this._world[y][x].edge.right)
+						// console.log('right? ', this._world[y][x].edge.right)
 						for (let h = 0; h < this._blockHeight; h++) {
 							if (this._world[y][x].tileStack[h].type === TileType.None) {
 								if (y % 2 === 0) {
@@ -337,7 +340,7 @@ export class Map {
 						}
 					}
 					if (!!this._world[y][x].edge.top) {
-						console.log('top? ', this._world[y][x].edge.top)
+						// console.log('top? ', this._world[y][x].edge.top)
 						for (let h = 0; h < this._blockHeight; h++) {
 							if (this._world[y][x].tileStack[h].type === TileType.None) {
 								if (x % 2 === 0) {
@@ -361,6 +364,9 @@ export class Map {
 			this.getEdges()
 			this._world = this.mods.addBuildingComponent(this)
 		}
+
+		console.log('remove excess arches');
+		this._world = this.mods.removeExcessArches(this);
 
 		/*	
 		 *	Add gardens or other ornamental features around the building */		
@@ -413,7 +419,18 @@ export class Map {
 													y, 
 													0, 
 													tileType,
-													tileColor)]
+													tileColor,
+													{
+														roof:		false,
+														pillar: 	false,
+														slope:		false,
+														windowed: 	0,
+														tower: 		false,
+														stairs:		false,
+														halfArch: 	false,
+														wholeArch:	false,
+														areaDecoration: ''
+													})]
 							
 
 							this._world[y][x] = gardenBlock
@@ -465,7 +482,18 @@ export class Map {
 													y, 
 													0, 
 													tileType,
-													tileColor)]
+													tileColor,
+													{
+														roof:		false,
+														pillar: 	false,
+														slope:		false,
+														windowed: 	0,
+														tower: 		false,
+														stairs:		false,
+														halfArch: 	false,
+														wholeArch:	false,
+														areaDecoration: ''
+													})]
 							
 
 							this._world[y][x] = gardenBlock
@@ -486,7 +514,18 @@ export class Map {
 									edgePointY, 
 									0, 
 									TileType.Shadow,
-									this._defaultColor)]
+									this._defaultColor,
+									{
+										roof:		false,
+										pillar: 	false,
+										slope:		false,
+										windowed: 	0,
+										tower: 		false,
+										stairs:		false,
+										halfArch: 	false,
+										wholeArch:	false,
+										areaDecoration: ''
+									})]
 
 			if (this._world[edgePointY][edgePointX].isDefined) {
 				
@@ -507,6 +546,14 @@ export class Map {
 			this._blockIdIterator++
 		}
 
+		/*
+		 *	Reset grass tiles beneath pillars and empty tiles below building blocks that
+		 *	should be grass tiles
+		 */
+
+		this._world = this.mods.resetGrassTilesBelowPillars(this);
+
+
 		/* 	
 		 *	Clear the edges and mirror the building
 		 */
@@ -516,6 +563,8 @@ export class Map {
 			this._world = this.mods.mirrorMap(this)
 		}		
 		// this.setEdges(true)
+
+		this._world = this.deco.placeRandomTrees(this)
 
 		console.log(this._world)
 	}	

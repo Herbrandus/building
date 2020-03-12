@@ -10,7 +10,7 @@ export class Modifiers {
 	private _lastBlockHollow: boolean = false
 	private _lastBlockShortestSide: number
 
-	mirrorMap(world: Map): any[][] {
+	public mirrorMap(world: Map): any[][] {
 
 		let oldBlockGroups = []
 		world.blockGroups.forEach(id => {
@@ -71,7 +71,8 @@ export class Modifiers {
 												tower: isTower,
 												stairs:	stairs,
 												halfArch: halfArches,
-												wholeArch: wholeArch
+												wholeArch: wholeArch,
+												areaDecoration: ''
 											}
 										)
 									)
@@ -84,7 +85,18 @@ export class Modifiers {
 											y, 
 											h, 
 											activeCol.tileStack[h].type,
-											tileColor											
+											tileColor,
+											{
+												roof:		false,
+												pillar: 	false,
+												slope:		false,
+												windowed: 	0,
+												tower: 		false,
+												stairs:		false,
+												halfArch: 	false,
+												wholeArch:	false,
+												areaDecoration: ''
+											}										
 										)
 									)
 								}
@@ -120,7 +132,7 @@ export class Modifiers {
 		return world.map
 	}
 	
-	clearMapEdges(world: Map): any[][] {
+	public clearMapEdges(world: Map): any[][] {
 
 		for (let y = 0; y < world.mapLength; y++) {
 			for (let x = 1; x < world.mapWidth; x++) {
@@ -139,9 +151,13 @@ export class Modifiers {
 		return world.map
 	}
 
-	addBuildingComponent(world: Map): any[][] {
+	public addBuildingComponent(world: Map): any[][] {
+
+		const defaultColor = world.defaultColor
 
 		if (world.blockAmountIterator < world.maxBlockIterations + 1) {
+
+			const newBuildingBlockColor = defaultColor.changeColorLighting(-Math.floor(Math.random() * 15))
 
 			world.blockEdges = world.getEdges()
 
@@ -191,10 +207,6 @@ export class Modifiers {
 				let xLowEdges = world.blockEdges.filter((edgePoint: Position) => edgePoint.x === xLow.x)
 				let xHighEdges = world.blockEdges.filter((edgePoint: Position) => edgePoint.x === xHigh.x)
 
-				console.log('Y High:', yHighEdges)
-				console.log('X Low:', xLowEdges)
-				console.log('X High:', xHighEdges)
-
 				let sideSelectionForGeneration = Math.floor(Math.random() * 3)	
 				if (yHigh.y > world.mapLength - 5) {
 					sideSelectionForGeneration = Math.floor(Math.random() * 2)
@@ -216,8 +228,6 @@ export class Modifiers {
 					
 					creationPoint = xLowEdges[randomEdgePoint]
 
-					console.log('chosen next point:', creationPoint)
-
 					yLowEdge = creationPoint.y - Math.round(nextBlockLength / 2) - 1
 					yHighEdge = creationPoint.y + Math.round(nextBlockLength / 2) + 1
 					xLowEdge = creationPoint.x - nextBlockWidth
@@ -231,8 +241,6 @@ export class Modifiers {
 					}					
 					creationPoint = xHighEdges[randomEdgePoint]
 
-					console.log('chosen next point:', creationPoint)
-
 					yLowEdge = creationPoint.y - Math.round(nextBlockLength / 2) - 1
 					yHighEdge = creationPoint.y + Math.round(nextBlockLength / 2) + 1
 					xLowEdge = creationPoint.x
@@ -242,8 +250,6 @@ export class Modifiers {
 					// highest y point
 					let randomEdgePoint = Math.floor(Math.random() * yHighEdges.length)
 					creationPoint = yHighEdges[randomEdgePoint]
-
-					console.log('chosen next point:', creationPoint)
 
 					yLowEdge = creationPoint.y
 					yHighEdge = creationPoint.y + nextBlockLength
@@ -285,9 +291,6 @@ export class Modifiers {
 				if (createTower) {
 					towerLocation = Math.round(Math.random() * 2)
 				}
-
-				console.log('world', world.map)
-				console.log('world.getFirstDefinedColumn()', world.getFirstDefinedColumn())
 
 				let defaultTileColor = world.getFirstDefinedColumn().tileStack[0].tileColor							
 
@@ -356,6 +359,7 @@ export class Modifiers {
 
 									let thisHeight = nextHeight
 									if (buildTowerHere) {
+										console.log('tower built');
 										thisHeight = nextHeight + 5
 									}
 
@@ -375,7 +379,7 @@ export class Modifiers {
 												slope = true
 											}
 										}	
-										let tileColor = defaultTileColor									
+										let tileColor = newBuildingBlockColor									
 										let tileType = TileType.Body										
 										let isTower = false
 										if (buildTowerHere) {
@@ -443,6 +447,37 @@ export class Modifiers {
 													}
 												}
 
+												if (nextBlockWidth === 6) {
+													if (x === xLowEdge + 1 || 
+														x === xLowEdge + 2 ||
+														x === xHighEdge - 2 ||
+														x === xHighEdge - 3) {
+														if (h < thisHeight - 2) {
+															tileType = TileType.None
+														}
+														if (h === thisHeight - 3) {
+															thisHalfArch = true
+														}													
+													}
+												}
+
+												if (nextBlockWidth === 8) {
+													if (x === xLowEdge + 1 || 
+														x === xLowEdge + 2 ||
+														x === xLowEdge + 4 ||
+														x === xLowEdge + 5) {
+														if (h < thisHeight - 2) {
+															tileType = TileType.None
+														}
+														if (h === thisHeight - 3) {
+															thisHalfArch = true
+														}
+													} else if (x === xLowEdge + 3 || x === xLowEdge + 6) {
+														tileType = TileType.Body
+														thisHalfArch = false
+													}
+												}
+
 											} else {
 												if (chanceForHigherSpace > 4) {
 													if (openFloor > 0 && (h === openFloor || h+1 === openFloor)) {
@@ -467,7 +502,7 @@ export class Modifiers {
 										} else if (h === 0) {
 											tileColor = world.firstLevelColor
 										} else {
-											tileColor = world.defaultColor
+											tileColor = newBuildingBlockColor
 										}
 
 										if (world.map[y][x].isDefined) {
@@ -477,7 +512,7 @@ export class Modifiers {
 													tileColor = world.map[y][x].tileStack[0].tileColor
 												}
 											}
-										}																				
+										}											
 
 										tileStack.push(
 											new Tile(
@@ -495,7 +530,8 @@ export class Modifiers {
 													tower: isTower,
 													stairs:	stairs,
 													halfArch: thisHalfArch,
-													wholeArch: thisWholeArch
+													wholeArch: thisWholeArch,
+													areaDecoration: ''
 												})
 											)								
 
@@ -530,31 +566,31 @@ export class Modifiers {
 
 				world.blockAmountIterator++
 
-				if (1 === 1) {
+				// if (1 === 1) {
 
-					for (let y = 0; y < world.mapLength; y++) {
-						for (let x = 0; x < world.mapWidth; x++) {
+				// 	for (let y = 0; y < world.mapLength; y++) {
+				// 		for (let x = 0; x < world.mapWidth; x++) {
 
-							if (x < world.mapWidth - 2 && x > 2) {
-								if (y < world.mapLength - 2 && y > 2) {
+				// 			if (x < world.mapWidth - 2 && x > 2) {
+				// 				if (y < world.mapLength - 2 && y > 2) {
 
-									if (world.map[y][x].isDefined && 
-										world.map[y-1][x].isDefined &&
-										world.map[y+1][x].isDefined &&
-										world.map[y][x-1].isDefined &&
-										world.map[y][x+1].isDefined) {
+				// 					if (world.map[y][x].isDefined && 
+				// 						world.map[y-1][x].isDefined &&
+				// 						world.map[y+1][x].isDefined &&
+				// 						world.map[y][x-1].isDefined &&
+				// 						world.map[y][x+1].isDefined) {
 
-										if (world.map[y][x].height > 4) {
-											if (world.map[y-1][x].blockGroup !== blockGroup) {
-												world.map[y][x].tileStack[world.map[y][x].height-1].type = TileType.HalfBlock
-											}	
-										}								
-									}		
-								}	
-							}							
-						}
-					}
-				}
+				// 						if (world.map[y][x].height > 4) {
+				// 							if (world.map[y-1][x].blockGroup !== blockGroup) {
+				// 								world.map[y][x].tileStack[world.map[y][x].height-1].type = TileType.HalfBlock
+				// 							}	
+				// 						}								
+				// 					}		
+				// 				}	
+				// 			}							
+				// 		}
+				// 	}
+				// }
 
 			} else {		
 				console.warn("Block edges array is empty.")
@@ -565,5 +601,110 @@ export class Modifiers {
 		}
 
 		return world.map
-	}	
+	}
+
+	public removeExcessArches(world: Map) {
+
+		for (let y = 0; y < world.mapLength; y++) {
+
+			for (let x = 0; x < world.mapWidth; x++) {
+
+				if (y > 0 && x > 0 && y < world.mapLength - 2 && x < world.mapWidth - 2) {
+
+					if (world.map[y][x].isDefined) {
+
+						for (let h = 0; h < world.map[y][x].height; h++) {
+
+							if (world.map[y][x].tileStack[h].type === TileType.None && world.map[y][x].tileStack[h].options.halfArch) {
+								
+								if (world.map[y - 1][x].isDefined && world.map[y - 1][x].height > 0 && world.map[y - 1][x].height === world.map[y][x].height) {
+
+									if (world.map[y - 1][x].tileStack[h].options.halfArch) {
+
+										console.log('y + 1', world.map[y + 1][x])
+
+										if (world.map[y + 1][x].isDefined && world.map[y + 1][x].height > 0 && world.map[y + 1][x].height === world.map[y][x].height) {
+
+											if (world.map[y + 1][x].tileStack[h].options.halfArch) {
+												world.map[y][x].tileStack[h].options.halfArch = false;
+											}
+
+										}
+
+										console.log('y + 2', world.map[y + 2][x])
+
+										if (world.map[y + 2][x].isDefined && world.map[y + 2][x].height > 0 && world.map[y + 2][x].height === world.map[y][x].height) {
+
+											if (world.map[y + 2][x].tileStack[h].options.halfArch) {
+												world.map[y + 1][x].tileStack[h].options.halfArch = false;
+											}
+
+										}
+									}
+								}
+
+								if (x > 1 && x < world.mapWidth - 3) {
+
+									if (world.map[y][x - 1].isDefined && world.map[y][x - 1].height === world.map[y][x].height) {
+
+										if (world.map[y][x - 1].tileStack[h].options.halfArch) {
+
+											if (world.map[y][x + 1].isDefined && world.map[y][x + 1].height === world.map[y][x].height) {
+											
+												if (world.map[y][x + 1].tileStack[h].options.halfArch) {
+													world.map[y][x].tileStack[h].options.halfArch = false;
+												}
+											}
+
+											console.log('x + 2', world.map[y + 2][x])
+
+											if (world.map[y][x + 2].isDefined && 
+												world.map[y][x + 1].height === world.map[y][x].height && 
+												world.map[y][x + 2].height === world.map[y][x].height) {
+
+												if (world.map[y][x + 2].tileStack[h].options.halfArch) {
+													world.map[y][x + 1].tileStack[h].options.halfArch = false;
+												}
+											}
+										}
+									}
+								}								
+							}
+						}
+					}
+				}						
+			}
+		}
+
+		return world.map;
+
+	}
+
+	public resetGrassTilesBelowPillars (world: Map) {
+
+		for (let y = 0; y < world.mapLength; y++) {
+
+			for (let x = 0; x < world.mapWidth; x++) {
+
+				if (y > 0 && x > 0 && y < world.mapLength - 1 && x < world.mapWidth - 1) {
+
+					if (world.map[y][x].isDefined && world.map[y][x].height > 0 && world.map[y][x].tileStack[0].type === TileType.None) {
+
+						if ((world.map[y - 1][x].isDefined && world.map[y - 1][x].tileStack[0].type === TileType.Grass) ||
+							(world.map[y + 1][x].isDefined && world.map[y + 1][x].tileStack[0].type === TileType.Grass) ||
+							(world.map[y][x - 1].isDefined && world.map[y][x - 1].tileStack[0].type === TileType.Grass) ||
+							(world.map[y][x + 1].isDefined && world.map[y][x + 1].tileStack[0].type === TileType.Grass)) {
+
+							console.log('should be grass tile!')
+						}
+					}
+
+				}
+			}
+
+		}
+
+		return world.map;
+
+	}
 }

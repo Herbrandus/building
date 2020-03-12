@@ -84,7 +84,8 @@ export interface TileOptions {
 	tower: boolean,
 	stairs:	boolean,
 	halfArch: boolean,
-	wholeArch: boolean
+	wholeArch: boolean,
+	areaDecoration: string
 }
 
 export enum TileType {
