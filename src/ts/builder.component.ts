@@ -44,7 +44,7 @@ export class Renderer {
 
 			for (let x = 0; x < map.mapWidth; x++) {
 
-				htmlMap += `<div class="tile${halfWay}" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;`
+				htmlMap += `<div data-y="${y}" data-x="${x}" class="tile${halfWay}" style="width:${this.config.tileWidth}px;height:${this.config.tileLength}px;`
 
 				if (map.getColumn(x, y).isDefined && map.getTopTile(x, y)) {
 					
@@ -158,6 +158,18 @@ export class Renderer {
 						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], color).html
 					}
 
+					if (map[y][x].height === 0) {
+
+						if (map[y][x].tileStack[0].type === TileType.None && map[y][x].tileStack[0].options.areaDecoration !== '') {
+
+							if (map[y][x].tileStack[0].options.areaDecoration === 'tree') {
+								const treeData = this.render.createTree(thisPosX, thisPosY)
+								newData += treeData.html
+								console.log('tree placed at y: ' + y + ', x: ' + x)
+							}
+						}
+					}
+
 					if (map[y][x].height > 0) {
 
 						newData += this.render.createPlane(thisPosX, thisPosY, map[y][x].tileStack[0], shadowColor).html
@@ -247,12 +259,14 @@ export class Renderer {
 
 								if (currentTile.options.halfArch) {
 
-									if (map[y+1][x].isDefined && map[y+1][x].height > 0 && map[y+1][x].height > h && map[y+1][x].tileStack[h].type === TileType.None) {
-										let arch = this.render.createHalfArch(thisPosX, thisPosY - tileHeight, currentTile, 'right-top')
-										newData += arch.html
-									} else if (map[y-1][x].isDefined && map[y-1][x].height > 0 && map[y-1][x].height > h && map[y-1][x].tileStack[h].type === TileType.None) {
-										let arch = this.render.createHalfArch(thisPosX, thisPosY - tileHeight, currentTile, 'right-bottom')
-										newData += arch.html
+									if (y > 1 && y < mapTotalLength - 1) {
+										if (map[y+1][x].isDefined && map[y+1][x].height > 0 && map[y+1][x].height > h && map[y+1][x].tileStack[h].type === TileType.None) {
+											let arch = this.render.createHalfArch(thisPosX, thisPosY - tileHeight, currentTile, 'right-top')
+											newData += arch.html
+										} else if (map[y-1][x].isDefined && map[y-1][x].height > 0 && map[y-1][x].height > h && map[y-1][x].tileStack[h].type === TileType.None) {
+											let arch = this.render.createHalfArch(thisPosX, thisPosY - tileHeight, currentTile, 'right-bottom')
+											newData += arch.html
+										}
 									}
 								}
 							}

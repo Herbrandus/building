@@ -937,4 +937,40 @@ export class RenderElements {
 
 		console.log('tile', tile);
 	}
+
+
+	createTree(xPos: number, yPos: number) {
+
+		const x = xPos
+		const y = yPos
+
+		const darkGreen = '#007c36'
+		const lightGreen = '#5fb875'
+		const darkBrown = '#443422'
+		const lightBrown = '#664c2c'
+		const shadowFull = '#00000744'
+		const shadowEmpty = '#02001e00'
+
+		const treeHtml = `
+		<defs>${this.calculations.addGradient("woodGradient", darkBrown, lightBrown)}</defs> 
+		<defs>${this.calculations.addGradient("leafGradient", darkGreen, lightGreen)}</defs>
+		<defs>${this.calculations.addGradient("shadow", shadowEmpty, shadowFull)}</defs>
+			<path fill="url(#woodGradient)" 
+			d="M${x+34.3} ${y+89.4}
+			l-0.4 21.3
+			c0,0,0.2 3.9,4.2 3.9
+			c3.4 0 3.5-4.4 3.5-4.4
+			l-0.5-20.8
+			L${x+34.3} ${y+89.4} z"/>			
+			<path fill="url(#leafGradient)"
+			d="M${x+38.6} ${y+32.8}
+			c-9.9 0-18.5 20-18.5 39.7
+			s12.4 23.1 18.1 23.1
+			s17.8-4.3 17.8-23.2
+			S${x+45.5} ${y+32.8} ${x+38.6} ${y+32.8} z"/>
+			<polygon fill="url(#shadow)" 
+			points="${x+34.8} ${y+111} ${x+25.7} ${y+115.7} ${x+32.8} ${y+118.8} ${x+41} ${y+113}"/>`
+
+		return { html: treeHtml }
+	}
 }

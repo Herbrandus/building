@@ -13,7 +13,6 @@ class RandomBuilding {
 		// !!Math.round(Math.random())
 		this._map = new Map(36, 36, 10, 1, 5, 3, 3, !!0)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
-		console.log("this.config.lightInWindows", this.config.lightInWindows)
 	}
 
 	public debug(): boolean {
@@ -65,6 +64,7 @@ class RandomBuilding {
 }
 
 window['debug'] = false
+let world
 
 window['activateDebug'] = () => { 
 	window['debug'] = true
@@ -75,6 +75,19 @@ window['activateDebug'] = () => {
 		document.querySelector('#buildingimg').classList.add('debug-active')
 	}	
 	document.querySelector('#color').innerHTML = building.colorMap()
+
+	const tiles = document.querySelector('#color').querySelectorAll('.tile')
+	world = building.map
+
+	tiles.forEach(tile => {
+		tile.addEventListener('click', event => {
+			const evtTarget = event.target as HTMLElement
+			const y = evtTarget.getAttribute('data-y')
+			const x = evtTarget.getAttribute('data-x')
+
+			console.log(world.map[y][x])
+		})
+	})
 }
 
 let building = new RandomBuilding()
@@ -116,6 +129,11 @@ document.querySelector('#generate').addEventListener('click', () => {
 
 	setColors(building)
 })
+
+const getTileInfo = (y, x) => {
+
+}
+
 /*
 document.querySelector('#debugActive').addEventListener('click', () => {
 	document.querySelector('#debug').classList.toggle('show')
