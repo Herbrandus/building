@@ -117,9 +117,9 @@ export class Map {
 
 		let startblockYfromCenterDeviation = 0
 		if (!this._mirrorAtCenter) {			
-			startblockYfromCenterDeviation = -5
+			startblockYfromCenterDeviation = -6
 			if (Math.round(Math.random()) === 0) {
-				startblockYfromCenterDeviation = 5
+				startblockYfromCenterDeviation = 3
 			}
 			console.log('not mirrorred: dev:', startblockYfromCenterDeviation)
 		}
@@ -367,8 +367,8 @@ export class Map {
 			this.getEdges()
 			this._world = this.mods.addBuildingComponent(this)
 		}
+		this.setEdges(false)
 
-		console.log('remove excess arches');
 		this._world = this.mods.removeExcessArches(this);
 
 		/*	
@@ -522,13 +522,35 @@ export class Map {
 			this._blockIdIterator++
 		}
 
+		for (let y = 0; y < this.mapLength; y++) {
+			for (let x = 0; x < this.mapWidth; x++) {
+				if (this._world[y][x].isDefined && this._world[y][x].height > 3) {
+
+					// if column is corner
+					if ((this._world[y][x].edge.right && this._world[y][x].edge.bottom) ||
+						(this._world[y][x].edge.left && this._world[y][x].edge.bottom) ||
+						(this._world[y][x].edge.right && this._world[y][x].edge.top)) {
+						for (let h = 0; h < this._world[y][x].height; h++) {
+							if (h < 4 && this._world[y][x].tileStack[h].type === TileType.None) {
+								this._world[y][x].tileStack[h].options.pillar = true
+							}
+						}
+					}
+				}
+			}
+		}
+
 		/*
 		 *	Reset grass tiles beneath pillars and empty tiles below building blocks that
 		 *	should be grass tiles
 		 */
 
-		this._world = this.mods.resetGrassTilesBelowPillars(this);
+		this._world = this.mods.resetGrassTilesBelowPillars(this)
 
+		/*
+		 *	If there are any large walls, make them more interesting by creating some see-through to it
+		 */
+		this._world = this.mods.refactorLargeWalls(this)
 
 		/* 	
 		 *	Clear the edges and mirror the building
@@ -716,19 +738,19 @@ export class Map {
 
 					} else {
 
-						if (!this._world[y-1][x].isDefined || y === 0) {
+						if (!this.isPhysicalBlock(y-1, x) || y === 0) {
 							this._world[y][x].edge.top = true
 						}
 
-						if (!this._world[y+1][x].isDefined || y === this.mapLength - 1) {
+						if (!this.isPhysicalBlock(y+1, x) || y === this.mapLength - 1) {
 							this._world[y][x].edge.bottom = true
 						}
 
-						if (!this._world[y][x-1].isDefined) {
+						if (!this.isPhysicalBlock(y, x-1)) {
 							this._world[y][x].edge.left = true
 						}
 
-						if (!this._world[y][x+1].isDefined) {
+						if (!this.isPhysicalBlock(y, x+1)) {
 							this._world[y][x].edge.right = true
 						}
 					}
@@ -798,6 +820,20 @@ export class Map {
 		}
 
 		return this._blockEdges
+	}
+
+	isPhysicalBlock(y: number, x: number): boolean {
+
+		if (!this._world[y][x].isDefined) {
+			return false
+		} else if (this._world[y][x].isDefined && this._world[y][x].height === 0) {
+			console.log('this block is undefined', this._world[y][x])
+			return false
+		}
+
+		console.log('this is a physical block', this._world[y][x])
+
+		return true
 	}
 
 	getLeastOpenSpaceOnX(): object {

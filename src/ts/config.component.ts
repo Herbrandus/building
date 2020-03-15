@@ -14,6 +14,8 @@ export class Config {
 		125 + Math.floor(Math.random() * 40),
 		160 + Math.floor(Math.random() * 30)
 	)
+	private _maxDarkenValue: number = -70
+	private _maxLightenValue: number = 40
 	private _tileEdgeBleed: number = 0.3
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
@@ -55,6 +57,14 @@ export class Config {
 
 	public get buildingBaseColor(): Color {
 		return this._buildingBaseColor
+	}
+
+	public get maxDarkenValue(): number {
+		return this._maxDarkenValue
+	}
+
+	public get maxLightenValue(): number {
+		return this._maxLightenValue
 	}
 
 	public get tileEdgeBleed(): number {

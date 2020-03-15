@@ -8,11 +8,13 @@ import { Coords } from './interfaces/coords.interface'
 import { TileTemplate } from './interfaces/tiletemplate.interface'
 import { Position } from './interfaces/position.interface'
 import { RenderElements } from './renderelements.component'
+import { TileOptionsFunctions } from './interfaces/tile-options.interface'
 
 export class Renderer {	
 
 	private config: Config = new Config()
 	private calculations: MapGenerationFunctions = new MapGenerationFunctions()
+	private tileOptionFuncs: TileOptionsFunctions = new TileOptionsFunctions()
 	private render: RenderElements = new RenderElements()
 	private tileW: number = this.config.tileWidth
 	private tileL: number = this.config.tileLength
@@ -142,6 +144,8 @@ export class Renderer {
 
 		if (topPavementType === 1) {
 			pavementType = 'triangles'
+		} else if (topPavementType === 2) {
+			pavementType = 'circles'	
 		} else if (topPavementType === 3) {
 			pavementType = 'squares'	
 		}	
@@ -208,16 +212,7 @@ export class Renderer {
 							if (currentTile.options) {
 								options = currentTile.options
 							} else {
-								options = {
-									roof: false,
-									pillar: false,
-									slope: false,
-									windowed: 0,
-									tower: false,
-									stairs:	false,
-									halfArch: false,
-									wholeArch: false
-								}
+								options = this.tileOptionFuncs.getDefaultTileOptions()
 							}
 
 							if (options.slope) {
@@ -233,13 +228,15 @@ export class Renderer {
 									if (!slopeInCol) {
 										
 										let isTop = ''
-										if (map[y][x].blockGroup % 2 === 1 && h === map[y][x].height-1) {
+										if (map[y][x].blockGroup % 2 === 1 && map[y][x].tileStack[h].options.roof) {
 											
 											isTop = pavementType
 
 											if (randomPaving > 2) {
 												if (topPavementType === 1) {
 													isTop = 'triangles'
+												} else if (topPavementType === 2) {
+													isTop = 'circles'	
 												} else if (topPavementType === 3) {
 													isTop = 'squares'	
 												}
@@ -304,7 +301,7 @@ export class Renderer {
 									} else {
 										towersByGroup[`${map[y][x].blockGroup}`] = [{ y, x }]
 									}
-									
+
 									const nextYblockDefined = map[y + 1][x].isDefined
 									const nextXblockDefined = map[y][x + 1].isDefined
 
@@ -352,7 +349,7 @@ export class Renderer {
 											{ x: bottom.x, y: bottom.y - (tileHeight * map[y][x].height) },
 											{ x: mostRight.x, y: mostRight.y - (tileHeight * map[y][x].height) },
 											{ x: mostTop.x, y: mostTop.y - (tileHeight * map[y][x].height) },
-											Math.floor(1 + Math.random() * 6),
+											Math.floor(2 + Math.random() * 5),
 											map[y][x].tileStack[h])
 									}
 								}																

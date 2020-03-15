@@ -154,7 +154,7 @@ export class Modifiers {
 
 		if (world.blockAmountIterator < world.maxBlockIterations + 1) {
 
-			const newBuildingBlockColor = defaultColor.changeColorLighting(-Math.floor(Math.random() * 15))
+			const newBuildingBlockColor = new Color(defaultColor.changeColorLightingString(-Math.floor(Math.random() * 15)))
 
 			world.blockEdges = world.getEdges()
 
@@ -497,6 +497,17 @@ export class Modifiers {
 											tileColor = world.decorativeColors['lineColor']
 										} else if (h === 0) {
 											tileColor = world.firstLevelColor
+										} else if (h === thisHeight - 1) {
+											if (nextBlockLength > 5) {
+												if (y % 2 === 0) {
+													tileColor = new Color(newBuildingBlockColor.getColorStringByHue(-10))
+												}
+											} else if (nextBlockWidth > 6) {
+												if (x % 2 === 0) {
+													tileColor = new Color(newBuildingBlockColor.getColorStringByHue(-10))
+												}
+											}
+
 										} else {
 											tileColor = newBuildingBlockColor
 										}
@@ -559,15 +570,19 @@ export class Modifiers {
 				}
 
 				world.blockHeight = nextHeight
-
 				world.blockAmountIterator++
 
-			} else {		
-				console.warn("Block edges array is empty.")
+			} else {
+
+				if (this.config.allowDebug) {
+					console.warn("Block edges array is empty.")
+				}		
 			}
 
 		} else {
-			console.warn("Cannot add more building components, maximum block iterations reached.")
+			if (this.config.allowDebug) {
+				console.warn("Cannot add more building components, maximum block iterations reached.")
+			}
 		}
 
 		return world.map
@@ -646,7 +661,6 @@ export class Modifiers {
 	public resetGrassTilesBelowPillars (world: Map) {
 
 		for (let y = 0; y < world.mapLength; y++) {
-
 			for (let x = 0; x < world.mapWidth; x++) {
 
 				if (y > 0 && x > 0 && y < world.mapLength - 1 && x < world.mapWidth - 1) {
@@ -659,6 +673,7 @@ export class Modifiers {
 							(world.map[y][x + 1].isDefined && world.map[y][x + 1].tileStack[0].type === TileType.Grass)) {
 
 							console.log('should be grass tile!')
+							world.map[y][x].tileStack[0].type = TileType.Grass
 						}
 					}
 
@@ -667,7 +682,66 @@ export class Modifiers {
 
 		}
 
-		return world.map;
+		return world.map
+	}
 
+	public refactorLargeWalls (world: Map) {
+
+		const walls = {}
+		const minWidth = 4
+		const minHeight = 5
+
+		for (let y = 0; y < world.mapLength; y++) {
+			for (let x = 0; x < world.mapWidth; x++) {
+
+				if (y > 1 && y < world.mapLength - 1) {
+
+					if (world.map[y][x].height > 0 && world.map[y][x].edge.top && world.map[y][x].edge.bottom) {
+
+						if (y in walls) {
+							walls[`${y}`].row.push(x)
+						} else {
+							walls[`${y}`] = { y, height: world.map[y][x].height, row: [x]}
+						}
+					}
+				}
+			}
+		}
+
+		if (Object.keys(walls).length) {
+			Object.keys(walls).forEach(key => {
+				if (walls[key].height > minHeight && walls[key].row.length > minWidth) {
+					const y = walls[key].y
+					const cols = walls[key].row.slice(1, walls[key].row.length - 1)
+
+					cols.forEach(x => {
+						for (let h = 0; h < walls[key].height; h++) {
+							if (h > walls[key].height - (minHeight + 2) && h < walls[key].height - 2) {
+								
+								try {
+									if (world.map[y][x].height > h) {
+										world.map[y][x].tileStack[h].type = TileType.None
+										world.map[y][x].tileStack[h].options.pillar = false	
+									}									
+
+									if (world.map[y][x].tileStack[walls[key].height - (minHeight + 2)-1].type === TileType.None) {
+										world.map[y][x].tileStack[walls[key].height - (minHeight + 2)-1].pillar = false
+									}
+
+								} catch (error) {
+									console.error(error)
+									console.error('tiles undefined', world.map[y][x])
+									console.error('height = ' + h + ' / ' + walls[key].height)
+								}
+							}
+						}						
+					})
+
+					console.log('wall changed:', walls[key])
+				}
+			})
+		}
+		
+		return world.map
 	}
 }

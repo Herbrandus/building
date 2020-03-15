@@ -49,9 +49,9 @@ export class Color {
 
 	public setHex(hexadecimal: string) {
 		if (hexadecimal.length < 7) {
-			let hexVal1 = hexadecimal.charAt(1)
-			let hexVal2 = hexadecimal.charAt(2)
-			let hexVal3 = hexadecimal.charAt(3)
+			const hexVal1 = hexadecimal.charAt(1)
+			const hexVal2 = hexadecimal.charAt(2)
+			const hexVal3 = hexadecimal.charAt(3)
 			hexadecimal = "#" + hexVal1 + hexVal1 + hexVal2 + hexVal2 + hexVal3 + hexVal3
 		}
 		this._colorHex = hexadecimal
@@ -76,7 +76,7 @@ export class Color {
 	}
 
 	validateHex(hex: string): boolean {
-		let regex = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+		const regex = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
 		if (hex.match(regex)) {
 			return true
 		} else {
@@ -85,40 +85,40 @@ export class Color {
 	}
 
 	hexToRgb() {
-		let hexValues: string[] = this._colorHex.substr(1).split('')
-		let hexPair1 = parseInt(hexValues[0]+hexValues[1], 16)
-		let hexPair2 = parseInt(hexValues[2]+hexValues[3], 16)
-		let hexPair3 = parseInt(hexValues[4]+hexValues[5], 16)
+		const hexValues: string[] = this._colorHex.substr(1).split('')
+		const hexPair1 = parseInt(hexValues[0]+hexValues[1], 16)
+		const hexPair2 = parseInt(hexValues[2]+hexValues[3], 16)
+		const hexPair3 = parseInt(hexValues[4]+hexValues[5], 16)
 		this.setRgb(hexPair1, hexPair2, hexPair3)
 		this.rgbToHex()
 	}
 
 	rgbToHex() {
 		if (typeof this._colorRgb === 'object') {
-			let r = this._colorRgb.r
-			let b = this._colorRgb.b
-			let g = this._colorRgb.g
-			let hexR = Number(r).toString(16)
-			let hexG = Number(g).toString(16)
-			let hexB = Number(b).toString(16)
+			const r = this._colorRgb.r
+			const b = this._colorRgb.b
+			const g = this._colorRgb.g
+			const hexR = Number(r).toString(16)
+			const hexG = Number(g).toString(16)
+			const hexB = Number(b).toString(16)
 			this._colorHex = "#" + hexR + hexG + hexB			
 		}
 	}
 
 	convertRGBtoHex(color: RGB): string {
-		let r = color.r
-		let b = color.b
-		let g = color.g
-		let hexR = Number(r).toString(16)
-		let hexG = Number(g).toString(16)
-		let hexB = Number(b).toString(16)
+		const r = color.r
+		const b = color.b
+		const g = color.g
+		const hexR = Number(r).toString(16)
+		const hexG = Number(g).toString(16)
+		const hexB = Number(b).toString(16)
 		return "#" + hexR + hexG + hexB
 	}
 
 	public changeColorLightingString(amount: number): string {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
+		const r = this._colorRgb.r
+		const b = this._colorRgb.b
+		const g = this._colorRgb.g
 		let newR = r + amount
 		let newG = g + amount
 		let newB = b + (amount - 8)
@@ -126,18 +126,18 @@ export class Color {
 		if (newG > 255) newG = 255
 		if (newR > 255) newR = 255
 
-		let hexR = Number(newR).toString(16)
-		let hexG = Number(newG).toString(16)
-		let hexB = Number(newB).toString(16)
-		let result = "#" + hexR + hexG + hexB
+		const hexR = Number(newR).toString(16)
+		const hexG = Number(newG).toString(16)
+		const hexB = Number(newB).toString(16)
+		const result = "#" + hexR + hexG + hexB
 
 		return result
 	}
 
 	public changeColorLighting(amount: number): Color {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
+		const r = this._colorRgb.r
+		const b = this._colorRgb.b
+		const g = this._colorRgb.g
 		let newR = r + amount
 		let newG = g + amount
 		let newB = b + (amount - 8)
@@ -154,7 +154,7 @@ export class Color {
 
 	public getColorStringByHue(hue: number): string {
 
-		let h = this._colorHsl.h,
+		const h = this._colorHsl.h,
 			s = this._colorHsl.s,
 			l = this._colorHsl.l
 
@@ -164,14 +164,14 @@ export class Color {
 			newHue = newHue % 360
 		}
 
-		let rgb = this.convertHSLtoRGB({h: newHue, s: s, l: l})
+		const rgb = this.convertHSLtoRGB({h: newHue, s: s, l: l})
 
 		return this.convertRGBtoHex(rgb)
 	}
 
 	public getColorByHue(hue: number): Color {
 
-		let h = this._colorHsl.h,
+		const h = this._colorHsl.h,
 			s = this._colorHsl.s,
 			l = this._colorHsl.l
 

@@ -18,6 +18,8 @@ export class RenderElements {
 	private tileL: number = this.config.tileLength
 	private tileH: number = this.config.tileHeight
 	private bleed: number = this.config.tileEdgeBleed
+	private _maxDarken: number = this.config.maxDarkenValue
+	private _maxLighten: number = this.config.maxLightenValue
 	private dimensions = this.calculations.calculateStraightLinesFromIsometricSquare(this.tileW, this.tileL)
 
 	private tileColor: Color = this.config.groundColor
@@ -101,13 +103,13 @@ export class RenderElements {
 
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
-			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-60)
+			highlight = tile.tileColor.changeColorLightingString(this._maxLighten)
+			darkestColor = tile.tileColor.changeColorLightingString(this._maxDarken)
 			patternColor = tile.tileColor.changeColorLightingString(15)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
-			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+			highlight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(this._maxDarken)
 			patternColor = this.config.buildingBaseColor.changeColorLightingString(15)
 		}
 
@@ -182,6 +184,50 @@ export class RenderElements {
 					d="M${blockTopTop} 
 					L${blockTopBottom}" />`
 
+		} else if (topTile === 'circles') {
+
+			const margin = 2;
+
+			const blockTopTileLeft = `${left.x-this.bleed+margin} ${left.y-height-this.tileH}`
+			const blockTopTileBottom = `${bottom.x} ${bottom.y-height-this.tileH-(margin/2)}`
+			const blockTopTileRight = `${right.x+this.bleed-margin} ${right.y-height-this.tileH}`
+			const blockTopTileTop = `${top.x} ${top.y-height-this.tileH+(margin/1.5)}`
+
+			const blockTopCenter = { x: left.x + ((right.x - left.x) / 2), y: (top.y + ((bottom.y - top.y) / 2))-height-this.tileH }
+
+			const blockTopCenterLeftMargin = `${blockTopCenter.x - (margin /2)} ${blockTopCenter.y}`
+			const blockTopCenterBottomMargin = `${blockTopCenter.x} ${blockTopCenter.y + (margin /2)}`
+			const blockTopCenterRightMargin = `${blockTopCenter.x + (margin /2)} ${blockTopCenter.y}`
+			const blockTopCenterTopMargin = `${blockTopCenter.x} ${blockTopCenter.y - (margin /2)}`
+
+			const blockTopLeftTopCenter = `${left.x + ((top.x - left.x) / 2)} ${top.y + ((left.y - top.y) / 2) - height - this.tileH}`
+			const blockTopLeftBottomCenter = `${left.x + ((bottom.x - left.x) / 2)} ${bottom.y - ((bottom.y - left.y) / 2) - height - this.tileH}`
+			const blockTopRightBottomCenter = `${right.x - ((right.x - bottom.x) / 2)} ${bottom.y - ((right.y - top.y) / 2) - height - this.tileH}`
+			const blockTopRightTopCenter = `${right.x - ((right.x - top.x) / 2)} ${right.y + ((bottom.y - right.y) / 2) - height - this.tileH}`
+
+			const circleRadiusY = (bottom.y - top.y) / 4
+			const circleRadiusX = (bottom.y - top.y) / 3
+
+			html += `<path fill="${highlight}"
+					d="M${blockTopLeft} 
+					L${blockTopBottom} 
+					L${blockTopRight} 
+					L${blockTopTop} 
+					L${blockTopLeft} Z" />
+					<path fill="transparent" stroke="${patternColor}"
+					d="M${blockTopLeft} 
+					L${blockTopBottom} 
+					L${blockTopRight} 
+					L${blockTopTop} 
+					L${blockTopLeft} Z" />
+					<path fill="transparent" stroke="${patternColor}"
+					d="M${blockTopLeft} 
+					L${blockTopRight}" />
+					<path fill="transparent" stroke="${patternColor}"
+					d="M${blockTopTop} 
+					L${blockTopBottom}" />
+					<ellipse cx="${blockTopCenter.x}" cy="${blockTopCenter.y}" rx="${circleRadiusX}" ry="${circleRadiusY}" fill="transparent" stroke="${patternColor}" />`
+
 		} else if (topTile === 'squares') {
 
 			const margin = 2;
@@ -244,13 +290,13 @@ export class RenderElements {
 
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
-			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-60)
+			highlight = tile.tileColor.changeColorLightingString(this._maxLighten)
+			darkestColor = tile.tileColor.changeColorLightingString(this._maxDarken)
 			strokeColor = tile.tileColor.changeColorLightingString(10)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
-			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+			highlight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(this._maxDarken)
 			strokeColor = this.config.buildingBaseColor.changeColorLightingString(10)
 		}	
 
@@ -322,27 +368,27 @@ export class RenderElements {
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
 			regularDarkerColor = tile.tileColor.changeColorLightingString(-10)
-			regularLighterColor = tile.tileColor.changeColorLightingString(10)
+			regularLighterColor = tile.tileColor.changeColorLightingString(this._maxLighten / 3)
 			shadowLight = tile.tileColor.changeColorLightingString(-20)
 			shadowHighlight = tile.tileColor.changeColorLightingString(20)
-			shadow = tile.tileColor.changeColorLightingString(-30)
-			highlight = tile.tileColor.changeColorLightingString(30)
+			shadow = tile.tileColor.changeColorLightingString(this._maxDarken / 2)
+			highlight = tile.tileColor.changeColorLightingString(this._maxLighten)
 			almostDarkestColor = tile.tileColor.changeColorLightingString(-40)
 			almostLightestColor = tile.tileColor.changeColorLightingString(40)
-			darkestColor = tile.tileColor.changeColorLightingString(-60)
-			lightestColor = tile.tileColor.changeColorLightingString(50)
+			darkestColor = tile.tileColor.changeColorLightingString(this._maxDarken)
+			lightestColor = tile.tileColor.changeColorLightingString(this._maxLighten * 2)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
 			regularDarkerColor = this.config.buildingBaseColor.changeColorLightingString(-10)
-			regularLighterColor = this.config.buildingBaseColor.changeColorLightingString(10)
+			regularLighterColor = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten / 3)
 			shadowLight = this.config.buildingBaseColor.changeColorLightingString(-20)
 			shadowHighlight = this.config.buildingBaseColor.changeColorLightingString(20)
-			shadow = this.config.buildingBaseColor.changeColorLightingString(-30)
-			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
+			shadow = this.config.buildingBaseColor.changeColorLightingString(this._maxDarken / 2)
+			highlight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten)
 			almostDarkestColor = this.config.buildingBaseColor.changeColorLightingString(-40)
 			almostLightestColor = this.config.buildingBaseColor.changeColorLightingString(40)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
-			lightestColor = this.config.buildingBaseColor.changeColorLightingString(50)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(this._maxDarken)
+			lightestColor = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten * 2)
 		}
 
 		const { top, left, bottom, right } = this.getPositions(xPos, yPos)
@@ -602,12 +648,12 @@ export class RenderElements {
 
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
-			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-60)
+			highlight = tile.tileColor.changeColorLightingString(this._maxLighten)
+			darkestColor = tile.tileColor.changeColorLightingString(this._maxDarken)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
-			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
+			highlight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(this._maxDarken)
 		}	
 
 		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
@@ -815,16 +861,16 @@ export class RenderElements {
 
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
-			highlight = tile.tileColor.changeColorLightingString(30)
-			darkestColor = tile.tileColor.changeColorLightingString(-60)
-			highlightLeft = tile.tileColor.changeColorLightingString(15)
-			highlightRight = tile.tileColor.changeColorLightingString(30)
+			highlight = tile.tileColor.changeColorLightingString(this._maxLighten)
+			darkestColor = tile.tileColor.changeColorLightingString(this._maxDarken)
+			highlightLeft = tile.tileColor.changeColorLightingString(this._maxLighten / 2)
+			highlightRight = tile.tileColor.changeColorLightingString(this._maxLighten)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
-			highlight = this.config.buildingBaseColor.changeColorLightingString(30)
-			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
-			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(15)
-			highlightRight = this.config.buildingBaseColor.changeColorLightingString(30)
+			highlight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten)
+			darkestColor = this.config.buildingBaseColor.changeColorLightingString(this._maxDarken)
+			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten / 2)
+			highlightRight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten)
 		}
 
 		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
@@ -930,11 +976,11 @@ export class RenderElements {
 		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
 			regularColor = tile.tileColor.hex()
 			highlightLeft = tile.tileColor.changeColorLightingString(-25)
-			highlightRight = tile.tileColor.changeColorLightingString(15)
+			highlightRight = tile.tileColor.changeColorLightingString(this._maxLighten / 2)
 		} else {
 			regularColor = this.config.buildingBaseColor.hex()
 			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(-25)
-			highlightRight = this.config.buildingBaseColor.changeColorLightingString(15)
+			highlightRight = this.config.buildingBaseColor.changeColorLightingString(this._maxLighten / 2)
 		}
 
 		const centerTop = {
