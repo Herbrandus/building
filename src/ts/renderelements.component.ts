@@ -22,12 +22,23 @@ export class RenderElements {
 
 	private tileColor: Color = this.config.groundColor
 
+	getPositions(xPos: number, yPos: number, topMargin: number = 0) {		
+		const top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + topMargin ) }
+		const left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + topMargin ) }
+		const bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + topMargin ) }
+		const right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + topMargin ) }
+
+		return { top, left, bottom, right }
+	}
+
 	createTile(xPos: number, yPos: number, shadow: string): TileTemplate {
 
-		let top: Position = { "x": (xPos + this.dimensions.horizontalWidthFromTop), "y": yPos}
-		let left: Position = { "x": xPos, "y": (yPos + this.dimensions.verticalHeightFromTop) }
-		let bottom: Position = { "x": (xPos + this.dimensions.horizontalWidthFromBottom), "y": (yPos + this.dimensions.totalHeight) }
-		let right: Position = { "x": (xPos + this.dimensions.totalWidth), "y": (yPos + this.dimensions.verticalHeightFromBottom) }
+		// let top: Position = { "x": (xPos + this.dimensions.horizontalWidthFromTop), "y": yPos}
+		// let left: Position = { "x": xPos, "y": (yPos + this.dimensions.verticalHeightFromTop) }
+		// let bottom: Position = { "x": (xPos + this.dimensions.horizontalWidthFromBottom), "y": (yPos + this.dimensions.totalHeight) }
+		// let right: Position = { "x": (xPos + this.dimensions.totalWidth), "y": (yPos + this.dimensions.verticalHeightFromBottom) }
+
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, 0)
 
 		let pointTop = `${top.x} ${top.y-this.bleed}`
 		let pointLeft = `${left.x-this.bleed} ${left.y}`
@@ -51,23 +62,14 @@ export class RenderElements {
 		return { html: html, coords: coords }
 	}
 
-	createPlane(xPos: number, yPos: number, tile: Tile, color?: Color): TileTemplate {
+	createPlane(xPos: number, yPos: number, tile: Tile, color: Color = this.config.groundColor): TileTemplate {
 
-		let id = tile.id
-		let height = (tile.h * this.tileH) - this.tileH
+		const id = tile.id
+		const height = (tile.h * this.tileH) - this.tileH
 
-		let regularColor
+		let regularColor = color.hex()
 
-		if (color) {
-			regularColor = color.hex()
-		} else {
-			regularColor = this.config.groundColor.hex()
-		}
-
-		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
 		let blockTopLeft = `${left.x-this.bleed} ${left.y}`
 		let blockTopBottom = `${bottom.x} ${bottom.y}`
@@ -89,8 +91,8 @@ export class RenderElements {
 
 	createBlock(xPos: number, yPos: number, tile: Tile, topTile: boolean | string = false): TileTemplate {
 
-		let id = tile.id
-		let height = (tile.h * this.tileH) - this.tileH
+		const id = tile.id
+		const height = (tile.h * this.tileH) - this.tileH
 
 		let regularColor
 		let highlight
@@ -109,10 +111,7 @@ export class RenderElements {
 			patternColor = this.config.buildingBaseColor.changeColorLightingString(15)
 		}
 
-		const top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
-		const left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		const bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		const right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
 		const leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
 		const leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
@@ -228,15 +227,15 @@ export class RenderElements {
 					
 		html +=	`</g>`
 
-		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
+		const coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 
 		return { html: html, coords: coords }
 	}
 
 	createHalfBlock(xPos: number, yPos: number, tile: Tile): TileTemplate {
 
-		let id = tile.id
-		let height = (tile.h * this.tileH) - this.tileH
+		const id = tile.id
+		const height = (tile.h * this.tileH) - this.tileH
 
 		let regularColor
 		let highlight
@@ -255,29 +254,26 @@ export class RenderElements {
 			strokeColor = this.config.buildingBaseColor.changeColorLightingString(10)
 		}	
 
-		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
-		let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-(this.tileH / 2)}`
-		let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
-		let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-		let leftWallRightTop = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
+		const leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-(this.tileH / 2)}`
+		const leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+		const leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+		const leftWallRightTop = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
 
-		let rightWallLeftTop = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
-		let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-		let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-		let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-(this.tileH / 2)}`
+		const rightWallLeftTop = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
+		const rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+		const rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+		const rightWallRightTop = `${right.x+this.bleed} ${right.y-height-(this.tileH / 2)}`
 
-		let blockTopLeft = `${left.x-this.bleed} ${left.y-height-(this.tileH / 2)}`
-		let blockTopBottom = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
-		let blockTopRight = `${right.x+this.bleed} ${right.y-height-(this.tileH / 2)}`
-		let blockTopTop = `${top.x} ${top.y-height-(this.tileH / 2)}`
+		const blockTopLeft = `${left.x-this.bleed} ${left.y-height-(this.tileH / 2)}`
+		const blockTopBottom = `${bottom.x} ${bottom.y-height-(this.tileH / 2)}`
+		const blockTopRight = `${right.x+this.bleed} ${right.y-height-(this.tileH / 2)}`
+		const blockTopTop = `${top.x} ${top.y-height-(this.tileH / 2)}`
 
-		let blockTopCenter = `${(left.x + ((right.x - left.x) / 2))} ${(top.y + ((bottom.y - top.y) / 2))}`
+		const blockTopCenter = `${(left.x + ((right.x - left.x) / 2))} ${(top.y + ((bottom.y - top.y) / 2))}`
 
-		let html = `<g style="z-index:${id};"><path fill="${darkestColor}"
+		const html = `<g style="z-index:${id};"><path fill="${darkestColor}"
 					d="M${leftWallLeftTop} 
 					L${leftWallLeftBottom} 
 					L${leftWallRightBottom} 
@@ -302,15 +298,15 @@ export class RenderElements {
 					L${blockTopTop}" />
 					</g>`
 
-		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
+		const coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 
 		return { html: html, coords: coords }
 	}
 
 	createSlopeBlock(xPos: number, yPos: number, tile: Tile, slopeDirection: string): TileTemplate {
 
-		let id = tile.id
-		let height = (tile.h * this.tileH) - this.tileH
+		const id = tile.id
+		const height = (tile.h * this.tileH) - this.tileH
 		let regularColor: string
 		let regularDarkerColor: string
 		let regularLighterColor: string
@@ -349,10 +345,7 @@ export class RenderElements {
 			lightestColor = this.config.buildingBaseColor.changeColorLightingString(50)
 		}
 
-		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos) }
-		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop) }
-		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight) }
-		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos)
 
 		let html = ''
 		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
@@ -617,33 +610,30 @@ export class RenderElements {
 			darkestColor = this.config.buildingBaseColor.changeColorLightingString(-60)
 		}	
 
-		let top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
-		let leftWallLeftTop = `${left.x-this.bleed + (tileWidth / 2.7)} ${left.y-height-this.tileH}`
-		let leftWallLeftBottom = `${left.x-this.bleed + (tileWidth / 2.7)} ${left.y-height}`
+		const leftWallLeftTop = `${left.x-this.bleed + (tileWidth / 2.7)} ${left.y-height-this.tileH}`
+		const leftWallLeftBottom = `${left.x-this.bleed + (tileWidth / 2.7)} ${left.y-height}`
 
-		let rightWallRightBottom = `${right.x+this.bleed - (tileWidth / 2.7)} ${right.y-height}`
-		let rightWallRightTop = `${right.x+this.bleed - (tileWidth / 2.7)} ${right.y-height-this.tileH}`
+		const rightWallRightBottom = `${right.x+this.bleed - (tileWidth / 2.7)} ${right.y-height}`
+		const rightWallRightTop = `${right.x+this.bleed - (tileWidth / 2.7)} ${right.y-height-this.tileH}`
 
-		let leftWallBezier = `${left.x-this.bleed + (tileWidth / 2.7) + (tileWidth / 12)} ${bottom.y-height}`
-		let rightWallBezier = `${right.x-this.bleed - (tileWidth / 2.7) - (tileWidth / 12)} ${bottom.y-height}`
+		const leftWallBezier = `${left.x-this.bleed + (tileWidth / 2.7) + (tileWidth / 12)} ${bottom.y-height}`
+		const rightWallBezier = `${right.x-this.bleed - (tileWidth / 2.7) - (tileWidth / 12)} ${bottom.y-height}`
 
-		let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
-		let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
-		let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
-		let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+		const blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+		const blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
+		const blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+		const blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
-		let html = `<g style="z-index:${id};">`
-			html += `<defs>${this.calculations.addGradient("pillarGradient", darkestColor, regularColor)}</defs>` 
-			html += `<path fill="url(#pillarGradient)"`
-			html += ` d="M ${leftWallLeftTop} `
-			html += `L ${leftWallLeftBottom} `
-			html += `C ${leftWallBezier}, ${rightWallBezier}, ${rightWallRightBottom} `
-			html += `L ${rightWallRightTop} `
-			html += `L ${leftWallLeftTop} Z" /></g>`
+		let html = `<g style="z-index:${id};">
+			<defs>${this.calculations.addGradient("pillarGradient", darkestColor, regularColor)}</defs> 
+			<path fill="url(#pillarGradient)"
+			 d="M ${leftWallLeftTop} 
+			L ${leftWallLeftBottom} 
+			C ${leftWallBezier}, ${rightWallBezier}, ${rightWallRightBottom} 
+			L ${rightWallRightTop} 
+			L ${leftWallLeftTop} Z" /></g>`
 
 		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 
@@ -658,10 +648,7 @@ export class RenderElements {
 		let darkestColor = '#111'
 		let light = '#f3ef76'
 
-		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
 		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
 
@@ -671,15 +658,15 @@ export class RenderElements {
 
 		if (columnInfo.edge.bottom) {
 
-			let xEdge = (bottom.x - left.x) / 3
-			let yEdge = (bottom.y - left.y) / 8
+			const xEdge = (bottom.x - left.x) / 3
+			const yEdge = (bottom.y - left.y) / 8
 
-			let leftWindowLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 7)}`
-			let leftWindowLeftBottom = `${left.x + xEdge} ${left.y - height + (yEdge)}`
-			let leftWindowRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 4)}`
-			let leftWindowRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 2)}`
-			let leftWindowRightBezier = `${bottom.x - xEdge} ${bottom.y - height - this.tileH - yEdge}`
-			let leftWindowLeftBezier = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4)}`
+			const leftWindowLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 7)}`
+			const leftWindowLeftBottom = `${left.x + xEdge} ${left.y - height + (yEdge)}`
+			const leftWindowRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 4)}`
+			const leftWindowRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 2)}`
+			const leftWindowRightBezier = `${bottom.x - xEdge} ${bottom.y - height - this.tileH - yEdge}`
+			const leftWindowLeftBezier = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4)}`
 
 			let windowColor = darkestColor
 			if (windowLights) {
@@ -697,15 +684,15 @@ export class RenderElements {
 		
 		if (columnInfo.edge.right) {
 
-			let xEdge = (right.x - bottom.x) / 3
-			let yEdge = (right.y - bottom.y) / 8
+			const xEdge = (right.x - bottom.x) / 3
+			const yEdge = (right.y - bottom.y) / 8
 
-			let rightWindowLeftTop = `${bottom.x + xEdge} ${bottom.y - height - this.tileH - (yEdge * 2)}`
-			let rightWindowLeftBottom = `${bottom.x + xEdge} ${bottom.y - height + (yEdge * 3.6)}`
-			let rightWindowRightBottom = `${right.x - xEdge} ${right.y - height - (yEdge * 1)}`
-			let rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 6.5)}`
-			let rightWindowRightBezier = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 3.2)}`
-			let rightWindowLeftBezier = `${bottom.x + xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.3)}`
+			const rightWindowLeftTop = `${bottom.x + xEdge} ${bottom.y - height - this.tileH - (yEdge * 2)}`
+			const rightWindowLeftBottom = `${bottom.x + xEdge} ${bottom.y - height + (yEdge * 3.6)}`
+			const rightWindowRightBottom = `${right.x - xEdge} ${right.y - height - (yEdge * 1)}`
+			const rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 6.5)}`
+			const rightWindowRightBezier = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 3.2)}`
+			const rightWindowLeftBezier = `${bottom.x + xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.3)}`
 			
 			let windowColor = regularColor
 			if (windowLights) {
@@ -727,8 +714,8 @@ export class RenderElements {
 
 	createDoor(xPos: number, yPos: number, tile: Tile, columnInfo: Column, direction?: string): TileTemplate {
 
-		let id = tile.id
-		let height = (tile.h * this.tileH) - this.tileH
+		const id = tile.id
+		const height = (tile.h * this.tileH) - this.tileH
 		let regularColor
 		let darkestColor
 		let doorHandleColor
@@ -743,14 +730,11 @@ export class RenderElements {
 			darkestColor = new Color(this.config.buildingBaseColor.hex()).getColorByHue(220).changeColorLightingString(-110)
 		}
 
-		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
-		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
+		const coords: Coords = { top: top, left: left, bottom: bottom, right: right }
 
-		let windowBorderWidth = (top.x - left.x) / 10
+		const windowBorderWidth = (top.x - left.x) / 10
 
 		let html = `<g style="z-index:${id+columnInfo.height};">`
 
@@ -761,14 +745,14 @@ export class RenderElements {
 
 			console.log(yEdge)
 
-			let leftWindowLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4.5)}`
-			let leftWindowLeftBottom = `${left.x + xEdge} ${left.y - height + (yEdge * 2)}`
-			let leftWindowRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 2)}`
-			let leftWindowRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.5)}`
+			const leftWindowLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4.5)}`
+			const leftWindowLeftBottom = `${left.x + xEdge} ${left.y - height + (yEdge * 2)}`
+			const leftWindowRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 2)}`
+			const leftWindowRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.5)}`
 
-			let leftWindowBorderLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4.5)}`
-			let leftWindowBorderRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 2)}`
-			let leftWindowBorderRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.5)}`
+			const leftWindowBorderLeftTop = `${left.x + xEdge} ${left.y - height - this.tileH + (yEdge * 4.5)}`
+			const leftWindowBorderRightBottom = `${bottom.x - xEdge} ${bottom.y - height - (yEdge * 2)}`
+			const leftWindowBorderRightTop = `${bottom.x - xEdge} ${bottom.y - height - this.tileH + (yEdge * 0.5)}`
 
 			html += `<path stroke="#111" stroke-width="1.3"
 						d="M${leftWindowBorderLeftTop}
@@ -789,13 +773,13 @@ export class RenderElements {
 		
 		if (direction === 'right') {
 
-			let xEdge = (right.x - bottom.x) / 4
-			let yEdge = (right.y - bottom.y) / 8
+			const xEdge = (right.x - bottom.x) / 4
+			const yEdge = (right.y - bottom.y) / 8
 
-			let rightWindowLeftTop = `${bottom.x + xEdge} ${bottom.y - height - this.tileH - (yEdge)}`
-			let rightWindowLeftBottom = `${bottom.x + xEdge} ${bottom.y - height + (yEdge * 2)}`
-			let rightWindowRightBottom = `${right.x - xEdge} ${right.y - height - (yEdge * 1.5)}`
-			let rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 4.5)}`
+			const rightWindowLeftTop = `${bottom.x + xEdge} ${bottom.y - height - this.tileH - (yEdge)}`
+			const rightWindowLeftBottom = `${bottom.x + xEdge} ${bottom.y - height + (yEdge * 2)}`
+			const rightWindowRightBottom = `${right.x - xEdge} ${right.y - height - (yEdge * 1.5)}`
+			const rightWindowRightTop = `${right.x - xEdge} ${right.y - height - this.tileH - (yEdge * 4.5)}`
 
 			html += `<path stroke="#444" stroke-width="1.3"
 						d="M${rightWindowRightTop}
@@ -820,8 +804,8 @@ export class RenderElements {
 
 	createHalfArch(xPos: number, yPos: number, tile: Tile, orientation: string): TileTemplate {
 
-		let id = tile.id
-		let height = (tile.h * this.tileH) - this.tileH
+		const id = tile.id
+		const height = (tile.h * this.tileH) - this.tileH
 		let regularColor
 		let darkestColor
 		let highlight
@@ -843,30 +827,27 @@ export class RenderElements {
 			highlightRight = this.config.buildingBaseColor.changeColorLightingString(30)
 		}
 
-		let top: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), y: Math.ceil(yPos + this.config.topMargin ) }
-		let left: Position = { x: Math.ceil(xPos), y: Math.ceil(yPos + this.dimensions.verticalHeightFromTop + this.config.topMargin ) }
-		let bottom: Position = { x: Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), y: Math.ceil(yPos + this.dimensions.totalHeight + this.config.topMargin ) }
-		let right: Position = { x: Math.ceil(xPos + this.dimensions.totalWidth), y: Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + this.config.topMargin ) }
+		const { top, left, bottom, right } = this.getPositions(xPos, yPos, this.config.topMargin)
 
-		let halfTileWidth = ((right.x - bottom.x) / 3)
+		const halfTileWidth = ((right.x - bottom.x) / 3)
 
 		if (orientation === 'right-bottom') {
 
-			let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
-			let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
-			let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			const leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			const leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+			const leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			const leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
 
-			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let rightWallLeftBottomBezier = `${bottom.x} ${bottom.y-height-(this.tileH * 0.5)}`
-			let rightWallRightTopBezier = `${bottom.x + (halfTileWidth*0.4)} ${bottom.y-height-this.tileH}`
-			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			const rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			const rightWallLeftBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			const rightWallLeftBottomBezier = `${bottom.x} ${bottom.y-height-(this.tileH * 0.5)}`
+			const rightWallRightTopBezier = `${bottom.x + (halfTileWidth*0.4)} ${bottom.y-height-this.tileH}`
+			const rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 
-			let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
-			let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
-			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+			const blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			const blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
+			const blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			const blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
 			html = `<g style="z-index:${id};">
 						<path fill="${darkestColor}"
@@ -892,26 +873,26 @@ export class RenderElements {
 
 		if (orientation === 'right-top') {
 
-			let leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
-			let leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
-			let leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
-			let leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			const leftWallLeftTop = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			const leftWallLeftBottom = `${left.x-this.bleed} ${left.y-height+this.bleed}`
+			const leftWallRightBottom = `${bottom.x} ${bottom.y-height+this.bleed}`
+			const leftWallRightTop = `${bottom.x} ${bottom.y-height-this.tileH}`
 
-			let rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let rightWallLeftTopBezier = `${right.x+this.bleed-(halfTileWidth*0.3)} ${right.y-height-(this.tileH*0.7)}`
-			let rightWallRightBottomBezier = `${right.x} ${right.y-height-(this.tileH*0.4)}`
-			let rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-			let rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			const rightWallLeftTop = `${bottom.x} ${bottom.y-height-this.tileH}`
+			const rightWallLeftTopBezier = `${right.x+this.bleed-(halfTileWidth*0.3)} ${right.y-height-(this.tileH*0.7)}`
+			const rightWallRightBottomBezier = `${right.x} ${right.y-height-(this.tileH*0.4)}`
+			const rightWallRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			const rightWallRightTop = `${right.x+this.bleed} ${right.y-height-this.tileH}`
 
-			let blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
-			let blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
-			let blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
-			let blockTopTop = `${top.x} ${top.y-height-this.tileH}`
+			const blockTopLeft = `${left.x-this.bleed} ${left.y-height-this.tileH}`
+			const blockTopBottom = `${bottom.x} ${bottom.y-height-this.tileH}`
+			const blockTopRight = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			const blockTopTop = `${top.x} ${top.y-height-this.tileH}`
 
-			let blockBackRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
-			let blockBackLeftBottom = `${right.x+this.bleed} ${right.y-height-this.tileH}`
-			let blockBackLeftTop = `${top.x-this.bleed} ${top.y-height-this.tileH}`
-			let blockBackRightTop = `${top.x-this.bleed} ${top.y-height}`
+			const blockBackRightBottom = `${right.x+this.bleed} ${right.y-height+this.bleed}`
+			const blockBackLeftBottom = `${right.x+this.bleed} ${right.y-height-this.tileH}`
+			const blockBackLeftTop = `${top.x-this.bleed} ${top.y-height-this.tileH}`
+			const blockBackRightTop = `${top.x-this.bleed} ${top.y-height}`
 
 			html = `<g style="z-index:${id};">
 						<path fill="${darkestColor}"
@@ -934,7 +915,7 @@ export class RenderElements {
 					</g>`
 		}
 
-		let coords: Coords = { top: top, left: left, bottom: bottom, right: right }
+		const coords: Coords = { top: top, left: left, bottom: bottom, right: right }
 
 		return { html: html, coords: coords }
 	}

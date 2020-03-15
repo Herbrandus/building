@@ -1,3 +1,6 @@
+import { RGB } from './interfaces/color-rgb.interface'
+import { HSL } from './interfaces/color-hsl.interface'
+
 export class Color {
 	private _colorRgb: RGB
 	private _colorHex: string
@@ -67,13 +70,9 @@ export class Color {
 	}
 
 	validateRgb(rgb: number[]): boolean {
-		if (rgb[0] > -1 && rgb[0] < 256 &&
+		return (rgb[0] > -1 && rgb[0] < 256 &&
 			rgb[1] > -1 && rgb[1] < 256 &&
-			rgb[2] > -1 && rgb[2] < 256) {
-			return true
-		} else {
-			return false
-		}
+			rgb[2] > -1 && rgb[2] < 256)
 	}
 
 	validateHex(hex: string): boolean {
@@ -151,84 +150,6 @@ export class Color {
 		this.convertToHSL()
 
 		return this
-	}
-
-	public getLightestRGB(): RGB {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
-		let newR = r + 55
-		let newG = g + 55
-		let newB = b + 40
-		if (newR > 255) newR = 255
-		if (newG > 255) newG = 255
-		if (newR > 255) newR = 255
-		return {r: newR, g: newG, b: newB}
-	}
-
-	public getHighlightsRGB(): RGB {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
-		let newR = r + 45
-		let newG = g + 45
-		let newB = b + 30
-		if (newR > 255) newR = 255
-		if (newG > 255) newG = 255
-		if (newR > 255) newR = 255
-		return {r: newR, g: newG, b: newB}
-	}
-
-	public getDarkerRegularRGB(): RGB {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
-		let newR = r + 15
-		let newG = g + 15
-		let newB = b + 5
-		if (newR > 255) newR = 255
-		if (newG > 255) newG = 255
-		if (newR > 255) newR = 255
-		return {r: newR, g: newG, b: newB}
-	}
-
-	public getHalflightsRGB(): RGB {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
-		let newR = r + 25
-		let newG = g + 25
-		let newB = b + 15
-		if (newR > 255) newR = 255
-		if (newG > 255) newG = 255
-		if (newR > 255) newR = 255
-		return {r: newR, g: newG, b: newB}
-	}
-
-	public getShadowsRGB(): RGB {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
-		let newR = r - 55
-		let newG = g - 55
-		let newB = b - 35
-		if (newR < 0) newR = 0
-		if (newG < 0) newG = 0
-		if (newR < 0) newR = 0
-		return {r: newR, g: newG, b: newB}
-	}
-
-	public getDarkestRGB(): RGB {
-		let r = this._colorRgb.r
-		let b = this._colorRgb.b
-		let g = this._colorRgb.g
-		let newR = r - 70
-		let newG = g - 70
-		let newB = b - 60
-		if (newR < 0) newR = 0
-		if (newG < 0) newG = 0
-		if (newR < 0) newR = 0
-		return {r: newR, g: newG, b: newB}
 	}
 
 	public getColorStringByHue(hue: number): string {
@@ -349,16 +270,4 @@ export class Color {
 
 		return {r: r, g: g, b: b}
 	}
-}
-
-export interface RGB {
-	r: number,
-	g: number,
-	b: number
-}
-
-export interface HSL {
-	h: number,
-	s: number,
-	l: number
 }
