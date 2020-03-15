@@ -4,7 +4,7 @@ import { MapGenerationFunctions } from './mapGenerationFunctions.component'
 import { BuildingHeightVariations } from './enums/building-height-variations.enum'
 import { Color } from './colors.component'
 import { Tile } from './tile.component'
-import { TileOptions } from './interfaces/tile-options.interface'
+import { TileOptions, TileOptionsFunctions } from './interfaces/tile-options.interface'
 import { TileType } from './enums/tile-type.enum'
 import { Config } from './config.component'
 import { Position } from './interfaces/position.interface'
@@ -13,6 +13,7 @@ export class Modifiers {
 
 	private config: Config = new Config()
 	private mapGen: MapGenerationFunctions = new MapGenerationFunctions()
+	private tileOptionFuncs: TileOptionsFunctions = new TileOptionsFunctions()
 	private _lastBlockHollow: boolean = false
 	private _lastBlockShortestSide: number
 
@@ -92,17 +93,7 @@ export class Modifiers {
 											h, 
 											activeCol.tileStack[h].type,
 											tileColor,
-											{
-												roof:		false,
-												pillar: 	false,
-												slope:		false,
-												windowed: 	0,
-												tower: 		false,
-												stairs:		false,
-												halfArch: 	false,
-												wholeArch:	false,
-												areaDecoration: ''
-											}										
+											this.tileOptionFuncs.getDefaultTileOptions()									
 										)
 									)
 								}
@@ -351,11 +342,11 @@ export class Modifiers {
 												buildTowerHere = true
 											}
 										} else if (towerLocation === 1) {
-											if (y <= yLowEdge + 1 && x >= xHighEdge - 2) {
+											if (y <= yLowEdge + 1 && x >= xHighEdge - 1) {
 												buildTowerHere = true
 											}
 										} else if (towerLocation === 2) {
-											if (y >= yHighEdge - 1 && x >= xHighEdge - 2) {
+											if (y >= yHighEdge - 1 && x >= xHighEdge - 1) {
 												if ((world.blockHeightVariation !== BuildingHeightVariations.TallCenter)) {
 													buildTowerHere = true
 												}												
@@ -365,7 +356,6 @@ export class Modifiers {
 
 									let thisHeight = nextHeight
 									if (buildTowerHere) {
-										console.log('tower built');
 										thisHeight = nextHeight + 5
 									}
 
@@ -395,7 +385,7 @@ export class Modifiers {
 										let thisHalfArch = false
 										let thisWholeArch = false
 
-										if (thisHeight > 4) {
+										if (thisHeight > 4 && !slope && !isTower) {
 											if (changeForHighCorridor) {
 
 												if (nextBlockLength > 4 && nextBlockLength < 6) {
@@ -601,17 +591,12 @@ export class Modifiers {
 
 									if (world.map[y - 1][x].tileStack[h].options.halfArch) {
 
-										console.log('y + 1', world.map[y + 1][x])
-
 										if (world.map[y + 1][x].isDefined && world.map[y + 1][x].height > 0 && world.map[y + 1][x].height === world.map[y][x].height) {
 
 											if (world.map[y + 1][x].tileStack[h].options.halfArch) {
 												world.map[y][x].tileStack[h].options.halfArch = false;
 											}
-
 										}
-
-										console.log('y + 2', world.map[y + 2][x])
 
 										if (world.map[y + 2][x].isDefined && world.map[y + 2][x].height > 0 && world.map[y + 2][x].height === world.map[y][x].height) {
 
@@ -635,8 +620,6 @@ export class Modifiers {
 													world.map[y][x].tileStack[h].options.halfArch = false;
 												}
 											}
-
-											console.log('x + 2', world.map[y + 2][x])
 
 											if (world.map[y][x + 2].isDefined && 
 												world.map[y][x + 1].height === world.map[y][x].height && 

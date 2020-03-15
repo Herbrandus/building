@@ -3,7 +3,7 @@ import { BuildingHeightVariations } from './enums/building-height-variations.enu
 import { Color } from './colors.component'
 import { Column } from './column.component'
 import { Tile } from './tile.component'
-import { TileOptions } from './interfaces/tile-options.interface'
+import { TileOptions, TileOptionsFunctions } from './interfaces/tile-options.interface'
 import { TileType } from './enums/tile-type.enum'
 import { Config } from './config.component'
 import { Position } from './interfaces/position.interface'
@@ -19,6 +19,7 @@ export class Map {
 	private primitives: Primitives = new Primitives()
 	private mods: Modifiers = new Modifiers()
 	private deco: Decorations = new Decorations()
+	private tileOptionFuncs: TileOptionsFunctions = new TileOptionsFunctions()
 
 	private _mapWidth: number
 	private _mapLength: number
@@ -116,9 +117,9 @@ export class Map {
 
 		let startblockYfromCenterDeviation = 0
 		if (!this._mirrorAtCenter) {			
-			startblockYfromCenterDeviation = -8
+			startblockYfromCenterDeviation = -5
 			if (Math.round(Math.random()) === 0) {
-				startblockYfromCenterDeviation = 8
+				startblockYfromCenterDeviation = 5
 			}
 			console.log('not mirrorred: dev:', startblockYfromCenterDeviation)
 		}
@@ -312,7 +313,7 @@ export class Map {
 				for (let x = 0; x < this.mapWidth; x++) {
 
 					if (!!this._world[y][x].edge.left) {
-						// console.log('left? ', this._world[y][x].edge.left)
+						
 						for (let h = 0; h < this._blockHeight; h++) {
 							if (this._world[y][x].tileStack[h].type === TileType.None) {
 								if (y % 2 === 0) {
@@ -422,17 +423,8 @@ export class Map {
 													0, 
 													tileType,
 													tileColor,
-													{
-														roof:		false,
-														pillar: 	false,
-														slope:		false,
-														windowed: 	0,
-														tower: 		false,
-														stairs:		false,
-														halfArch: 	false,
-														wholeArch:	false,
-														areaDecoration: ''
-													})]
+													this.tileOptionFuncs.getDefaultTileOptions()
+												)]
 							
 
 							this._world[y][x] = gardenBlock
@@ -485,17 +477,8 @@ export class Map {
 													0, 
 													tileType,
 													tileColor,
-													{
-														roof:		false,
-														pillar: 	false,
-														slope:		false,
-														windowed: 	0,
-														tower: 		false,
-														stairs:		false,
-														halfArch: 	false,
-														wholeArch:	false,
-														areaDecoration: ''
-													})]
+													this.tileOptionFuncs.getDefaultTileOptions()
+												)]
 							
 
 							this._world[y][x] = gardenBlock
@@ -517,17 +500,8 @@ export class Map {
 									0, 
 									TileType.Shadow,
 									this._defaultColor,
-									{
-										roof:		false,
-										pillar: 	false,
-										slope:		false,
-										windowed: 	0,
-										tower: 		false,
-										stairs:		false,
-										halfArch: 	false,
-										wholeArch:	false,
-										areaDecoration: ''
-									})]
+									this.tileOptionFuncs.getDefaultTileOptions()
+								)]
 
 			if (this._world[edgePointY][edgePointX].isDefined) {
 				

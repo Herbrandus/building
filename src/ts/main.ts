@@ -39,7 +39,7 @@ class RandomBuilding {
 	public getBaseColor(): Color {
 		const col = this.map.getFirstDefinedColumn()
 		const tile = col.tileStack[col.tileStack.length-1]
-		return tile.getColor()
+		return tile.tileColor
 	}
 
 	public getImageTag(): void {

@@ -12,7 +12,7 @@ export class Tile {
 	_tileColor: Color
 	_options?: TileOptions
 
-	constructor(			
+	constructor(
 			id: number,
 			x: number,
 			y: number,
@@ -59,10 +59,6 @@ export class Tile {
 		} else {
 			return undefined
 		}
-	}
-
-	public getColor(): Color {
-		return this._tileColor
 	}
 
 	get tileColor(): Color {

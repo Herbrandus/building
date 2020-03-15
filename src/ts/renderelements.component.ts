@@ -920,9 +920,44 @@ export class RenderElements {
 		return { html: html, coords: coords }
 	}
 
-	createTowerTop(xPos: number, yPos: number, tile: Tile) {
+	createTowerTop(left: Position, bottom: Position, right: Position, top: Position, height: number, tile: Tile) {
 
-		console.log('tile', tile);
+		let regularColor
+		let highlightLeft
+		let highlightRight
+		let html
+
+		if (tile.tileColor.hex() !== this.config.buildingBaseColor.hex()) {
+			regularColor = tile.tileColor.hex()
+			highlightLeft = tile.tileColor.changeColorLightingString(-25)
+			highlightRight = tile.tileColor.changeColorLightingString(15)
+		} else {
+			regularColor = this.config.buildingBaseColor.hex()
+			highlightLeft = this.config.buildingBaseColor.changeColorLightingString(-25)
+			highlightRight = this.config.buildingBaseColor.changeColorLightingString(15)
+		}
+
+		const centerTop = {
+			x: left.x + ((right.x - left.x) / 2),
+			y: left.y - (this.tileH * height)
+		}
+
+		html = `<g id="towerTop_${tile.id}">
+				<path fill="${highlightLeft}"
+					d="M${left.x} ${left.y+this.bleed}
+					L${bottom.x} ${bottom.y+this.bleed}
+					L${centerTop.x} ${centerTop.y}
+					L${left.x} ${left.y+this.bleed} Z" 
+				/>
+				<path fill="${highlightRight}"
+					d="M${bottom.x} ${bottom.y+this.bleed}
+					L${right.x} ${right.y+this.bleed}
+					L${centerTop.x} ${centerTop.y}
+					L${bottom.x} ${bottom.y+this.bleed} Z" 
+				/>
+			</g>`
+
+		return html
 	}
 
 
