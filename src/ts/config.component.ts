@@ -1,4 +1,4 @@
-import { Color } from './mapGenerationFunctions.component'
+import { Color } from './colors.component'
 
 export class Config {
 
@@ -96,26 +96,4 @@ export class Config {
 	public getMapLength(mapArrayLength: number): number {
 		return mapArrayLength * this._tileLength
 	}
-}
-
-export interface Coords {
-	top?: Position,
-	left?: Position,
-	bottom?: Position,
-	right?: Position
-}
-
-export interface TileTemplate {
-	html?: string,
-	coords?: Coords
-}
-
-export interface Position {
-	x?: number,
-	y?: number
-}
-
-export interface Dimensions {
-	w?: number,
-	l?: number
 }

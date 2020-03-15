@@ -1,7 +1,13 @@
-import { Config, Coords, TileTemplate, Position } from './config.component'
-import { MapGenerationFunctions, Color } from './mapGenerationFunctions.component'
-import { Tile, TileType } from './tile.component'
-import { Column, ColumnEdge } from './mapper.component'
+import { Config } from './config.component'
+import { MapGenerationFunctions } from './mapGenerationFunctions.component'
+import { Color } from './colors.component'
+import { Tile } from './tile.component'
+import { TileType } from './enums/tile-type.enum'
+import { Coords } from './interfaces/coords.interface'
+import { TileTemplate } from './interfaces/tiletemplate.interface'
+import { Position } from './interfaces/position.interface'
+import { Column } from './column.component'
+import { ColumnEdge } from './interfaces/column-edge.interface'
 
 export class RenderElements {
 

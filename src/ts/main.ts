@@ -1,6 +1,6 @@
 import { Map } from './mapper.component'
 import { Renderer } from './builder.component'
-import { Color } from './mapGenerationFunctions.component'
+import { Color } from './colors.component'
 import { Config } from './config.component'
 
 class RandomBuilding {

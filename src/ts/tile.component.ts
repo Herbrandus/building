@@ -1,4 +1,6 @@
-import { Color } from './mapGenerationFunctions.component'
+import { Color } from './colors.component'
+import { TileType } from './enums/tile-type.enum'
+import { TileOptions } from './interfaces/tile-options.interface'
 
 export class Tile {
 	
@@ -74,26 +76,4 @@ export class Tile {
 	set type(type: TileType) {
 		this._tileType = type
 	}
-}
-
-export interface TileOptions {
-	roof: boolean,
-	pillar: boolean,
-	slope: string | boolean,
-	windowed: number,
-	tower: boolean,
-	stairs:	boolean,
-	halfArch: boolean,
-	wholeArch: boolean,
-	areaDecoration: string
-}
-
-export enum TileType {
-	None = 'none',
-	Body = 'body',
-	Tower = 'tower',
-	HalfBlock = 'halfBlock',
-	Roof = 'roof',
-	Grass = 'grass',
-	Shadow = 'shadow'
 }

@@ -1,6 +1,9 @@
-import { Map, Column } from './mapper.component'
+import { Map } from './mapper.component'
+import { Column } from './column.component'
 import { Config } from './config.component'
-import { Tile, TileType, TileOptions } from './tile.component'
+import { Tile } from './tile.component'
+import { TileType } from './enums/tile-type.enum'
+import { TileOptions } from './interfaces/tile-options.interface'
 
 export class Decorations {
 
@@ -17,8 +20,6 @@ export class Decorations {
 		for (let t = 0; t < randomAmount; t++) {
 			yPlacement.push(Math.floor(5 + Math.random() * (world.mapLength - 5)))
 		}
-
-		console.log('placing on: ' + yPlacement)
 
 		for (let y = 0; y < world.mapLength; y++) {
 

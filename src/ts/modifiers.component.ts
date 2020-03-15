@@ -1,7 +1,13 @@
-import { Map, Column } from './mapper.component'
-import { MapGenerationFunctions, BuildingHeightVariations, Color } from './mapGenerationFunctions.component'
-import { Tile, TileType, TileOptions } from './tile.component'
-import { Config, Position } from './config.component'
+import { Map } from './mapper.component'
+import { Column } from './column.component'
+import { MapGenerationFunctions } from './mapGenerationFunctions.component'
+import { BuildingHeightVariations } from './enums/building-height-variations.enum'
+import { Color } from './colors.component'
+import { Tile } from './tile.component'
+import { TileOptions } from './interfaces/tile-options.interface'
+import { TileType } from './enums/tile-type.enum'
+import { Config } from './config.component'
+import { Position } from './interfaces/position.interface'
 
 export class Modifiers {
 
@@ -565,32 +571,6 @@ export class Modifiers {
 				world.blockHeight = nextHeight
 
 				world.blockAmountIterator++
-
-				// if (1 === 1) {
-
-				// 	for (let y = 0; y < world.mapLength; y++) {
-				// 		for (let x = 0; x < world.mapWidth; x++) {
-
-				// 			if (x < world.mapWidth - 2 && x > 2) {
-				// 				if (y < world.mapLength - 2 && y > 2) {
-
-				// 					if (world.map[y][x].isDefined && 
-				// 						world.map[y-1][x].isDefined &&
-				// 						world.map[y+1][x].isDefined &&
-				// 						world.map[y][x-1].isDefined &&
-				// 						world.map[y][x+1].isDefined) {
-
-				// 						if (world.map[y][x].height > 4) {
-				// 							if (world.map[y-1][x].blockGroup !== blockGroup) {
-				// 								world.map[y][x].tileStack[world.map[y][x].height-1].type = TileType.HalfBlock
-				// 							}	
-				// 						}								
-				// 					}		
-				// 				}	
-				// 			}							
-				// 		}
-				// 	}
-				// }
 
 			} else {		
 				console.warn("Block edges array is empty.")
