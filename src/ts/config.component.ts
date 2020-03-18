@@ -3,9 +3,9 @@ import { Color } from './colors.component'
 export class Config {
 
 	private _allowDebug: boolean = true
-	private _tileWidth: number = 16
-	private _tileLength: number = 16
-	private _tileHeight: number = 14
+	private _tileWidth: number = 20
+	private _tileLength: number = 20
+	private _tileHeight: number = 10
 	private _tileSmallAngle: number = 85
 	private _tileLargeAngle: number = 100
 	private _groundColor: Color = new Color('#f5f3e5')
@@ -16,9 +16,10 @@ export class Config {
 	)
 	private _maxDarkenValue: number = -70
 	private _maxLightenValue: number = 40
-	private _tileEdgeBleed: number = 0.3
+	private _tileEdgeBleed: number = 0.05
 	private _maxAllowedHeight: number = 12
 	private _topMargin: number = 80
+	private _allowBuildingDecorations: boolean = false
 	private _allowSurroundingDecorations: boolean = true
 	private _allowWindows: boolean = false
 	private _lightInWindows: boolean = Math.round(Math.random() * 8) > 6 ? true : false
@@ -85,6 +86,10 @@ export class Config {
 
 	public get allowWindows(): boolean {
 		return this._allowWindows
+	}
+
+	public get allowBuildingDecorations(): boolean {
+		return this._allowBuildingDecorations
 	}
 
 	public get allowSurroundingDecorations(): boolean {

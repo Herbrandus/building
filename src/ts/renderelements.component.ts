@@ -25,20 +25,15 @@ export class RenderElements {
 	private tileColor: Color = this.config.groundColor
 
 	getPositions(xPos: number, yPos: number, topMargin: number = 0) {		
-		const top: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromTop), "y": Math.ceil(yPos + topMargin ) }
-		const left: Position = { "x": Math.ceil(xPos), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromTop + topMargin ) }
-		const bottom: Position = { "x": Math.ceil(xPos + this.dimensions.horizontalWidthFromBottom), "y": Math.ceil(yPos + this.dimensions.totalHeight + topMargin ) }
-		const right: Position = { "x": Math.ceil(xPos + this.dimensions.totalWidth), "y": Math.ceil(yPos + this.dimensions.verticalHeightFromBottom + topMargin ) }
+		const top: Position = { "x": xPos + this.dimensions.horizontalWidthFromTop, "y": yPos + topMargin }
+		const left: Position = { "x": xPos, "y": yPos + this.dimensions.verticalHeightFromTop + topMargin }
+		const bottom: Position = { "x": xPos + this.dimensions.horizontalWidthFromBottom, "y": yPos + this.dimensions.totalHeight + topMargin }
+		const right: Position = { "x": xPos + this.dimensions.totalWidth, "y": yPos + this.dimensions.verticalHeightFromBottom + topMargin }
 
 		return { top, left, bottom, right }
 	}
 
 	createTile(xPos: number, yPos: number, shadow: string): TileTemplate {
-
-		// let top: Position = { "x": (xPos + this.dimensions.horizontalWidthFromTop), "y": yPos}
-		// let left: Position = { "x": xPos, "y": (yPos + this.dimensions.verticalHeightFromTop) }
-		// let bottom: Position = { "x": (xPos + this.dimensions.horizontalWidthFromBottom), "y": (yPos + this.dimensions.totalHeight) }
-		// let right: Position = { "x": (xPos + this.dimensions.totalWidth), "y": (yPos + this.dimensions.verticalHeightFromBottom) }
 
 		const { top, left, bottom, right } = this.getPositions(xPos, yPos, 0)
 
@@ -171,16 +166,16 @@ export class RenderElements {
 					L${blockTopRight} 
 					L${blockTopTop} 
 					L${blockTopLeft} Z" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopLeft} 
 					L${blockTopBottom} 
 					L${blockTopRight} 
 					L${blockTopTop} 
 					L${blockTopLeft} Z" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopLeft} 
 					L${blockTopRight}" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopTop} 
 					L${blockTopBottom}" />`
 
@@ -214,19 +209,19 @@ export class RenderElements {
 					L${blockTopRight} 
 					L${blockTopTop} 
 					L${blockTopLeft} Z" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopLeft} 
 					L${blockTopBottom} 
 					L${blockTopRight} 
 					L${blockTopTop} 
 					L${blockTopLeft} Z" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopLeft} 
 					L${blockTopRight}" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopTop} 
 					L${blockTopBottom}" />
-					<ellipse cx="${blockTopCenter.x}" cy="${blockTopCenter.y}" rx="${circleRadiusX}" ry="${circleRadiusY}" fill="transparent" stroke="${patternColor}" />`
+					<ellipse cx="${blockTopCenter.x}" cy="${blockTopCenter.y}" rx="${circleRadiusX}" ry="${circleRadiusY}" fill="transparent" stroke="${patternColor}" stroke-linecap="round" />`
 
 		} else if (topTile === 'squares') {
 
@@ -255,7 +250,7 @@ export class RenderElements {
 					L${blockTopRight} 
 					L${blockTopTop} 
 					L${blockTopLeft} Z" />
-					<path fill="transparent" stroke="${patternColor}"
+					<path fill="transparent" stroke="${patternColor}" stroke-linecap="round"
 					d="M${blockTopLeft} 
 					L${blockTopBottom} 
 					L${blockTopRight} 
@@ -337,7 +332,7 @@ export class RenderElements {
 					L${blockTopRight} 
 					L${blockTopTop} 
 					L${blockTopLeft} Z" />
-					<path fill="transparent" stroke="${strokeColor}"
+					<path fill="transparent" stroke="${strokeColor}" stroke-linecap="round"
 					d="M${blockTopRight}
 					L${blockTopLeft}
 					L${blockTopBottom}
@@ -675,11 +670,13 @@ export class RenderElements {
 		let html = `<g style="z-index:${id};">
 			<defs>${this.calculations.addGradient("pillarGradient", darkestColor, regularColor)}</defs> 
 			<path fill="url(#pillarGradient)"
-			 d="M ${leftWallLeftTop} 
-			L ${leftWallLeftBottom} 
-			C ${leftWallBezier}, ${rightWallBezier}, ${rightWallRightBottom} 
-			L ${rightWallRightTop} 
-			L ${leftWallLeftTop} Z" /></g>`
+			 d="M${leftWallLeftTop} 
+			L${leftWallLeftBottom} 
+			C${leftWallBezier}, ${rightWallBezier}, ${rightWallRightBottom} 
+			L${rightWallRightTop} 
+			L${leftWallLeftTop} Z" />
+			
+			</g>`
 
 		let coords: Coords = { "top": top, "left": left, "bottom": bottom, "right": right }
 

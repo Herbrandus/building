@@ -142,13 +142,15 @@ export class Renderer {
 
 		const towersByGroup = {}
 
-		if (topPavementType === 1) {
-			pavementType = 'triangles'
-		} else if (topPavementType === 2) {
-			pavementType = 'circles'	
-		} else if (topPavementType === 3) {
-			pavementType = 'squares'	
-		}	
+		if (this.config.allowBuildingDecorations) {
+			if (topPavementType === 1) {
+				pavementType = 'triangles'
+			} else if (topPavementType === 2) {
+				pavementType = 'circles'	
+			} else if (topPavementType === 3) {
+				pavementType = 'squares'	
+			}
+		}			
 
 		for (let y = 0; y < mapTotalLength; y++) {
 
@@ -222,7 +224,7 @@ export class Renderer {
 							if (currentTile.type === TileType.Body) {
 								
 								if (currentTile.options.slope) {
-									let slope = this.render.createSlopeBlock(thisPosX, thisPosY + (tileHeight * 4.75), map[y][x].getTile(h), 'e')
+									let slope = this.render.createSlopeBlock(thisPosX, thisPosY + (tileHeight * 7), map[y][x].getTile(h), 'e')
 									newData += slope.html
 								} else {
 									if (!slopeInCol) {

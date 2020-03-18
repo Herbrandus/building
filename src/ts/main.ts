@@ -11,7 +11,7 @@ class RandomBuilding {
 
 	constructor() {
 		// !!Math.round(Math.random())
-		this._map = new Map(36, 36, 10, 1, 5, 3, 3, !!0)
+		this._map = new Map(32, 32, 12, 1, 5, 3, 3, !!0)
 		document.querySelector('body').style.background = this.config.groundColor.hex()
 	}
 
@@ -38,8 +38,11 @@ class RandomBuilding {
 
 	public getBaseColor(): Color {
 		const col = this.map.getFirstDefinedColumn()
-		const tile = col.tileStack[col.tileStack.length-1]
-		return tile.tileColor
+		if (col.height > 0) {
+			const tile = col.tileStack[col.tileStack.length-1]
+			return tile.tileColor	
+		}
+		return new Color('#fff')
 	}
 
 	public getImageTag(): void {
